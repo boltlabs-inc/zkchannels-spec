@@ -1,10 +1,10 @@
 # Setup for new merchants
 
-A party who wishes to act as a merchant must create and publish parameters to use across all of their customer relationships: 
+A party who wishes to act as a zkChannel merchant must create and publish parameters for use across all of their zkChannels: 
 
-1. Blind signing keys. The merchant must use the same keys to sign all transactions.
-2. Commitment keys. These will be used to verify commitments that the customer makes.
-3. Range proof keys and signatures. The pay protocol requires a separate set of parameters to prove that updated channel balances are valid.
+1. Blind signature public key pair. The merchant must use this key pair to sign all channel state initializations and updates in zkAbacus. This keypair is also used as a condition in the Tezos smart contract for each channel. (XX: TODO break this into parts bc we will only send the G2 part to Tezos for verification?)
+2. Commitment parameters. These will be used to generate commitments that the customer makes.
+3. Range proof keys and signatures. The zkAbacus.Pay protocol requires a separate set of parameters to prove that updated channel balances are valid.
 
 
 ## Blind signing keys
