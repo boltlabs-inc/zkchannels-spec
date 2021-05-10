@@ -37,7 +37,15 @@ The zkchannels protocol has three phases: establish, pay, and close.
 
         - where node A is the 'customer' and node B is the 'merchant'
 
-## Open
+## Global defaults
+* [`int`:`selfDelay`] 
+* [`int`:`minimum_depth`]
+
+`selfDelay` sets the length of the dispute period. The same delay is applied to the `expiry` and `custClose` entrypoints. The value is interpreted in seconds. 
+
+`minimum_depth` sets the minimum number of confirmations for the funding to be considered final.
+
+## The `open` Message
 (XX: We might want to add a field to the 'Open' messages to communicate `minimum_depth`, the minimum number of confirmations required for considering an operation as finalized. It is referenced below)
 
 ## Init
@@ -59,7 +67,6 @@ Before the originating the zkChannel contract, the customer and merchant must ha
     * [`bls12_381_g2`:`merchPk4`]
     * [`bls12_381_g2`:`merchPk5`]
     * [`bls12_381_fr`:`hashCloseB`]
-    * [`int`:`selfDelay`] (XX: `selfDelay` could also be channel specific)
 * Channel specific arguments
     * [`bls12_381_fr`:`chanID`]
     * [`address`:`custAddr`]
