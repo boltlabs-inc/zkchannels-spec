@@ -10,11 +10,11 @@ A party who wishes to act as a zkChannel merchant must create and publish parame
 
 
 ## Blind signing keys
-Generate a [new](https://github.com/boltlabs-inc/libzkchannels-crypto/blob/main/libzkchannels-crypto/src/ps_keys.rs#L69) Pointcheval-Sanders keypair of length 5.
+Generate a [new](https://github.com/boltlabs-inc/libzkchannels-crypto/blob/main/libzkchannels-crypto/src/ps_keys.rs#L69) Pointcheval-Sanders keypair for signatures on message tuples of length 5.
 Publish the public key from the pair.
 
 ## Commitment keys
-Generate [new](https://github.com/boltlabs-inc/libzkchannels-crypto/blob/main/libzkchannels-crypto/src/pedersen_commitments.rs#L41) Pedersen parameters of length 1. Publish the whole set.
+Generate [new](https://github.com/boltlabs-inc/libzkchannels-crypto/blob/main/libzkchannels-crypto/src/pedersen_commitments.rs#L41) Pedersen parameters for commitments to message tuples of length 1. Publish the whole set.
 
 ## Range proof parameters
 
@@ -22,7 +22,7 @@ A range proof demonstrates that a value (in our case, an updated balance) is non
 
 TODO: Confirm choice of `u`,`l` (probably 128,9)
 
-Generate a [new](https://github.com/boltlabs-inc/libzkchannels-crypto/blob/main/libzkchannels-crypto/src/ps_keys.rs#L69) Pointcheval-Sanders keypair of length 5.
+Generate a [new](https://github.com/boltlabs-inc/libzkchannels-crypto/blob/main/libzkchannels-crypto/src/ps_keys.rs#L69) Pointcheval-Sanders keypair for signatures on message tuples of length 1.
 With this keypair, separately [sign](https://github.com/boltlabs-inc/libzkchannels-crypto/blob/main/libzkchannels-crypto/src/ps_signatures.rs#L64) each value from 0 to `u`.
 
 Publish the public key and the signatures.
