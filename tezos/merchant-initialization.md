@@ -1,10 +1,12 @@
+# Global System Setup
+Commitment parameters. These parameters are used for generic commitments in zkAbacus. (XX TODO define as g2 from BLS12-381 and hash to curve of some sensible string for the other generator)
+
 # Setup for new merchants
 
 A party who wishes to act as a zkChannel merchant must create and publish parameters for use across all of their zkChannels: 
 
 1. Blind signature public key pair. The merchant must use this key pair to sign all channel state initializations and updates in zkAbacus. This keypair is also used as a condition in the Tezos smart contract for each channel. (XX: TODO break this into parts bc we will only send the G2 part to Tezos for verification?)
-2. Commitment parameters. These will be used to generate commitments that the customer makes.
-3. Range proof keys and signatures. The zkAbacus.Pay protocol requires a separate set of parameters to prove that updated channel balances are valid.
+2. Range proof keys and signatures. The zkAbacus.Pay protocol requires a separate set of parameters to prove that updated channel balances are valid.
 
 
 ## Blind signing keys
