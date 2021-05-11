@@ -1,34 +1,30 @@
 # Channel Establishment
 
   * [Overview](#Overview)
-    * [Open](#open)
-    * [Init](#init)
-    * [Contract Origination](#contract-origination)
-        * [1. Requirements](#1.-requirements)
-        * [2. Customer forges and signs operation](#2.-customer-forges-and-signs-operation)
-        * [3. Customer injects origination operation](#3.-customer-injects-origination-operation)
-        * [4. Origination confirmed ](#4.-origination-confirmed )
-        * [5. Customer funds their side of the contract](#5.-customer-funds-their-side-of-the-contract)
-        * [6. Merchant verifies the contract](#6.-Merchant-verifies-the-contract)
+    * [The `open_c` Message](#the-`open_c`-Message)
+    * [The `open_m` Message](#the-`open_m`-Message)
+    * [The `init_c` Message](#the-`init_c`-Message)
+    * [The `init_m` Message](#the-`init_m`-Message)
+    * [The `funding_confirmed` Message](#the-`funding_confirmed`-Message)
+    * [The `funding_ack` Message](#the-`funding_ack`-Message)
+    * [The `activate_c` Message](#the-`activate_c`-Message)
+    * [The `activate_m` Message](#the-`activate_m`-Message)
 
-    * [Activate](#activate)
-    * [Unlink](#unlink)
-
-  * [Pay](#pay)
-  * [Close](#close)
-  
 ## Overview
 (XX: TODO - add overall summary about messages sent during Establish. Something similar to 'Channel Establishment' section in LN spec)
 
         +-------+                              +-------+
         |       |--(1)-------  open_c  ------->|       |
-        |       |<-(2)-------  open_c  --------|       |
+        |       |<-(2)-------  open_m  --------|       |
         |       |                              |       |
         |   A   |--(3)-------- init_c -------->|   B   |
         |       |<-(4)-------- init_m ---------|       |
         |       |                              |       |
         |       |--(5)-- funding_confirmed --->|       |
-        |       |<-(6)--- funding_locked ------|       |
+        |       |<-(6)---- funding_ack --------|       |
+        |       |                              |       |
+        |       |--(5)------ activate_c ------>|       |
+        |       |<-(6)------ activate_m -------|       |
         +-------+                              +-------+
 
         - where node A is the 'customer' and node B is the 'merchant'
@@ -43,77 +39,115 @@
 
 ### The `open_c` Message
 
-1. type: XX (`open_c`)
-2. data: (XX: Check)
+1. type: (`open_c`)
+2. data: 
     * [`string`:`cid_p`]
     * [`int`:`bal_cust_0`]
     * [`int`:`bal_merch_0`]
-
+    * XX: Check with Ayo 
 #### Requirements
 
-The customer MUST:
+The customer must:
   - Ensure `cid_p` is generated randomly and is unique for each channel.
 
-The merchant MUST:
+The merchant must:
   - Check that `cid_p` , `bal_cust_0` ≥ 0, and `bal_merch_0` ≥ 0 are in the expected domain.
 
 ### The `open_c` Message
 
-1. type: XX (`open_m`)
-2. data: (XX: Check)
+1. type: (`open_m`)
+2. data:
     * [`bool`:`accept`]
     * [`string`:`cid_m`]
+    * XX: Check with Ayo
 
 #### Requirements
 
-The merchant MUST:
+The merchant must:
   - Ensure `cid_p` is generated randomly and is unique for each channel.
 
-Both the customer and merchant MUST:
+Both the customer and merchant must:
   - set `cid` to H(`cid_p`, `cid_m`)
 
-### The `init` Message
+### The `init_c` Message
 
-1. type: XX (`init`)
-2. data: (XX: Fill in)
+1. type: (`init_c`)
+2. data: 
+    * [`string`:`custAddr`]
+    * [`string`:`custPk`]
+    * XX: Check with Ayo
+
+#### Requirements
+
+### The `init_m` Message
+
+1. type: (`init_m`)
+2. data: 
+    * [`address`:`merchAddr`]
+    * [`key`:`merchPk`]
+    * [`bls12_381_g2`:`g2`]
+    * [`bls12_381_g2`:`merchPk0`]
+    * [`bls12_381_g2`:`merchPk1`]
+    * [`bls12_381_g2`:`merchPk2`]
+    * [`bls12_381_g2`:`merchPk3`]
+    * [`bls12_381_g2`:`merchPk4`]
+    * [`bls12_381_g2`:`merchPk5`]
+    * [`bls12_381_fr`:`hashCloseB`]
+    * [`json`:`message`]
+      * [`string`:`bal_cust_0`]
+      * [`string`:`bal_merch_0`]
+      * [`string`:`close`]
+      * [`string`:`rev_lock`]
+      * [`string`:`channel_id`]
+    * [`json`:`signature`]
+      * [`string`:`s1`]
+      * [`string`:`s2`]
+    * XX: Check with Ayo
 
 #### Requirements
 
 ### The `funding_confirmed` Message
 
-1. type: XX (`funding_confirmed`)
+1. type: (`funding_confirmed`)
 2. data: 
     * [`string`:`cid`]
     * [`string`:`contract-id`]
 
 #### Requirements
 
-The customer MUST:
-  - Ensure that the funds have been confirmed on chain for at least `minimum_depth` blocks.
-(XX: May decide that this gets sent only after origination has been confirmed)
+The customer must:
+  - Ensure that the funds have been confirmed on chain for at least `minimum_depth` blocks. (XX: might be better to set this to `minimum_depth` + 1 blocks to make sure the customer isn't ahead of the merchant.)
 
-The merchant MUST:
-  - Check that the originated contract `contract-id` has the exact same code as the zkchannels contract.
-  - Check that the on-chain storage of `contract-id` is exactly as expected for channel `cid`.
+### The `funding_ack` Message
 
-### The `funding_locked` Message
-
-1. type: XX (`funding_locked`)
+1. type: (`funding_ack`)
 2. data: 
-    * [`string`:`cid`]
+    * [`string`:`accept`] (XX: check what this msg should be)
 
 #### Requirements
 
-The merchant MUST:
-  - Ensure that the contract storage field `status` has been set to `1` (meaning the funding has been locked in) for at least `minimum_depth` blocks.
+The merchant must:
+  - Check that the originated contract `contract-id` has the exact same code as the zkchannels contract.
+  - Check that the on-chain storage of `contract-id` is exactly as expected for channel `cid` (including that the customer's side has been funded).
+  - Check that the contract storage `status` has not changed for at least `minimum_depth` blocks before sending this message.
+  - If it is a dual funded channel, the merchant must fund their side of the channel.
 
-The customer SHOULD:
-  - Wait until the contract storage field `status` has been set to `1` (meaning the funding has been locked in) for at least `minimum_depth` blocks.
+### The `activate_c` Message
 
-## Activate
+1. type: (`activate_c`)
+2. data: 
+    * XX: Check with Ayo
 
-## Unlink
+#### Requirements
 
-# Pay
+The customer must:
+  - Wait until the contract storage field `status` has been set to `1` (meaning the funding has been locked in) for at least `minimum_depth` blocks before sending this message.
 
-# Close
+### The `activate_m` Message
+
+1. type: (`activate_m`)
+2. data: 
+    * XX: Check with Ayo
+
+#### Requirements
+
