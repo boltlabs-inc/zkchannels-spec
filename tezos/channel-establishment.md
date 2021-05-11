@@ -11,7 +11,7 @@
     * [The `activate_m` Message](#the-`activate_m`-Message)
 
 ## Overview
-(XX: TODO - add overall summary about messages sent during Establish. Something similar to 'Channel Establishment' section in LN spec)
+TODO zkchannels-spec#5: Add high level overview of establish
 
         +-------+                              +-------+
         |       |--(1)-------  open_c  ------->|       |
@@ -44,7 +44,6 @@
     * [`string`:`cid_p`]
     * [`int`:`bal_cust_0`]
     * [`int`:`bal_merch_0`]
-    * XX: Check with Ayo 
 #### Requirements
 
 The customer must:
@@ -53,13 +52,12 @@ The customer must:
 The merchant must:
   - Check that `cid_p` , `bal_cust_0` ≥ 0, and `bal_merch_0` ≥ 0 are in the expected domain.
 
-### The `open_c` Message
+### The `open_m` Message
 
 1. type: (`open_m`)
 2. data:
     * [`bool`:`accept`]
     * [`string`:`cid_m`]
-    * XX: Check with Ayo
 
 #### Requirements
 
@@ -75,7 +73,6 @@ Both the customer and merchant must:
 2. data: 
     * [`string`:`custAddr`]
     * [`string`:`custPk`]
-    * XX: Check with Ayo
 
 #### Requirements
 
@@ -102,7 +99,6 @@ Both the customer and merchant must:
     * [`json`:`signature`]
       * [`string`:`s1`]
       * [`string`:`s2`]
-    * XX: Check with Ayo
 
 #### Requirements
 
@@ -116,7 +112,7 @@ Both the customer and merchant must:
 #### Requirements
 
 The customer must:
-  - Ensure that the funds have been confirmed on chain for at least `minimum_depth` blocks. (XX: might be better to set this to `minimum_depth` + 1 blocks to make sure the customer isn't ahead of the merchant.)
+  - Ensure that the funds have been confirmed on chain for at least `minimum_depth` + 1 blocks.
 
 ### The `funding_ack` Message
 
@@ -136,7 +132,6 @@ The merchant must:
 
 1. type: (`activate_c`)
 2. data: 
-    * XX: Check with Ayo
 
 #### Requirements
 
@@ -147,7 +142,6 @@ The customer must:
 
 1. type: (`activate_m`)
 2. data: 
-    * XX: Check with Ayo
 
 #### Requirements
 
