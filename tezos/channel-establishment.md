@@ -46,11 +46,11 @@ TODO zkchannels-spec#5: Add high level overview of establish
     * [`int`:`bal_merch_0`]
 #### Requirements
 
-The customer must:
-  - Ensure `cid_p` is generated randomly and is unique for each channel.
+The customer:
+  - Ensures `cid_p` is generated randomly and is unique for each channel.
 
-The merchant must:
-  - Check that `cid_p` , `bal_cust_0` ≥ 0, and `bal_merch_0` ≥ 0 are in the expected domain.
+The merchant:
+  - Checks that `cid_p` , `bal_cust_0` ≥ 0, and `bal_merch_0` ≥ 0 are in the expected domain.
 
 ### The `open_m` Message
 
@@ -61,10 +61,10 @@ The merchant must:
 
 #### Requirements
 
-The merchant must:
-  - Ensure `cid_p` is generated randomly and is unique for each channel.
+The merchant:
+  - Ensures `cid_m` is generated randomly and is unique for each channel.
 
-Both the customer and merchant must:
+Both the customer and merchant:
   - set `cid` to H(`cid_p`, `cid_m`)
 
 ### The `init_c` Message
@@ -111,8 +111,8 @@ Both the customer and merchant must:
 
 #### Requirements
 
-The customer must:
-  - Ensure that the funds have been confirmed on chain for at least `minimum_depth` + 1 blocks.
+The customer:
+  - Ensures that the funds have been confirmed on chain for at least `minimum_depth` + 1 blocks.
 
 ### The `funding_ack` Message
 
@@ -122,10 +122,10 @@ The customer must:
 
 #### Requirements
 
-The merchant must:
-  - Check that the originated contract `contract-id` has the exact same code as the zkchannels contract.
-  - Check that the on-chain storage of `contract-id` is exactly as expected for channel `cid` (including that the customer's side has been funded).
-  - Check that the contract storage `status` has not changed for at least `minimum_depth` blocks before sending this message.
+The merchant:
+  - Checks that the originated contract `contract-id` has the exact same code as the zkchannels contract.
+  - Checks that the on-chain storage of `contract-id` is exactly as expected for channel `cid` (including that the customer's side has been funded).
+  - Checks that the contract storage `status` has not changed for at least `minimum_depth` blocks before sending this message.
   - If it is a dual funded channel, the merchant must fund their side of the channel.
 
 ### The `activate_c` Message
@@ -135,8 +135,8 @@ The merchant must:
 
 #### Requirements
 
-The customer must:
-  - Wait until the contract storage field `status` has been set to `1` (meaning the funding has been locked in) for at least `minimum_depth` blocks before sending this message.
+The customer:
+  - Waits until the contract storage field `status` has been set to `1` (meaning the funding has been locked in) for at least `minimum_depth` blocks before sending this message.
 
 ### The `activate_m` Message
 
