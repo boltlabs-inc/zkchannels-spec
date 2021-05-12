@@ -16,4 +16,11 @@ zkChannels on Tezos is built out two main components:
 XX add reference to blindsigs-protocol doc.
 
 ## Glossary
-
+* #### *`cid`*:
+   * Short for 'channel identifier', a uniquely identifying hash for each channel.
+* #### *`contract-id`*:
+   * The smart contract's KT1 address.
+* #### *inject*:
+   * The process of broadcasting an operation on the Tezos blockchain.
+* #### *storage*:
+   * The memory held by the smart contract.
