@@ -9,8 +9,11 @@
 
 ## Overview
 zkChannels on Tezos is built out two main components:
-* zkAbacus. This component contains the functionality for a customer and a merchant to open, track payments, and collaboratively close a channel. This component does not interact with a payment network.
-* Tezos-instantiated zkEscrowAgent realization. This component provides the functionality for a customer and a merchant to open and close a zkChannels escrow account as a Tezos smart contract. 
+* `zkAbacus`. This component contains the functionality for a customer and a merchant to open, track payments, and collaboratively close a channel. This component does not interact with a payment network.
+* `TezosEscrowAgent`: A Tezos realization of the `zkEscrowAgent` functionality. This component provides the functionality for a customer and a merchant to open and close a zkChannels escrow account as a Tezos smart contract. 
+
+## References
+XX add reference to blindsigs-protocol doc.
 
 ## Glossary
 
