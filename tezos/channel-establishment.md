@@ -32,6 +32,7 @@ TODO zkchannels-spec#5: Add high level overview of establish
 ## Global defaults
 * [`int`:`selfDelay`] 
 * [`int`:`minimum_depth`]
+* [`bls12_381_g2`:`g2`]
 
 `selfDelay` sets the length of the dispute period. The same delay is applied to the `expiry` and `custClose` entrypoints. The value is interpreted in seconds. 
 
@@ -82,7 +83,6 @@ Both the customer and merchant:
 2. data: 
     * [`address`:`merchAddr`]
     * [`key`:`merchPk`]
-    * [`bls12_381_g2`:`g2`]
     * [`bls12_381_g2`:`merchPk0`]
     * [`bls12_381_g2`:`merchPk1`]
     * [`bls12_381_g2`:`merchPk2`]
@@ -90,16 +90,11 @@ Both the customer and merchant:
     * [`bls12_381_g2`:`merchPk4`]
     * [`bls12_381_g2`:`merchPk5`]
     * [`bls12_381_fr`:`hashCloseB`]
-    * [`json`:`message`]
-      * [`string`:`bal_cust_0`]
-      * [`string`:`bal_merch_0`]
-      * [`string`:`close`]
-      * [`string`:`rev_lock`]
-      * [`string`:`channel_id`]
-    * [`json`:`signature`]
-      * [`string`:`s1`]
-      * [`string`:`s2`]
+    * [`json`:`closing_signature`]
+      * [`bls12_381_g1`:`s1`]
+      * [`bls12_381_g1`:`s2`]
 
+`hashCloseB` is the set to H(`merch_str`), where `merch_str` is a unique string set by the merchant.
 #### Requirements
 
 ### The `funding_confirmed` Message
@@ -132,6 +127,8 @@ The merchant:
 
 1. type: (`activate_c`)
 2. data: 
+    * [`bls12_381_fr`:`cid`]
+    * [`string`:`cid_p`]
 
 #### Requirements
 
@@ -142,6 +139,9 @@ The customer:
 
 1. type: (`activate_m`)
 2. data: 
+    * [`json`:`payment_tag`]
+      * [`bls12_381_g1`:`s1`]
+      * [`bls12_381_g1`:`s2`]
 
 #### Requirements
 
