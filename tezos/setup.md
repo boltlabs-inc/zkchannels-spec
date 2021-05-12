@@ -1,5 +1,6 @@
 # Global System Setup
-Commitment parameters. These parameters are used for generic commitments in zkAbacus. (XX TODO define as g2 from BLS12-381 and hash to curve of some sensible string for the other generator)
+## Commitment parameters. 
+These parameters are used for generic commitments in zkAbacus. (XX TODO define as g2 from BLS12-381 and hash to curve of some sensible string for the other generator)
 
 # Setup for new merchants
 
@@ -12,9 +13,6 @@ A party who wishes to act as a zkChannel merchant must create and publish parame
 ## Blind signing keys
 Generate a [new](https://github.com/boltlabs-inc/libzkchannels-crypto/blob/main/libzkchannels-crypto/src/ps_keys.rs#L69) Pointcheval-Sanders keypair for signatures on message tuples of length 5.
 Publish the public key from the pair.
-
-## Commitment keys
-Generate [new](https://github.com/boltlabs-inc/libzkchannels-crypto/blob/main/libzkchannels-crypto/src/pedersen_commitments.rs#L41) Pedersen parameters for commitments to message tuples of length 1. Publish the whole set.
 
 ## Range proof parameters
 
