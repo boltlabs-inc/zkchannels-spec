@@ -1,14 +1,15 @@
 # Channel Establishment
 
   * [Overview](#Overview)
-    * [The `open_c` Message](#the-`open_c`-Message)
-    * [The `open_m` Message](#the-`open_m`-Message)
-    * [The `init_c` Message](#the-`init_c`-Message)
-    * [The `init_m` Message](#the-`init_m`-Message)
-    * [The `funding_confirmed` Message](#the-`funding_confirmed`-Message)
-    * [The `funding_ack` Message](#the-`funding_ack`-Message)
-    * [The `activate_c` Message](#the-`activate_c`-Message)
-    * [The `activate_m` Message](#the-`activate_m`-Message)
+  * [Global defaults](#global-defaults)
+  * [The `open_c` Message](#the-`open_c`-Message)
+  * [The `open_m` Message](#the-`open_m`-Message)
+  * [The `init_c` Message](#the-`init_c`-Message)
+  * [The `init_m` Message](#the-`init_m`-Message)
+  * [The `funding_confirmed` Message](#the-`funding_confirmed`-Message)
+  * [The `funding_ack` Message](#the-`funding_ack`-Message)
+  * [The `activate_c` Message](#the-`activate_c`-Message)
+  * [The `activate_m` Message](#the-`activate_m`-Message)
 
 ## Overview
 TODO zkchannels-spec#5: Add high level overview of establish
@@ -32,10 +33,8 @@ TODO zkchannels-spec#5: Add high level overview of establish
 ## Global defaults
 * [`int`:`selfDelay`] 
 * [`int`:`minimum_depth`]
-* [`bls12_381_g2`:`g2`]
 
 `selfDelay` sets the length of the dispute period. The same delay is applied to the `expiry` and `custClose` entrypoints. The value is interpreted in seconds. 
-
 `minimum_depth` sets the minimum number of confirmations for the funding to be considered final.
 
 ### The `open_c` Message
@@ -98,12 +97,14 @@ Both the customer and merchant:
 #### Requirements
 
 ### The `funding_confirmed` Message
+This message tells the merchant that the channel has been originated and the customer's side of the channel has been funded. For more information about this process, please refer to [contract-origination.md](contract-origination.md).
 
 1. type: (`funding_confirmed`)
 2. data: 
     * [`string`:`cid`]
     * [`string`:`contract-id`]
 
+The `cid` lets the merchant know which channel the customer is referring to, and `contract-id` allows the merchant to search for the contract on-chain and verify its contents.
 #### Requirements
 
 The customer:
