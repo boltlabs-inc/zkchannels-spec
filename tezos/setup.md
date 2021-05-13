@@ -1,13 +1,13 @@
 # Global System Setup
 
 ## Commitment scheme parameters
-* Pedersen commitments: We use Pedersen commitments on messages of length one in the pairing group `G1` of BLS12-381. We set parameters as the pair `(g1, h)`, where `g1` is the standard generator defined in the BLS12-381 crate and `h` is a hash-to-curve of the string `'zkChannels Pedersen generator'`.
-* Hash commitment parameters:
+* **Pedersen commitments**: We use Pedersen commitments on messages of length one in the pairing group `G1` of BLS12-381. We set parameters as the pair `(g1, h)`, where `g1` is the standard generator defined in the BLS12-381 crate and `h` is a hash-to-curve of the string `'zkChannels Pedersen generator'`.
+* **Hash commitment parameters**:
 We use SHA3-256 hashes to instantiate our hash-based commitments.
 
 ## Signature schemes
 * Pointcheval-Sanders signatures public parameters: We use the pairing defined by the [BLS12-381](https://crates.io/crates/bls12_381) crate. 
-* EdDSA signature public parameters: (XX)
+* EdDSA signature public parameters: We rely on the public parameters selected by the `tezos-client` for Ed25519.
 
 
 # Merchant Setup
