@@ -28,6 +28,6 @@ Publish the public key from this pair.
 Generate a [new Pointcheval-Sanders keypair](https://github.com/boltlabs-inc/libzkchannels-crypto/blob/main/libzkchannels-crypto/src/ps_keys.rs#L69) for signatures on message tuples of length one.
 With this keypair, separately [sign](https://github.com/boltlabs-inc/libzkchannels-crypto/blob/main/libzkchannels-crypto/src/ps_signatures.rs#L64) each integer in the range `[0, u-1]`.
 
-The merchant publishes the resulting public key and signatures in a config file. The merchant then advertises its server IP address and port for customers to open channels using the `<pub-key-hash>@<ip>:<port>` format.
+The merchant publishes the resulting public key and signatures in a config file. The merchant then advertises its server IP address and port for customers to open channels using the `<pub-key>@<ip>:<port>` format.
 
-**Tezos-related Node Initialization.** We assume the merchant runs or connects to a `tezos-node` that has been initialized correctly and securely. This means that the node has successfully established a connection to the P2P network and connected to a list of bootstrapped and trusted peers. It is assumed that the node run a version of tezos that includes support for the **Edo** protocol or later.
+**Tezos-related Node Initialization.** We assume the merchant runs or connects to a `tezos-node` that has been initialized correctly and securely. This means that the node has successfully established a connection to the P2P network and connected to a list of bootstrapped and trusted peers. It is assumed that the node runs a version of tezos that includes support for the **Edo** protocol or later.
