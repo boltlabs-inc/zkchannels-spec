@@ -7,7 +7,7 @@
   * [The `init_c` Message](#the-`init_c`-Message)
   * [The `init_m` Message](#the-`init_m`-Message)
   * [The `funding_confirmed` Message](#the-`funding_confirmed`-Message)
-  * [The `funding_ack` Message](#the-`funding_ack`-Message)
+  * [The `funding_locked` Message](#the-`funding_locked`-Message)
   * [The `activate_c` Message](#the-`activate_c`-Message)
   * [The `activate_m` Message](#the-`activate_m`-Message)
 
@@ -22,7 +22,7 @@ TODO zkchannels-spec#5: Add high level overview of establish
         |       |<-(4)-------- init_m ---------|       |
         |       |                              |       |
         |       |--(5)-- funding_confirmed --->|       |
-        |       |<-(6)---- funding_ack --------|       |
+        |       |<-(6)---- funding_locked -----|       |
         |       |                              |       |
         |       |--(5)------ activate_c ------>|       |
         |       |<-(6)------ activate_m -------|       |
@@ -101,40 +101,40 @@ This message tells the merchant that the channel has been originated and the cus
 
 1. type: (`funding_confirmed`)
 2. data: 
-    * [`string`:`cid`]
-    * [`string`:`contract-id`]
+    * [`address`:`contract-id`]
 
 The `cid` lets the merchant know which channel the customer is referring to, and `contract-id` allows the merchant to search for the contract on-chain and verify its contents.
+
 #### Requirements
 
 The customer:
-  - Ensures that the funds have been confirmed on chain for at least `minimum_depth` + 1 blocks.
+  - Ensures that the funds have been confirmed on chain for at least `minimum_depth`.
 
-### The `funding_ack` Message
+Upon receipt, the merchant:
+  - Checks that the originated contract `contract-id` has the exact same code as the zkchannels contract.
+  - Checks that the on-chain storage of `contract-id` is exactly as expected for channel `cid` (including that the customer's side has been funded).
+  - Checks that the contract storage `status` has not changed for at least `minimum_depth` blocks.
 
-1. type: (`funding_ack`)
+For a dual funded channel, the merchant will fund their side of the channel (see [contract-origination.md](contract-origination.md)).
+  ### The `funding_locked` Message
+
+1. type: (`funding_locked`)
 2. data: 
     * [`string`:`accept`] (XX: check what this msg should be)
 
 #### Requirements
-
-The merchant:
-  - Checks that the originated contract `contract-id` has the exact same code as the zkchannels contract.
-  - Checks that the on-chain storage of `contract-id` is exactly as expected for channel `cid` (including that the customer's side has been funded).
-  - Checks that the contract storage `status` has not changed for at least `minimum_depth` blocks before sending this message.
-  - If it is a dual funded channel, the merchant must fund their side of the channel.
+When the contract is fully funded, the `status` will change to `1` indicating that the funds are locked in. At this point the merchant waits until this status has been stable for `minimum_depth` blocks before sending `funding_locked` to the customer.
 
 ### The `activate_c` Message
 
 1. type: (`activate_c`)
 2. data: 
     * [`bls12_381_fr`:`cid`]
-    * [`string`:`cid_p`]
 
 #### Requirements
 
 The customer:
-  - Waits until the contract storage field `status` has been set to `1` (meaning the funding has been locked in) for at least `minimum_depth` blocks before sending this message.
+  - Ensures that the contract storage field `status` has been set to `1` (meaning the funding has been locked in) for at least `minimum_depth` blocks before sending this message.
 
 ### The `activate_m` Message
 
