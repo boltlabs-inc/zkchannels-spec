@@ -71,8 +71,8 @@ Both the customer and merchant:
 
 1. type: (`init_c`)
 2. data: 
-    * [`string`:`custAddr`]
-    * [`string`:`custPk`]
+    * [`address`:`custAddr`]
+    * [`key`:`custPk`]
 
 #### Requirements
 
@@ -129,7 +129,6 @@ When the contract is fully funded, the `status` will change to `1` indicating th
 
 1. type: (`activate_c`)
 2. data: 
-    * [`bls12_381_fr`:`cid`]
 
 #### Requirements
 
