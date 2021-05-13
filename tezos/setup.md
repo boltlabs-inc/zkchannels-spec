@@ -18,16 +18,20 @@ A party who wishes to act as a zkChannel merchant must create and publish the fo
 * **Range proof public key and signatures.** The `zkAbacus.Pay` protocol requires a separate set of parameters to prove that updated channel balances are valid. A range proof demonstrates that a value (in our case, an updated channel balance) is non-negative. Specifically, we use range proofs to show that an integer is in the range `[0, u^l)`, for integer values `u`, `l`. We set `u = 128` and `l = 9`. This primitive relies on Poincheval Sanders signatures.
 
 The merchant completes setup as follows.
-## Blind signing key
+## Blind signing key generation
 
 Generate a [new Pointcheval-Sanders keypair](https://github.com/boltlabs-inc/libzkchannels-crypto/blob/main/libzkchannels-crypto/src/ps_keys.rs#L69) for signatures on message tuples of length five.
-Publish the public key from this pair.
+This key pair must be used across all channels with the merchant.
 
-## Range proof parameters
+## Range proof parameters generation
 
 Generate a [new Pointcheval-Sanders keypair](https://github.com/boltlabs-inc/libzkchannels-crypto/blob/main/libzkchannels-crypto/src/ps_keys.rs#L69) for signatures on message tuples of length one.
 With this keypair, separately [sign](https://github.com/boltlabs-inc/libzkchannels-crypto/blob/main/libzkchannels-crypto/src/ps_signatures.rs#L64) each integer in the range `[0, u-1]`.
 
-The merchant publishes the resulting public key and signatures in a config file. The merchant then advertises its server IP address and port for customers to open channels using the `<pub-key>@<ip>:<port>` format.
+The resulting public key and signatures form the the merchant's range proof parameters. This keypair must not be used for any other purpose.
 
-**Tezos-related Node Initialization.** We assume the merchant runs or connects to a `tezos-node` that has been initialized correctly and securely. This means that the node has successfully established a connection to the P2P network and connected to a list of bootstrapped and trusted peers. It is assumed that the node runs a version of tezos that includes support for the **Edo** protocol or later.
+## Publishing public parameters
+The merchant publishes their blind signing key pair and their range proof parameters in a config file. The merchant then advertises their server IP address and port for customers to open channels using the `<pub-params>@<ip>:<port>` format.
+
+## Tezos-related node initialization
+We assume the merchant runs or connects to a `tezos-node` that has been initialized correctly and securely. This means that the node has successfully established a connection to the P2P network and connected to a list of bootstrapped and trusted peers. It is assumed that the node runs a version of tezos that includes support for the **Edo** protocol or later.
