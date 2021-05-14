@@ -48,6 +48,7 @@ Here, `merch_pk_hash` is the hash of the merchant's public parameters including 
 
 #### Requirements
 The customer:
+  - Needs to have obtained the merchant’s setup information (signature parameters and tezos account details) out of band beforehand.
   - Ensures `cid_p` is generated randomly and is unique for each channel.
 
 Upon receipt, the merchant:
