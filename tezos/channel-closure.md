@@ -62,7 +62,7 @@ When the `@custClose` entrypoint has been called, the merchant's balace (`bal_me
 
 If the merchant does not call `@merchDispute` within the timeout period, the customer will claim their balance by calling the `@custClaim` entrypoint, at which point the smart contract with transfer the customer's balance to `custAddr`.
 
-## Merch Dispute
+## Merchant Dispute
 As soon as the merchant detects that the customer has called the `@custClose` entrypoint, `rev_lock` is read from the contract storage and checked to see if it corresponds to a known `rev_secret` where H(`rev_secret`) == `rev_lock`. If `rev_secret` is known, this means the customer is attempting to close on an outdated state and the merchant will call the `@merchDispute` entrypoint with:
 * [`bytes`:`rev_secret`]
 
