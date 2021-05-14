@@ -10,13 +10,13 @@
 ## Requirements
 * Both the customer and merchant:
     * need tz1 accounts with a sufficient balance to carry out on-chain operations (origination, funding, and closure).
-    * need online tezos clients that can create and inject operations from their (`custAddr` and `merchAddr`).
+    * need online tezos clients that can create and inject operations from their (`cust_addr` and `merch_addr`).
     * have already agreed upon the initial storage arguments.
 * In addition, the customer:
     * needs a closing signature from the merchant on the initial state.
 ### Initial storage arguments
 * Merchant's fixed arguments
-    * [`address`:`merchAddr`]
+    * [`address`:`merch_addr`]
     * [`key`:`merchPk`]
     * [`bls12_381_g2`:`g2`]
     * [`bls12_381_g2`:`merchPk0`]
@@ -29,7 +29,7 @@
     * [`int`:`selfDelay`] 
 * Channel specific arguments
     * [`bls12_381_fr`:`cid`]
-    * [`address`:`custAddr`]
+    * [`address`:`cust_addr`]
     * [`key`:`custPk`]
     * [`mutez`:`custFunding`]
     * [`mutez`:`merchFunding`]
@@ -40,29 +40,27 @@ The customer will forge and sign the operation with the zkchannels contract and 
 ## Customer broadcasts origination operation
 When the customer broadcasts (or 'injects') their operation, they begin watching the blockchain to ensure that the operation is confirmed. If the operation is not confirmed within 60 blocks of the block header referenced in the operation, the operation will be dropped from the mempool and the customer must go back to the previous step to forge and sign a new operation.
 
-The customer must wait until the specified number of confirmations `minimum_depth` to specify how many confirmations they require. This should probably happen for us during 'open' or 'init'.)
-
 ## Origination confirmed 
 Once the operation has reached the minimum number of required confirmations, the `contract-id` is locked in, the customer is ready to fund the contract with their initial balance.
 
 ## Customer funds their side of the contract
-The customer funds their side of the contract using the `@addFunding` entrypoint of the contract. The source of this transfer operation must be equal to the `custAddr` specified in the contract's initial storage, with the transfer amount being exactly equal to `custFunding`. 
+The customer funds their side of the contract using the `@addFunding` entrypoint of the contract. The source of this transfer operation must be equal to the `cust_addr` specified in the contract's initial storage, with the transfer amount being exactly equal to `custFunding`. 
 
-Once the funding has been confirmed, the customer sends the merchant a `funding_confirmed` message containing the `contract_address` and `cid`. This is to inform the merchant that the channel is ready, either for the merchant to fund their side, or if single-funded, to consider the channel open. 
+Once the funding has been confirmed, the customer sends the merchant a `open_c` message containing the `contract-id` and `cid`. This is to inform the merchant that the channel is ready, either for the merchant to fund their side, or if single-funded, to consider the channel open. 
 
 ## Merchant verifies the contract
-When the merchant receives the `funding_confirmed` message they will:
-* search for the `contract_address` on chain.
+When the merchant receives the `open_c` message they will:
+* search for the `contract-id` on chain.
 * check the contract code against their own copy of the zkchannels contract (zkchannels.tz).
 * check the contract storage matches the expected [initial storage](#Initial-storage-arguments)
-* check that the customer has funded their side of the channel.
-* the latest operation has at least `minimum_depth` confirmations.
 
 If any of the above checks fail, the merchant aborts.
 
-If it is a dual-funded channel, the merchant funds their side of the channel using the `@addFunding` entrypoint and waits for that operation to confirm. The source of this transfer operation must be equal to the `merchAddr` specified in the contract's initial storage, with the transfer amount being exactly equal to `merchFunding`. 
+If the customer has funded their side of the channel but there are not at least `minimum_depth` confirmations, wait until there are before proceeding. 
 
-At this point, the merchant should check the contract storage and ensure that `status` is equal to `1`, meaning the funding is locked in. 
+If it is a dual-funded channel, the merchant funds their side of the channel using the `@addFunding` entrypoint and waits for that operation to confirm. The source of this transfer operation must be equal to the `merch_addr` specified in the contract's initial storage, with the transfer amount being exactly equal to `merchFunding`. 
+
+At this point, the merchant checks the contract storage and ensure that `status` is equal to `1`, meaning the funding is locked in. When this status has at least `minimum_depth` confirmations, the merchant will send `open_m` to the customer.
 
 ## Reclaim funding
-(XX: Darius TODO - describe when `@reclaimFunding` should be used)
+If during the funding process, either the customer or merchant are in the position where they have funded their own side, but the other side has not been funded, they can abort the process and reclaim their initial funds by calling the `@reclaimFunding` entrypoint. However, if both sides have funded the contract, the funds are locked in and `@reclaimFunding` will fail when called. 

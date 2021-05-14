@@ -2,30 +2,21 @@
 
   * [Overview](#Overview)
   * [Global defaults](#global-defaults)
-  * [The `open_c` Message](#the-`open_c`-Message)
-  * [The `open_m` Message](#the-`open_m`-Message)
   * [The `init_c` Message](#the-`init_c`-Message)
   * [The `init_m` Message](#the-`init_m`-Message)
-  * [The `funding_confirmed` Message](#the-`funding_confirmed`-Message)
-  * [The `funding_locked` Message](#the-`funding_locked`-Message)
-  * [The `activate_c` Message](#the-`activate_c`-Message)
-  * [The `activate_m` Message](#the-`activate_m`-Message)
+  * [The `open_c` Message](#the-`open_c`-Message)
+  * [The `open_m` Message](#the-`open_m`-Message)
 
 ## Overview
 TODO zkchannels-spec#5: Add high level overview of establish
 
         +-------+                              +-------+
-        |       |--(1)-------  open_c  ------->|       |
-        |       |<-(2)-------  open_m  --------|       |
+        |       |--(1)-------  init_c  ------->|       |
+        |       |<-(2)-------  init_m  --------|       |
+        |   A   |                              |   B   |
+        |       |--(3)-------- open_c -------->|       |
+        |       |<-(4)-------- open_m ---------|       |
         |       |                              |       |
-        |   A   |--(3)-------- init_c -------->|   B   |
-        |       |<-(4)-------- init_m ---------|       |
-        |       |                              |       |
-        |       |--(5)-- funding_confirmed --->|       |
-        |       |<-(6)---- funding_locked -----|       |
-        |       |                              |       |
-        |       |--(5)------ activate_c ------>|       |
-        |       |<-(6)------ activate_m -------|       |
         +-------+                              +-------+
 
         - where node A is the 'customer' and node B is the 'merchant'
@@ -37,27 +28,31 @@ TODO zkchannels-spec#5: Add high level overview of establish
 `selfDelay` sets the length of the dispute period. The same delay is applied to the `expiry` and `custClose` entrypoints. The value is interpreted in seconds. 
 `minimum_depth` sets the minimum number of confirmations for the funding to be considered final.
 
-### The `open_c` Message
-
-1. type: (`open_c`)
+### The `init_c` Message
+1. type: (`init_c`)
 2. data: 
     * [`string`:`cid_p`]
     * [`int`:`bal_cust_0`]
     * [`int`:`bal_merch_0`]
+    * [`address`:`cust_addr`]
+    * [`key`:`cust_pk`]
+    * [`bytes`:`merch_pk_hash`]
 #### Requirements
-
 The customer:
   - Ensures `cid_p` is generated randomly and is unique for each channel.
 
 The merchant:
   - Checks that `cid_p` , `bal_cust_0` ≥ 0, and `bal_merch_0` ≥ 0 are in the expected domain.
 
-### The `open_m` Message
-
-1. type: (`open_m`)
+### The `init_m` Message
+1. type: (`init_m`)
 2. data:
-    * [`bool`:`accept`]
     * [`string`:`cid_m`]
+    * [`json`:`closing_signature`]
+      * [`bls12_381_g1`:`s1`]
+      * [`bls12_381_g1`:`s2`]
+
+Here, `closing_signature` is the merchant's closing authorization signature over the initial state.
 
 #### Requirements
 
@@ -67,39 +62,10 @@ The merchant:
 Both the customer and merchant:
   - set `cid` to H(`cid_p`, `cid_m`)
 
-### The `init_c` Message
-
-1. type: (`init_c`)
-2. data: 
-    * [`address`:`custAddr`]
-    * [`key`:`custPk`]
-
-#### Requirements
-
-### The `init_m` Message
-
-1. type: (`init_m`)
-2. data: 
-    * [`address`:`merchAddr`]
-    * [`key`:`merchPk`]
-    * [`bls12_381_g2`:`merchPk0`]
-    * [`bls12_381_g2`:`merchPk1`]
-    * [`bls12_381_g2`:`merchPk2`]
-    * [`bls12_381_g2`:`merchPk3`]
-    * [`bls12_381_g2`:`merchPk4`]
-    * [`bls12_381_g2`:`merchPk5`]
-    * [`bls12_381_fr`:`hashCloseB`]
-    * [`json`:`closing_signature`]
-      * [`bls12_381_g1`:`s1`]
-      * [`bls12_381_g1`:`s2`]
-
-`hashCloseB` is the set to H(`merch_str`), where `merch_str` is a unique string set by the merchant.
-#### Requirements
-
-### The `funding_confirmed` Message
+### The `open_c` Message
 This message tells the merchant that the channel has been originated and the customer's side of the channel has been funded. For more information about this process, please refer to [contract-origination.md](contract-origination.md).
 
-1. type: (`funding_confirmed`)
+1. type: (`open_c`)
 2. data: 
     * [`address`:`contract-id`]
 
@@ -116,32 +82,13 @@ Upon receipt, the merchant:
   - Checks that the contract storage `status` has not changed for at least `minimum_depth` blocks.
 
 For a dual funded channel, the merchant will fund their side of the channel (see [contract-origination.md](contract-origination.md)).
-  ### The `funding_locked` Message
+  ### The `open_m` Message
 
-1. type: (`funding_locked`)
-2. data: 
-    * [`string`:`accept`] (XX: check what this msg should be)
-
-#### Requirements
-When the contract is fully funded, the `status` will change to `1` indicating that the funds are locked in. At this point the merchant waits until this status has been stable for `minimum_depth` blocks before sending `funding_locked` to the customer.
-
-### The `activate_c` Message
-
-1. type: (`activate_c`)
-2. data: 
-
-#### Requirements
-
-The customer:
-  - Ensures that the contract storage field `status` has been set to `1` (meaning the funding has been locked in) for at least `minimum_depth` blocks before sending this message.
-
-### The `activate_m` Message
-
-1. type: (`activate_m`)
+1. type: (`open_m`)
 2. data: 
     * [`json`:`payment_tag`]
       * [`bls12_381_g1`:`s1`]
       * [`bls12_381_g1`:`s2`]
 
 #### Requirements
-
+When the contract is fully funded, the `status` will change to `1` indicating that the funds are locked in. At this point the merchant waits until this status has been stable for `minimum_depth` blocks before sending `funding_locked` to the customer.

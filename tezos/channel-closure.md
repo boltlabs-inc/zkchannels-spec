@@ -58,9 +58,9 @@ For the customer to initial a unilateral channel closure, they call the smart co
 * [`bls12_381_g1`:`s1`]
 * [`bls12_381_g1`:`s2`]
 
-When the `@custClose` entrypoint has been called, the merchant's balace (`bal_merch`) will automatically be transferred to the `merchAddr` by the smart contract. The customer's balance (`bal_cust`) begins a timeout period to allow the merchant to [dispute](#merchant-dispute) the latest balance. The length of the timeout period is determined by `selfDelay` set in the smart contract at origination.
+When the `@custClose` entrypoint has been called, the merchant's balace (`bal_merch`) will automatically be transferred to the `merch_addr` by the smart contract. The customer's balance (`bal_cust`) begins a timeout period to allow the merchant to [dispute](#merchant-dispute) the latest balance. The length of the timeout period is determined by `selfDelay` set in the smart contract at origination.
 
-If the merchant does not call `@merchDispute` within the timeout period, the customer will claim their balance by calling the `@custClaim` entrypoint, at which point the smart contract with transfer the customer's balance to `custAddr`.
+If the merchant does not call `@merchDispute` within the timeout period, the customer will claim their balance by calling the `@custClaim` entrypoint, at which point the smart contract with transfer the customer's balance to `cust_addr`.
 
 ## Merchant Dispute
 As soon as the merchant detects that the customer has called the `@custClose` entrypoint, `rev_lock` is read from the contract storage and checked to see if it corresponds to a known `rev_secret` where H(`rev_secret`) == `rev_lock`. If `rev_secret` is known, this means the customer is attempting to close on an outdated state and the merchant will call the `@merchDispute` entrypoint with:
