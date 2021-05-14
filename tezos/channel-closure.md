@@ -9,8 +9,8 @@ A zkChannel can close either via a mutual close, in which both the customer and 
 1. type: (`mutual_close_c`)
 2. data: 
     * [`bls12_381_fr`:`cid`]
-    * [`int`:`bal_cust`]
-    * [`int`:`bal_merch`]
+    * [`bls12_381_fr`:`bal_cust`]
+    * [`bls12_381_fr`:`bal_merch`]
     * [`bls12_381_fr`:`rev_lock`]
     * [`json`:`closing_signature`]
       * [`bls12_381_g1`:`s1`]
@@ -54,7 +54,7 @@ For the customer to initial a unilateral channel closure, they call the smart co
 * [`bls12_381_fr`:`cid`]
 * [`mutez`:`bal_cust`]
 * [`mutez`:`bal_merch`]
-* [`bls12_381_fr`:`rev_lock`]
+* [`bytes`:`rev_lock`]
 * [`bls12_381_g1`:`s1`]
 * [`bls12_381_g1`:`s2`]
 
