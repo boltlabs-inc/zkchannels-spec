@@ -14,7 +14,7 @@ Channel establishment begins with the customer sending the `init_c` message, con
 
 At this point, the customer and merchant have exchanged enough information to compute a channel is, `cid`, which will act as the unique channel identifier on and off chain. The customer originates the contract with the initial state and funds their side of the channel. The customer sends `open_c` to the merchant, containing the contract id. The merchant checks that the contract on chain matches up with what they were expecting (the contract and inital storage). The merchant then funds their side of the smart contract. Once the contract is fully funded, the funds are locked in and the merchant sends the customer `open_m` with the first payment tag.
 
-When the customer receives and verifies the payment tag, the channel is open and they are ready to make payments with the [pay-protocol (XX add link for pay)](link-for-pay).
+When the customer receives and verifies the payment tag, the channel is open and they are ready to make payments with the [payments protocol](channel-payments.md).
 
         +-------+                              +-------+
         |       |--(1)-------  init_c  ------->|       |
