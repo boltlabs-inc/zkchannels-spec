@@ -8,7 +8,13 @@
   * [The `open_m` Message](#the-`open_m`-Message)
 
 ## Overview
-TODO zkchannels-spec#5: Add high level overview of establish
+After the merchant has completed the [setup](#setup.md) phase, and the customer and merchant have established a communication session, channel establishment may begin. 
+
+Channel establishment begins with the customer sending the `init_c` message, containing information about the proposed initial state of the channel contract. If the merchant agrees to the proposed channel, they reply with `init_m`, containing the initial closing authorization signature (`closing_signature`).  
+
+At this point, the customer and merchant have exchanged enough information to compute a channel is, `cid`, which will act as the unique channel identifier on and off chain. The customer originates the contract with the initial state and funds their side of the channel. The customer sends `open_c` to the merchant, containing the contract id. The merchant checks that the contract on chain matches up with what they were expecting (the contract and inital storage). The merchant then funds their side of the smart contract. Once the contract is fully funded, the funds are locked in and the merchant sends the customer `open_m` with the first payment tag.
+
+When the customer receives and verifies the payment tag, the channel is open and they are ready to make payments with the [pay-protocol (XX add link for pay)](link-for-pay).
 
         +-------+                              +-------+
         |       |--(1)-------  init_c  ------->|       |
