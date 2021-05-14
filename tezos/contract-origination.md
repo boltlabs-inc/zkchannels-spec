@@ -60,7 +60,7 @@ If the customer has funded their side of the channel but there are not at least 
 
 If it is a dual-funded channel, the merchant funds their side of the channel using the `@addFunding` entrypoint and waits for that operation to confirm. The source of this transfer operation must be equal to the `merch_addr` specified in the contract's initial storage, with the transfer amount being exactly equal to `merchFunding`. 
 
-At this point, the merchant checks the contract storage and ensure that `status` is equal to `1`, meaning the funding is locked in. When this status has at least `minimum_depth` confirmations, the merchant will send `open_m` to the customer.
+At this point, the merchant checks the contract storage and ensure that `status` is set to `OPEN` (denoted as `1`), meaning the funding is locked in. When this status has at least `minimum_depth` confirmations, the merchant will send `open_m` to the customer.
 
 ## Reclaim funding
 If during the funding process, either the customer or merchant are in the position where they have funded their own side, but the other side has not been funded, they can abort the process and reclaim their initial funds by calling the `@reclaimFunding` entrypoint. However, if both sides have funded the contract, the funds are locked in and `@reclaimFunding` will fail when called. 

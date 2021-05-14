@@ -92,7 +92,7 @@ The customer:
 Upon receipt, the merchant:
   - Checks that the originated contract `contract-id` has the exact same code as the zkchannels contract.
   - Checks that the on-chain storage of `contract-id` is exactly as expected for channel `cid` (including that the customer's side has been funded).
-  - Checks that the contract storage `status` has not changed for at least `minimum_depth` blocks.
+  - Checks that the contract storage `status` has been set to `OPEN` (denoted as `1`) for at least `minimum_depth` blocks.
 
 For a dual funded channel, the merchant will fund their side of the channel (see [contract-origination.md](contract-origination.md)).
   ### The `open_m` Message
@@ -104,7 +104,7 @@ For a dual funded channel, the merchant will fund their side of the channel (see
       * [`bls12_381_g1`:`s2`]
 
 #### Requirements
-When the contract is fully funded, the `status` will change to `1` indicating that the funds are locked in. At this point the merchant waits until this status has been stable for `minimum_depth` blocks before sending `funding_locked` to the customer.
+When the contract is fully funded, the `status` will change to `OPEN` (denoted as `1`) indicating that the funds are locked in. At this point the merchant waits until this status has been stable for `minimum_depth` blocks before sending `funding_locked` to the customer.
 
 Upon receipt, the customer:
   - verifies the `payment_tag`.
