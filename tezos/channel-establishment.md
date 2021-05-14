@@ -37,12 +37,16 @@ TODO zkchannels-spec#5: Add high level overview of establish
     * [`address`:`cust_addr`]
     * [`key`:`cust_pk`]
     * [`bytes`:`merch_pk_hash`]
+
+Here, `merch_pk_hash` is the hash of the merchant's public parameters including their PS key and Tezos account information. This ensures that the customer has the correct merchant details before attempting to open a channel on chain. 
+
 #### Requirements
 The customer:
   - Ensures `cid_p` is generated randomly and is unique for each channel.
 
-The merchant:
+Upon receipt, the merchant:
   - Checks that `cid_p` , `bal_cust_0` ≥ 0, and `bal_merch_0` ≥ 0 are in the expected domain.
+  - Checks that `merch_pk_hash` is correct.
 
 ### The `init_m` Message
 1. type: (`init_m`)
@@ -56,12 +60,15 @@ Here, `closing_signature` is the merchant's closing authorization signature over
 
 #### Requirements
 
-The merchant:
+Both the customer and merchant:
+  - Set `cid` to H(`cid_p`, `cid_m`)
+
+Before sending, the merchant:
   - Ensures `cid_m` is generated randomly and is unique for each channel.
 
-Both the customer and merchant:
-  - set `cid` to H(`cid_p`, `cid_m`)
-
+Upon receipt, the customer:
+  - Verifies the merchant's `closing_signature` on the initial state.
+  
 ### The `open_c` Message
 This message tells the merchant that the channel has been originated and the customer's side of the channel has been funded. For more information about this process, please refer to [contract-origination.md](contract-origination.md).
 
@@ -92,3 +99,6 @@ For a dual funded channel, the merchant will fund their side of the channel (see
 
 #### Requirements
 When the contract is fully funded, the `status` will change to `1` indicating that the funds are locked in. At this point the merchant waits until this status has been stable for `minimum_depth` blocks before sending `funding_locked` to the customer.
+
+Upon receipt, the customer:
+  - verifies the `payment_tag`.
