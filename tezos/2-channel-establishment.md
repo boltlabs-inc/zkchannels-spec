@@ -8,13 +8,13 @@
   * [The `open_m` Message](#the-`open_m`-Message)
 
 ## Overview
-After the merchant has completed the [setup](#01-setup.md) phase, and the customer and merchant have established a communication session, channel establishment may begin. 
+After the merchant has completed the [setup](#1-setup.md) phase, and the customer and merchant have established a communication session, channel establishment may begin. 
 
 Channel establishment begins with the customer sending the `init_c` message, containing information about the proposed initial state of the channel contract. If the merchant agrees to the proposed channel, they reply with `init_m`, containing the initial closing authorization signature (`closing_signature`).  
 
 At this point, the customer and merchant have exchanged enough information to compute a channel is, `cid`, which will act as the unique channel identifier on and off chain. The customer originates the contract with the initial state and funds their side of the channel. The customer sends `open_c` to the merchant, containing the contract id. The merchant checks that the contract on chain matches up with what they were expecting (the contract and inital storage). The merchant then funds their side of the smart contract. Once the contract is fully funded, the funds are locked in and the merchant sends the customer `open_m` with the first payment tag.
 
-When the customer receives and verifies the payment tag, the channel is open and they are ready to make payments with the [payments protocol](03-channel-payments.md).
+When the customer receives and verifies the payment tag, the channel is open and they are ready to make payments with the [payments protocol](3-channel-payments.md).
 
         +-------+                              +-------+
         |       |--(1)-------  init_c  ------->|       |
@@ -77,7 +77,7 @@ Upon receipt, the customer:
   - Verifies the merchant's `closing_signature` on the initial state.
   
 ### The `open_c` Message
-This message tells the merchant that the channel has been originated and the customer's side of the channel has been funded. For more information about this process, please refer to [02-contract-origination.md](02-contract-origination.md).
+This message tells the merchant that the channel has been originated and the customer's side of the channel has been funded. For more information about this process, please refer to [2-contract-origination.md](2-contract-origination.md).
 
 1. type: (`open_c`)
 2. data: 
@@ -95,7 +95,7 @@ Upon receipt, the merchant:
   - Checks that the on-chain storage of `contract-id` is exactly as expected for channel `cid` (including that the customer's side has been funded).
   - Checks that the contract storage `status` has been set to `OPEN` (denoted as `1`) for at least `minimum_depth` blocks.
 
-For a dual funded channel, the merchant will fund their side of the channel (see [02-contract-origination.md](02-contract-origination.md)).
+For a dual funded channel, the merchant will fund their side of the channel (see [2-contract-origination.md](2-contract-origination.md)).
   ### The `open_m` Message
 
 1. type: (`open_m`)
