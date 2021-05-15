@@ -1,10 +1,10 @@
 # zkChannels on Tezos: Overview and Index
 
 
-1. [System Setup and Merchant Initialization](setup.md)
-3. [Channel Establishment](channel-establishment.md)
-4. [Channel Payments](channel-payments.md)
-5. [Channel Closure](channel-closure.md) 
+1. [System Setup and Merchant Initialization](01-setup.md)
+3. [Channel Establishment](02-channel-establishment.md)
+4. [Channel Payments](03-channel-payments.md)
+5. [Channel Closure](04-channel-closure.md) 
 
 
 ## Overview
