@@ -37,7 +37,7 @@ When the customer receives and verifies the payment tag, the channel is open and
 ### The `init_c` Message
 1. type: (`init_c`)
 2. data: 
-    * [`string`:`cid_p`]
+    * [`string`:`cid_c`]
     * [`int`:`bal_cust_0`]
     * [`int`:`bal_merch_0`]
     * [`address`:`cust_addr`]
@@ -49,10 +49,10 @@ Here, `merch_pk_hash` is the hash of the merchant's public parameters including 
 #### Requirements
 The customer:
   - Needs to have obtained the merchant’s setup information (signature parameters and tezos account details) out of band beforehand.
-  - Ensures `cid_p` is generated randomly and is unique for each channel.
+  - Ensures `cid_c` is generated randomly and is unique for each channel.
 
 Upon receipt, the merchant:
-  - Checks that `cid_p` , `bal_cust_0` ≥ 0, and `bal_merch_0` ≥ 0 are in the expected domain.
+  - Checks that `cid_c` , `bal_cust_0` ≥ 0, and `bal_merch_0` ≥ 0 are in the expected domain.
   - Checks that `merch_pk_hash` is correct.
 
 ### The `init_m` Message
@@ -68,7 +68,7 @@ Here, `closing_signature` is the merchant's closing authorization signature over
 #### Requirements
 
 Both the customer and merchant:
-  - Set `cid` to H(`cid_p`, `cid_m`)
+  - Set `cid` to H(`cid_c`, `cid_m`, `cust_pk`, `merch_pk`, `merch_PS_pk`) where `cust_pk`, `merch_pk` refer to the customer and merchant's Tezos account public keys respectively, and `merch_PS_pk` refers to the merchant's public PS public keys.
 
 Before sending, the merchant:
   - Ensures `cid_m` is generated randomly and is unique for each channel.
