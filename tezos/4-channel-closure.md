@@ -68,8 +68,6 @@ As soon as the merchant detects that the customer has called the `@custClose` en
 
 if `rev_secret` hashes to `rev_lock`, the smart contract will send the customer's pending balance to the merchant.
 
-(XX: If the customer attempts to make a payment after @custClose, should the merchant punish the customer by running @dispute, or just fail the payment?)
-
 ## Unilateral Merchant Close
 As the merchant does not know the latest state of a payment channel, the merchant initiates a unilateral closure by effectively forcing the customer to close the channel within a timeout period. The length of the timeout period is determined by `selfDelay` (the same as the timeout period for `@custClose`).
 
