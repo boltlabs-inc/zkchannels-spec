@@ -12,9 +12,11 @@
 ## Overview
 After the merchant has completed the [setup](#1-setup.md) phase, and the customer and merchant have established a communication session, channel establishment may begin. 
 
-Channel establishment begins with the customer sending the `init_c` message, containing information about the proposed initial state of the channel contract. If the merchant agrees to the proposed channel, they reply with `init_m`, containing the initial closing authorization signature (`closing_signature`).  
+Channel establishment begins with the customer sending the `prep_c` message, containing information about the proposed initial state of the channel contract. If the merchant agrees to the proposed channel, they reply with `prep_m`. At this point, the customer and merchant have exchanged enough information to compute a channel id, `cid`, which will act as the unique channel identifier on and off chain.
 
-At this point, the customer and merchant have exchanged enough information to compute a channel is, `cid`, which will act as the unique channel identifier on and off chain. The customer originates the contract with the initial state and funds their side of the channel. The customer sends `open_c` to the merchant, containing the contract id. The merchant checks that the contract on chain matches up with what they were expecting (the contract and inital storage). The merchant then funds their side of the smart contract. Once the contract is fully funded, the funds are locked in and the merchant sends the customer `open_m` with the first payment tag.
+The customer initiates the initialization phase by sending `init_c`. This message contains a commitment to the initial state and initial closing state. In return, the merchant will send back `init_m`, containing their initial closing authorization signature.
+
+The customer originates the contract with the initial state and funds their side of the channel. The customer sends `open_c` to the merchant, containing the contract id. The merchant checks that the contract on chain matches up with what they were expecting (the contract and inital storage). The merchant then funds their side of the smart contract. Once the contract is fully funded, the funds are locked in and the merchant sends the customer `open_m` with the first payment tag.
 
 When the customer receives and verifies the payment tag, the channel is open and they are ready to make payments with the [payments protocol](3-channel-payments.md).
 
@@ -66,16 +68,23 @@ Upon receipt, the merchant:
     * [`string`:`cid_m`]
 
 #### Requirements
-Both the customer and merchant:
-  - Set `cid` to H(`cid_c`, `cid_m`, `cust_pk`, `merch_pk`, `merch_PS_pk`) where `cust_pk`, `merch_pk` refer to the customer and merchant's Tezos account public keys respectively, and `merch_PS_pk` refers to the merchant's public PS public keys.
-
 Before sending, the merchant:
   - Ensures `cid_m` is generated randomly and is unique for each channel.
-  
+  - Sets `cid` to H(`cid_c`, `cid_m`, `cust_pk`, `merch_pk`, `merch_PS_pk`) where `cust_pk`, `merch_pk` refer to the customer and merchant's Tezos account public keys respectively, and `merch_PS_pk` refers to the merchant's public PS public keys.
+
+Upon receipt, the customer:
+  - Checks that `cid_m` is in the expected range. If yes, set `cid` to H(`cid_c`, `cid_m`, `cust_pk`, `merch_pk`, `merch_PS_pk`).
 
 ### The `init_c` Message
+The customer initiates `zkAbacus.Initialize()` by sending the merchant `init_c`.
+
 1. type: (`init_c`)
 2. data: 
+    * [`bls12_381_g2`:`A'`]
+    * [`bls12_381_g2`:`A''`]
+    * [`bls12_381_g2`/`bls12_381_g1`/`bls12_381_fr`:`Pi`]
+
+#### Requirements
 
 ### The `init_m` Message
 1. type: (`init_m`)
