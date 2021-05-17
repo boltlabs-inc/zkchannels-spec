@@ -21,7 +21,7 @@ In the first round, the customer sends the `prep_c` message, which contains info
 
 In the next round, the customer and merchant initialize the `zkAbacus` channel by running `zkAbacus.Initialize()` on the previously established parameters. In this subroutine, the customer sends `init_c`, which consists of a (hiding) commitment to the intial state and a zero-knowledge proof of correctness. In return, the merchant sends `init_m`, which contains an initial closing authorization signature for the customer.
 
-For the final round, the customer originates the contract and funds their side of the channel. The customer sends `open_c` to the merchant, which contains the contract id `contract-ID`. The merchant checks the corresponding contract and initial storage for correctness. The merchant then funds their side of the smart contract, if applicable. Once the contract is fully funded, the funds are locked in. At this point, the merchant runs `zkAbacus.\Activate()` to generate the initial payment tag and sends the customer the message `open_m`, which contains the payment tag.
+For the final round, the customer originates the contract and funds their side of the channel. The customer sends `open_c` to the merchant, which contains the contract id `contract-ID`. The merchant checks the corresponding contract and initial storage for correctness. The merchant then funds their side of the smart contract, if applicable. Once the contract is fully funded, the funds are locked in. At this point, the merchant runs `zkAbacus.Activate()` to generate the initial payment tag and sends the customer the message `open_m`, which contains the payment tag.
 
 When the customer receives and verifies the payment tag, the channel is open and they are ready to make payments with the [payments protocol](3-channel-payments.md).
 
@@ -45,6 +45,7 @@ When the customer receives and verifies the payment tag, the channel is open and
 
 `selfDelay` sets the length of the dispute period. The same delay is applied to the `expiry` and `custClose` entrypoints. The value is interpreted in seconds. 
 `minimum_depth` sets the minimum number of confirmations for the funding to be considered final.
+
 
 ## The `prep_c` Message
 1. type: (`prep_c`)
@@ -74,31 +75,35 @@ Upon receipt, the merchant:
 
 ### Requirements
 Before sending, the merchant:
-  - Ensures `cid_m` is generated randomly and is unique for each channel.
-  - Sets `cid` to H(`cid_c`, `cid_m`, `cust_pk`, `merch_pk`, `merch_PS_pk`) where `cust_pk`, `merch_pk` refer to the customer and merchant's Tezos account public keys respectively, and `merch_PS_pk` refers to the merchant's public PS public keys.
+  - Generates `cid_m` randomly using a secure RNG.
+  - Sets `cid` to `SHA3-256(cid_c, cid_m, cust_pk, merch_pk, merch_PS_pk)` where `cust_pk`, `merch_pk` refer to the customer and merchant's Tezos account public keys respectively, and `merch_PS_pk` refers to the merchant's public PS public keys.
 
 Upon receipt, the customer:
-  - Checks that `cid_m` is in the expected range. If yes, set `cid` to H(`cid_c`, `cid_m`, `cust_pk`, `merch_pk`, `merch_PS_pk`).
+  - Checks that `cid_m` is a valid string. If yes, sets `cid` to `SHA3-256(cid_c, cid_m, cust_pk, merch_pk, merch_PS_pk)`.
 
 ## The `init_c` Message
-The customer initiates `zkAbacus.Initialize()` by sending the merchant `init_c`.
+The `init_c` message is the first message of `zkAbacus.Initialize()`.
 
 1. type: (`init_c`)
 2. data: 
-    * [`bls12_381_g2`:`A'`]
-    * [`bls12_381_g2`:`A''`]
-    * [`bls12_381_g2`/`bls12_381_g1`/`bls12_381_fr`:`Pi`]
+    * [`bls12_381_g1`:`A'`]
+    * [`bls12_381_g1`:`A''`]
+    * [`(bls12_381_g1, bls12_381_g1, Vec<bls12_381_fr>):Pi`]
 
 ### Requirements
+Upon receipt, the merchant checks `init_c` and continues as specified in `zkAbacus.Initialize()`. 
 
 ## The `init_m` Message
+The `init_m` message is the second (and last) message of `zkAbacus.Initialize()`.
+
 1. type: (`init_m`)
 2. data: 
     * [`json`:`closing_signature`]
       * [`bls12_381_g1`:`s1`]
       * [`bls12_381_g1`:`s2`]
 
-Here, `closing_signature` is the merchant's closing authorization signature over the initial state.
+Here, `closing_signature` is a closing authorization signature on the initial closing state, under the merchant's Pointcheval-Sanders keypair.
+(XX what is the initial state)
 
 Upon receipt, the customer:
   - Verifies the merchant's `closing_signature` on the initial state.
