@@ -54,7 +54,7 @@ For the customer to initial a unilateral channel closure, they call the smart co
 * [`bls12_381_fr`:`cid`]
 * [`mutez`:`bal_cust`]
 * [`mutez`:`bal_merch`]
-* [`bytes`:`rev_lock`]
+* [`bls12_381_fr`:`rev_lock`]
 * [`bls12_381_g1`:`s1`]
 * [`bls12_381_g1`:`s2`]
 
