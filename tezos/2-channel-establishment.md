@@ -71,9 +71,6 @@ Both the customer and merchant:
 
 Before sending, the merchant:
   - Ensures `cid_m` is generated randomly and is unique for each channel.
-
-Upon receipt, the customer:
-  - Verifies the merchant's `closing_signature` on the initial state.
   
 
 ### The `init_c` Message
@@ -89,6 +86,8 @@ Upon receipt, the customer:
 
 Here, `closing_signature` is the merchant's closing authorization signature over the initial state.
 
+Upon receipt, the customer:
+  - Verifies the merchant's `closing_signature` on the initial state.
 ### The `open_c` Message
 This message tells the merchant that the channel has been originated and the customer's side of the channel has been funded. For more information about this process, please refer to [2-contract-origination.md](2-contract-origination.md).
 
