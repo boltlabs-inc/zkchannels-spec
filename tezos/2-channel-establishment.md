@@ -2,6 +2,8 @@
 
   * [Overview](#Overview)
   * [Global defaults](#global-defaults)
+  * [The `prep_c` Message](#the-`init_c`-Message)
+  * [The `prep_m` Message](#the-`init_m`-Message)
   * [The `init_c` Message](#the-`init_c`-Message)
   * [The `init_m` Message](#the-`init_m`-Message)
   * [The `open_c` Message](#the-`open_c`-Message)
@@ -17,6 +19,9 @@ At this point, the customer and merchant have exchanged enough information to co
 When the customer receives and verifies the payment tag, the channel is open and they are ready to make payments with the [payments protocol](3-channel-payments.md).
 
         +-------+                              +-------+
+        |       |--(1)-------  prep_c  ------->|       |
+        |       |<-(2)-------  prep_m  --------|       |
+        |       |                              |       |
         |       |--(1)-------  init_c  ------->|       |
         |       |<-(2)-------  init_m  --------|       |
         |   A   |                              |   B   |
@@ -34,8 +39,8 @@ When the customer receives and verifies the payment tag, the channel is open and
 `selfDelay` sets the length of the dispute period. The same delay is applied to the `expiry` and `custClose` entrypoints. The value is interpreted in seconds. 
 `minimum_depth` sets the minimum number of confirmations for the funding to be considered final.
 
-### The `init_c` Message
-1. type: (`init_c`)
+### The `prep_c` Message
+1. type: (`prep_c`)
 2. data: 
     * [`string`:`cid_c`]
     * [`int`:`bal_cust_0`]
@@ -55,18 +60,12 @@ Upon receipt, the merchant:
   - Checks that `cid_c` , `bal_cust_0` ≥ 0, and `bal_merch_0` ≥ 0 are in the expected domain.
   - Checks that `merch_pk_hash` is correct.
 
-### The `init_m` Message
-1. type: (`init_m`)
+### The `prep_m` Message
+1. type: (`prep_m`)
 2. data:
     * [`string`:`cid_m`]
-    * [`json`:`closing_signature`]
-      * [`bls12_381_g1`:`s1`]
-      * [`bls12_381_g1`:`s2`]
-
-Here, `closing_signature` is the merchant's closing authorization signature over the initial state.
 
 #### Requirements
-
 Both the customer and merchant:
   - Set `cid` to H(`cid_c`, `cid_m`, `cust_pk`, `merch_pk`, `merch_PS_pk`) where `cust_pk`, `merch_pk` refer to the customer and merchant's Tezos account public keys respectively, and `merch_PS_pk` refers to the merchant's public PS public keys.
 
@@ -76,6 +75,20 @@ Before sending, the merchant:
 Upon receipt, the customer:
   - Verifies the merchant's `closing_signature` on the initial state.
   
+
+### The `init_c` Message
+1. type: (`init_c`)
+2. data: 
+
+### The `init_m` Message
+1. type: (`init_m`)
+2. data: 
+    * [`json`:`closing_signature`]
+      * [`bls12_381_g1`:`s1`]
+      * [`bls12_381_g1`:`s2`]
+
+Here, `closing_signature` is the merchant's closing authorization signature over the initial state.
+
 ### The `open_c` Message
 This message tells the merchant that the channel has been originated and the customer's side of the channel has been funded. For more information about this process, please refer to [2-contract-origination.md](2-contract-origination.md).
 

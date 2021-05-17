@@ -20,6 +20,8 @@ XX add reference to blindsigs-protocol doc.
    * Short for 'channel identifier', a uniquely identifying hash for each channel. It is defined as H(cid_c, cid_m, cust_pk, merch_pk, merch_PS_pk) where cust_pk, merch_pk refer to the customer and merchant's Tezos account public keys respectively, and merch_PS_pk refers to the merchant's public PS public keys.
 * #### *`contract-id`*:
    * The smart contract's KT1 address.
+* #### *forging*:
+   * The process of creating a serialized Tezos operation.
 * #### *inject*:
    * The process of broadcasting an operation on the Tezos blockchain.
 * #### *storage*:
