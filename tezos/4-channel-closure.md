@@ -34,6 +34,8 @@ If the merchant fails either of these checks, abort.
 2. data: 
     * [`signature`:`mutual_close_signature`]
 
+Where `mutual_close_signature` is an EdDSA signature on the final state using the corresponding private key of the merchant's tezos account (denoted by `merch_addr`).
+
 #### Requirements
 
 Upon receipt, the customer:
