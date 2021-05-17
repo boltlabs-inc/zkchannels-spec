@@ -16,13 +16,13 @@ zkChannels on Tezos is built out two main components:
 XX add reference to blindsigs-protocol doc.
 
 ## Glossary
-* #### *`cid`*:
-   * Short for 'channel identifier', a uniquely identifying hash for each channel. It is defined as H(cid_c, cid_m, cust_pk, merch_pk, merch_PS_pk) where cust_pk, merch_pk refer to the customer and merchant's Tezos account public keys respectively, and merch_PS_pk refers to the merchant's public PS public keys.
-* #### *`contract-id`*:
+* **`cid`**:
+   A unique channel identifier generated as a SHA3-256 hash of random contributions from both parties, together with `zkAbacus` channel parameters and `TezosEscrowAgent` escrow account parameters.
+* **`contract-id`**:
    * The smart contract's KT1 address.
-* #### *forging*:
-   * The process of creating a serialized Tezos operation.
-* #### *inject*:
-   * The process of broadcasting an operation on the Tezos blockchain.
-* #### *storage*:
-   * The memory held by the smart contract.
+*  **forging**:
+   The process of creating a serialized Tezos operation.
+*  **inject**:
+   The process of broadcasting an operation on the Tezos blockchain.
+*  **storage**:
+   The memory held by the smart contract.
