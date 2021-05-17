@@ -23,8 +23,8 @@ When the customer receives and verifies the payment tag, the channel is open and
         |       |<-(2)-------  prep_m  --------|       |
         |       |                              |       |
         |       |--(1)-------  init_c  ------->|       |
-        |       |<-(2)-------  init_m  --------|       |
-        |   A   |                              |   B   |
+        |   A   |<-(2)-------  init_m  --------|   B   |
+        |       |                              |       |
         |       |--(3)-------- open_c -------->|       |
         |       |<-(4)-------- open_m ---------|       |
         |       |                              |       |
