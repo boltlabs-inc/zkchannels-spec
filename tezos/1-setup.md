@@ -1,4 +1,4 @@
-# Global System Setup
+# System Setup
 
 ## Commitment scheme parameters
 * **Pedersen commitments**: We use Pedersen commitments on messages of length one in the pairing group `G1` of BLS12-381. We set parameters as the pair `(g1, h)`, where `g1` is the standard generator defined in the BLS12-381 crate and `h` is a hash-to-curve of the string `'zkChannels Pedersen generator'`.
@@ -9,6 +9,11 @@ We use SHA3-256 hashes to instantiate our hash-based commitments.
 * Pointcheval-Sanders signatures public parameters: We use the pairing defined by the [BLS12-381](https://crates.io/crates/bls12_381) crate. 
 * EdDSA signature public parameters: We rely on the public parameters selected by the `tezos-client` for Ed25519.
 
+## Global defaults
+### `TezosEscrowAgent` global defaults
+* `selfDelay`: an integer that represents the length of the dispute period. The same delay is applied to the `expiry` and `custClose` entrypoints. The value is interpreted in seconds. 
+
+* `minimum_depth`: an integer that represents the minimum number of confirmations for the funding to be considered final.
 
 # Merchant Setup
 
@@ -35,3 +40,4 @@ The merchant publishes their blind signing key pair and their range proof parame
 
 ## Tezos-related node initialization
 We assume the merchant runs or connects to a `tezos-node` that has been initialized correctly and securely. This means that the node has successfully established a connection to the P2P network and connected to a list of bootstrapped and trusted peers. It is assumed that the node runs a version of tezos that includes support for the **Edo** protocol or later.
+
