@@ -2,8 +2,8 @@
 
   * [Overview](#Overview)
   * [Global defaults](#global-defaults)
-  * [The `prep_c` Message](#the-`init_c`-Message)
-  * [The `prep_m` Message](#the-`init_m`-Message)
+  * [The `prep_c` Message](#the-`prep_c`-Message)
+  * [The `prep_m` Message](#the-`prep_m`-Message)
   * [The `init_c` Message](#the-`init_c`-Message)
   * [The `init_m` Message](#the-`init_m`-Message)
   * [The `open_c` Message](#the-`open_c`-Message)
