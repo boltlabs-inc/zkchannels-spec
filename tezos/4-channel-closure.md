@@ -63,10 +63,10 @@ When the `@custClose` entrypoint has been called, the merchant's balace (`bal_me
 If the merchant does not call `@merchDispute` within the timeout period, the customer will claim their balance by calling the `@custClaim` entrypoint, at which point the smart contract with transfer the customer's balance to `cust_addr`.
 
 ## Merchant Dispute
-As soon as the merchant detects that the customer has called the `@custClose` entrypoint, `rev_lock` is read from the contract storage and checked to see if it corresponds to a known `rev_secret` where H(`rev_secret`) == `rev_lock`. If `rev_secret` is known, this means the customer is attempting to close on an outdated state and the merchant will call the `@merchDispute` entrypoint with:
+As soon as the merchant detects that the customer has called the `@custClose` entrypoint, `rev_lock` is read from the contract storage and checked to see if it corresponds to a known `rev_secret` where H(`rev_secret`) == `rev_lock`, using the hash function SHA3-256. If `rev_secret` is known, this means the customer is attempting to close on an outdated state and the merchant will call the `@merchDispute` entrypoint with:
 * [`bytes`:`rev_secret`]
 
-if `rev_secret` hashes to `rev_lock`, the smart contract will send the customer's pending balance to the merchant.
+if `rev_secret` hashes to `rev_lock`, the smart contract will send the customer's pending balance to the merchant. 
 
 ## Unilateral Merchant Close
 As the merchant does not know the latest state of a payment channel, the merchant initiates a unilateral closure by effectively forcing the customer to close the channel within a timeout period. The length of the timeout period is determined by `selfDelay` (the same as the timeout period for `@custClose`).
