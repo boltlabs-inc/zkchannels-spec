@@ -2,12 +2,13 @@
 
   * [Overview](#Overview)
   * [Global defaults](#global-defaults)
-  * [The `prep_c` Message](#the-`prep_c`-Message)
-  * [The `prep_m` Message](#the-`prep_m`-Message)
-  * [The `init_c` Message](#the-`init_c`-Message)
-  * [The `init_m` Message](#the-`init_m`-Message)
-  * [The `open_c` Message](#the-`open_c`-Message)
-  * [The `open_m` Message](#the-`open_m`-Message)
+  * [Message Specifications](#message-specifications)
+    * [The `prep_c` Message](#the-`prep_c`-Message)
+    * [The `prep_m` Message](#the-`prep_m`-Message)
+    * [The `init_c` Message](#the-`init_c`-Message)
+    * [The `init_m` Message](#the-`init_m`-Message)
+    * [The `open_c` Message](#the-`open_c`-Message)
+    * [The `open_m` Message](#the-`open_m`-Message)
 
 ## Prerequistes
 The merchant has completed the [setup](#1-setup.md) phase, and the customer and merchant have established a communication session.
@@ -48,8 +49,9 @@ Upon completion of `zkAbacus.Activate()`, the channel is open and ready for [pay
 `self_delay` sets the length of the dispute period. The same delay is applied to the `expiry` and `custClose` entrypoints. The value is interpreted in seconds. 
 `minimum_depth` sets the minimum number of confirmations for the funding to be considered final.
 
+## Message Specifications
 
-## The `prep_c` Message
+### The `prep_c` Message
 1. type: (`prep_c`)
 2. data: 
     * [`string`:`cid_c`]
@@ -61,7 +63,7 @@ Upon completion of `zkAbacus.Activate()`, the channel is open and ready for [pay
 
 Here, `merch_pk_hash` is set to `SHA3-256(merch_addr, merch_pk, merch_PS_pk, close)`, the hash of the merchant's Tezos account information, public parameters including their Pointcheval-Sanders public key, and `close` flag. This ensures that the customer has the correct merchant details before attempting to open a channel on chain.
 
-### Requirements
+#### Requirements
 The customer:
    - Generates `cid_c` randomly using a secure RNG. 
 
@@ -69,12 +71,12 @@ Upon receipt, the merchant:
   - Checks that `cid_c` is a valid string and `bal_cust_0` ≥ 0 and `bal_merch_0` ≥ 0 are positive integers.
   - Checks that `merch_pk_hash` is correct. 
 
-## The `prep_m` Message
+### The `prep_m` Message
 1. type: (`prep_m`)
 2. data:
     * [`string`:`cid_m`]
 
-### Requirements
+#### Requirements
 Before sending, the merchant:
   - Generates `cid_m` randomly using a secure RNG.
   - Sets `cid` to `SHA3-256(cid_c, cid_m, cust_pk, merch_pk, merch_PS_pk)` where `cust_pk`, `merch_pk` refer to the customer and merchant's Tezos account public keys respectively, and `merch_PS_pk` refers to the merchant's public PS public keys.
@@ -82,7 +84,7 @@ Before sending, the merchant:
 Upon receipt, the customer:
   - Checks that `cid_m` is a valid string. If yes, sets `cid` to `SHA3-256(cid_c, cid_m, cust_pk, merch_pk, merch_PS_pk)`.
 
-## The `init_c` Message
+### The `init_c` Message
 The `init_c` message is the first message of `zkAbacus.Initialize()`.
 
 1. type: (`init_c`)
@@ -91,10 +93,10 @@ The `init_c` message is the first message of `zkAbacus.Initialize()`.
     * [`bls12_381_g1`:`A''`]
     * [`(bls12_381_g1, bls12_381_g1, Vec<bls12_381_fr>):Pi`]
 
-### Requirements
+#### Requirements
 Upon receipt, the merchant checks `init_c` and continues as specified in `zkAbacus.Initialize()`. 
 
-## The `init_m` Message
+### The `init_m` Message
 The `init_m` message is the second (and last) message of `zkAbacus.Initialize()`.
 
 1. type: (`init_m`)
@@ -105,11 +107,11 @@ The `init_m` message is the second (and last) message of `zkAbacus.Initialize()`
 
 Here, `closing_signature` is a closing authorization signature, usable by the customer for closing.
 
-### Requirements
+#### Requirements
 Upon receipt, the customer:
   - Checks `closing_signature` and continues as specified in `zkAbacus.Initialize()`.
 
-## The `open_c` Message
+### The `open_c` Message
 This message tells the merchant that the contract has been originated and the customer's side of the escrow account has been funded. For more information about this process, please refer to [2-contract-origination.md](2-contract-origination.md).
 
 1. type: (`open_c`)
@@ -117,23 +119,23 @@ This message tells the merchant that the contract has been originated and the cu
     * [`address`:`contract-id`]
 
 
-### Requirements
+#### Requirements
 
 The customer:
   - Ensures that the funds have been confirmed on chain for at least `minimum_depth`.
 
 Upon receipt, the merchant:
   - Checks that the originated contract `contract-id` contains the expected zkchannels [contract](https://github.com/boltlabs-inc/tezos-contract/blob/main/zkchannels-contract/zkchannel_contract.tz).
-  - Checks that the on-chain storage of `contract-id` is exactly as expected for channel `cid` (including that the customer's side has been funded). Specifically, check that:
+  - Checks that the on-chain storage of `contract-id` is exactly as expected for channel `cid` (including that the customer's side has been funded). Specifically, checks that:
     - The values stored in the following fields match the merchant's PS public key values:`g2`, `merchPk0`, `merchPk1`, `merchPk2`, `merchPk3`, `merchPk4`, `merchPk5`.
     - The merchant's tezos address and public key match the fields `merch_addr` and  `merch_pk`, respectively.
     - The `self_delay` field in the contract matches the global default. 
     - The `close` field matches the merchant's `close` flag.
     - `custFunding` and `merchFunding` match the initial balances `bal_cust_0` and `bal_merch_0`, respectively.
-  - In the customer-funded case, check that the contract storage `status` has been set to `OPEN` (denoted as `1`) for at least `minimum_depth` blocks.
+  - In the customer-funded case, checks that the contract storage `status` has been set to `OPEN` (denoted as `1`) for at least `minimum_depth` blocks.
   - In the dual-funded case, the merchant funds their side of the escrow account (see [2-contract-origination.md](2-contract-origination.md)).
 
-  ## The `open_m` Message
+  ### The `open_m` Message
   This `open_m` message consists of the sole message of `zkAbacus.Activate()`.
 
 1. type: (`open_m`)
@@ -142,7 +144,7 @@ Upon receipt, the merchant:
       * [`bls12_381_g1`:`s1`]
       * [`bls12_381_g1`:`s2`]
 
-### Requirements
+#### Requirements
 Before sending, the merchant:
   - Waits until the contract storage status has been set to `OPEN` (denoted as `1`) for `minimum_depth` blocks.
 
