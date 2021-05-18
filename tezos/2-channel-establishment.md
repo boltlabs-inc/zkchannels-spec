@@ -82,7 +82,7 @@ Upon receipt, the customer:
   - Checks that `cid_m` is a valid string. If yes, sets `cid` to `SHA3-256(cid_c, cid_m, cust_pk, merch_pk, merch_PS_pk)`.
 
 ### The `init_c` Message
-The customer runs the `zkAbacus.Initialize()` with the following inputs: `cust_pk`, `cid`, `bal_cust` and `bal_merch`. The customer sends an `init_c` message which consists of a pair of (hiding) commitments to the intial state and a zero-knowledge proof.
+The customer runs the `zkAbacus.Initialize()` with the following inputs: `cust_pk`, `cid`, `bal_cust` and `bal_merch`. The customer sends an `init_c` message which consists of the output of `Initialize()`: a pair of (hiding) commitments to the intial state and a zero-knowledge proof.
 
 1. type: (`init_c`)
 2. data:
