@@ -20,7 +20,7 @@ Channel establishment is a three round protocol.
 
 In the first round, the customer sends the `open_c` message, which contains information about the initial state of the proposed channel. If the merchant agrees to open the proposed channel, they reply with the message `open_m`, which contains the merchan'ts contribution to the channel identifier. At the end of this round, the customer and merchant have exchanged enough information to compute the channel identifer `cid`, which acts as the unique channel identifier for the on-chain Tezos escrow account and off-chain `zkAbacus` channel.
 
-In the next round, the customer and merchant initialize the `zkAbacus` channel by running `zkAbacus.Initialize()` on the previously established parameters. In this subroutine, the customer sends `init_c`, which consists of a (hiding) commitment to the intial state and a zero-knowledge proof of correctness. In return, the merchant sends `init_m`, which contains an initial closing authorization signature for the customer. 
+In the next round, the customer and merchant initialize the `zkAbacus` channel by running `zkAbacus.Initialize()` on the previously established public parameters. In this subroutine, the customer sends `init_c`, which consists of a (hiding) commitment to the intial state and a zero-knowledge proof of correctness. In return, the merchant sends `init_m`, which contains an initial closing authorization signature for the customer. 
 
 For the final round, the customer originates the contract and funds their side of the channel. The customer sends `funding_confirmed` to the merchant, which contains the contract id `contract-id`. The merchant checks the corresponding contract and initial storage for the expected values. The merchant then funds their side of the smart contract, if applicable. Once the contract is fully funded, the funds are locked in. At this point, the merchant runs `zkAbacus.Activate()` to generate the initial payment tag and sends the customer the message `activate`, which contains the payment tag.
 
@@ -82,19 +82,20 @@ Upon receipt, the customer:
   - Checks that `cid_m` is a valid string. If yes, sets `cid` to `SHA3-256(cid_c, cid_m, cust_pk, merch_pk, merch_PS_pk)`.
 
 ### The `init_c` Message
-The `init_c` message is the first message of `zkAbacus.Initialize()`.
+The customer runs the `zkAbacus.Initialize()` with the following inputs: `cust_pk`, `cid`, `bal_cust` and `bal_merch`. The customer sends an `init_c` message which consists of a pair of (hiding) commitments to the intial state and a zero-knowledge proof.
 
 1. type: (`init_c`)
-2. data: 
+2. data:
+    * [`string`:`cid`]
     * [`bls12_381_g1`:`CloseStateCommitment`]
     * [`bls12_381_g1`:`StateCommitment`]
     * [`(bls12_381_g1, bls12_381_g1, Vec<bls12_381_fr>): PayProof`]
 
 #### Requirements
-Upon receipt, the merchant checks `init_c` and continues as specified in `zkAbacus.Initialize()`. 
+Upon receipt, the merchant checks the correctness of the `cid` in the `init_c` message and continues as specified in `zkAbacus.Initialize()`. 
 
 ### The `init_m` Message
-The `init_m` message is the second (and last) message of `zkAbacus.Initialize()`.
+The merchant sends back an `init_m` message that consists of a closing authorization signature `closing_signature` on the initial state if `zkAbacus.Initialize()` was successful.
 
 1. type: (`init_m`)
 2. data: 
@@ -102,11 +103,9 @@ The `init_m` message is the second (and last) message of `zkAbacus.Initialize()`
       * [`bls12_381_g1`:`s1`]
       * [`bls12_381_g1`:`s2`]
 
-Here, `closing_signature` is a closing authorization signature, usable by the customer for closing.
-
 #### Requirements
 Upon receipt, the customer:
-  - Checks `closing_signature` and continues as specified in `zkAbacus.Initialize()`.
+  - Verifies `closing_signature` and continues as specified in `zkAbacus.Initialize()`.
 
 ### The `funding_confirmed` Message
 This message tells the merchant that the contract has been originated and the customer's side of the escrow account has been funded. For more information about this process, please refer to [2-contract-origination.md](2-contract-origination.md).
