@@ -17,14 +17,14 @@ zkChannels on Tezos is built out two main components:
 We briefly describe the protocol in four phases:
 
 ### (1) System Setup and Merchant Initialization
-Primitive specification and defaults are given [here](XX link to appropriate part of setup)
+Primitive specification and defaults are given [here](1-setup.md#system-setup)
 Each merchant using zkChannels generates long-lived public keys and parameters for use
-with all zkChannels as detailed [here](XX link to appropriate part of setup). 
+with all zkChannels as detailed [here](1-setup.md#merchant-setup). 
 
 
 ### (2) Channel establishment
 
-The customer and merchant agree on parameters, initialize a `zkAbacus` channel, open and fund a Tezos smart contract, and activate the `zkAbacus` channel as detailed [here](XX link).
+The customer and merchant agree on parameters, initialize a `zkAbacus` channel, open and fund a Tezos smart contract, and activate the `zkAbacus` channel as detailed [here](2-channel-establishment.md).
 
 ### (3) Channel payments
 Channel payments are specified in (XX link design doc). The customer initiates all payment requests, but both positive and negative payment values are supported. 
@@ -40,11 +40,11 @@ A zkChannel may be thought of a _sequence of _states__; the `zkAbacus` component
 From the merchant’s perspective, each successful payment results in a revocation secret that allows the merchant to track whether a given state has been invalidated, but the merchant learns nothing else about the payment except the amount. 
 The merchant is, however, confident that payments are successful only if they are initiated on a valid, current state of sufficient balance. As long as `zkAbacus.Pay` completes successfully, the merchant should provide the requested service.
 
-### (4) Channel closure (XX can you put this section in Tezos language)
-There are three options for [channel closure](XX link):
-  - Mutual close: The customer and merchant can collaborate off-network to create a mutual closing operation. This requires fewer on-chain operations and is therefore cheaper.
-  - Unilateral customer close: The customer can unilaterally initiate channel closure by using their current closing authorization signature to create an on-network customer closing operation. The merchant's balance gets paid to them immediately. The customer's balance is held by the contract for a prespecified timeout period. If during this time, the merchant can prove it was an attempted double spend, by providing the revocation secret, the merchant can claim the customer's entire balance. After the timeout period, if the merchant has not claimed the customer's balance, the customer may claim it.
-  - Unilateral merchant close: The merchant can unilaterally initiate channel closure by calling the `expiry` entrypoint on the smart contract. This operation triggers a timeout period, durinng which the customer must broadcast their latest state (as with a unilateral customer close). If the customer fails to do so within the timeout period, the merchant may claim the entire channel balance.
+### (4) Channel closure
+There are three options for [channel closure](4-channel-closure.md):
+  - Mutual close: The customer and merchant can collaborate off-chain to create an operation calling the `@mutualClose` entrypoint in the contract. This requires fewer on-chain operations and is therefore cheaper.
+  - Unilateral customer close: The customer can unilaterally initiate channel closure by using their current closing authorization signature to create an operation calling the `@custClose` entrypoint. The merchant's balance gets transferred to them immediately amd the customer's balance is held by the contract for a prespecified timeout period. If during this time, the merchant can prove it was an attempted double spend, by providing the revocation secret, the merchant can claim the customer's entire balance. After the timeout period, if the merchant has not claimed the customer's balance, the customer may claim it via the `@custClaim` entrypoint.
+  - Unilateral merchant close: The merchant can unilaterally initiate channel closure by calling the `@expiry` entrypoint on the smart contract. This operation triggers a timeout period, during which the customer must broadcast their latest state by calling `@custClose` (as with a unilateral customer close). If the customer fails to do so within the timeout period, the merchant may claim the entire channel balance via the `@merchClaim` entrypoint.
 
 ## References
 XX add reference to blindsigs-protocol doc.
