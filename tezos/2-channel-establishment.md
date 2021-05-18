@@ -12,7 +12,7 @@
 ## Prerequistes
 The merchant has completed the [setup](#1-setup.md) phase, and the customer and merchant have established a communication session.
 
-The customer has [obtained the merchant’s setup information](1-setup.md) out of band beforehand. The merchant public parameters include the following: XX add me.
+The customer has [obtained the merchant’s setup information](1-setup.md) out of band beforehand. The merchant public parameters include the following: `g2`, `merchPk0`, `merchPk1`, `merchPk2`, `merchPk3`, `merchPk4`, `merchPk5`.
 
 ## Overview
 Channel establishment is a three round protocol.
@@ -59,8 +59,7 @@ Upon completion of `zkAbacus.Activate()`, the channel is open and ready for [pay
     * [`key`:`cust_pk`]
     * [`bytes`:`merch_pk_hash`]
 
-Here, `merch_pk_hash` is the SHA3-256 hash of the merchant's public parameters including their Pointcheval-Sanders public key and Tezos account information. This ensures that the customer has the correct merchant details before attempting to open a channel on chain. 
-XX TODO: define this hash.
+Here, `merch_pk_hash` is set to `SHA3-256(merch_addr, merch_pk, merch_PS_pk, close)`, the hash of the merchant's Tezos account information, public parameters including their Pointcheval-Sanders public key, and `close` flag. This ensures that the customer has the correct merchant details before attempting to open a channel on chain.
 
 ### Requirements
 The customer:
@@ -144,8 +143,10 @@ Upon receipt, the merchant:
       * [`bls12_381_g1`:`s2`]
 
 ### Requirements
- The contract storage status must be `OPEN` (denoted as `1`) for `minimum_depth` blocks before the merchent sends `open_m` to the customer.
-(XX timeouut needed)
+Before sending, the merchant:
+  - Waits until the contract storage status has been set to `OPEN` (denoted as `1`) for `minimum_depth` blocks.
+
+If the customer fails to fund their side of the contract within 180 minutes of sending `open_c`, the merchant will abort. If the decision to abort occurs after the merchant has already funded their side of the channel, call the `@reclaimFunding` entrypoint in order to retrieve the merchant's initial funding.
 
 Upon receipt, the customer:
   - In the dual-funded case, checks that contract storage status has been `OPEN` for `minimum_depth` blocks. If this check fails, the customer should reclaim their funding by initiating a unilateral close.
