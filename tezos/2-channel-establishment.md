@@ -59,9 +59,6 @@ Upon completion of `zkAbacus.Activate()`, the channel is open and ready for [pay
     * [`int`:`bal_merch_0`]
     * [`address`:`cust_addr`]
     * [`key`:`cust_pk`]
-    * [`bytes`:`merch_pk_hash`]
-
-Here, `merch_pk_hash` is set to `SHA3-256(merch_addr, merch_pk, merch_PS_pk, "close")`, the hash of the merchant's Tezos account information, public parameters including their Pointcheval-Sanders public key, and `"close"` string. This ensures that the customer has the correct merchant details before attempting to open a channel on chain.
 
 #### Requirements
 The customer:
