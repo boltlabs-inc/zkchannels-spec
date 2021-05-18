@@ -19,11 +19,13 @@ Channel establishment is a three round protocol.
 
 In the first round, the customer sends the `prep_c` message, which contains information about the initial state of the proposed channel. If the merchant agrees to open the proposed channel, they reply with the message `prep_m`, which contains the merchan'ts contribution to the channel identifier. At the end of this round, the customer and merchant have exchanged enough information to compute the channel identifer `cid`, which acts as the unique channel identifier for the on-chain Tezos escrow account and off-chain `zkAbacus` channel.
 
-In the next round, the customer and merchant initialize the `zkAbacus` channel by running `zkAbacus.Initialize()` on the previously established parameters. In this subroutine, the customer sends `init_c`, which consists of a (hiding) commitment to the intial state and a zero-knowledge proof of correctness. In return, the merchant sends `init_m`, which contains an initial closing authorization signature for the customer.
+In the next round, the customer and merchant initialize the `zkAbacus` channel by running `zkAbacus.Initialize()` on the previously established parameters. In this subroutine, the customer sends `init_c`, which consists of a (hiding) commitment to the intial state and a zero-knowledge proof of correctness. In return, the merchant sends `init_m`, which contains an initial closing authorization signature for the customer. 
 
 For the final round, the customer originates the contract and funds their side of the channel. The customer sends `open_c` to the merchant, which contains the contract id `contract-ID`. The merchant checks the corresponding contract and initial storage for correctness. The merchant then funds their side of the smart contract, if applicable. Once the contract is fully funded, the funds are locked in. At this point, the merchant runs `zkAbacus.Activate()` to generate the initial payment tag and sends the customer the message `open_m`, which contains the payment tag.
 
-When the customer receives and verifies the payment tag, the channel is open and they are ready to make payments with the [payments protocol](3-channel-payments.md).
+Upon completion of `zkAbacus.Activate()`, the channel is open and ready for [payments](3-channel-payments.md).  Details for `zkAbacus.Initialize` maybe found here. (XX reference)
+
+
 
         +-------+                           +-------+
         |       |---------  prep_c  ------->|       |
@@ -102,19 +104,19 @@ The `init_m` message is the second (and last) message of `zkAbacus.Initialize()`
       * [`bls12_381_g1`:`s1`]
       * [`bls12_381_g1`:`s2`]
 
-Here, `closing_signature` is a closing authorization signature on the initial closing state, under the merchant's Pointcheval-Sanders keypair.
-(XX what is the initial state)
+Here, `closing_signature` is a closing authorization signature, usable by the customer for closing.
 
+### Requirements
 Upon receipt, the customer:
-  - Verifies the merchant's `closing_signature` on the initial state.
+  - Checks `closing_signature` and continues as specified in `zkAbacus.Initialize()`.
+
 ## The `open_c` Message
-This message tells the merchant that the channel has been originated and the customer's side of the channel has been funded. For more information about this process, please refer to [2-contract-origination.md](2-contract-origination.md).
+This message tells the merchant that the contract has been originated and the customer's side of the escrow account has been funded. For more information about this process, please refer to [2-contract-origination.md](2-contract-origination.md).
 
 1. type: (`open_c`)
 2. data: 
     * [`address`:`contract-id`]
 
-The `cid` lets the merchant know which channel the customer is referring to, and `contract-id` allows the merchant to search for the contract on-chain and verify its contents.
 
 ### Requirements
 
@@ -122,12 +124,13 @@ The customer:
   - Ensures that the funds have been confirmed on chain for at least `minimum_depth`.
 
 Upon receipt, the merchant:
-  - Checks that the originated contract `contract-id` has the exact same code as the zkchannels contract.
-  - Checks that the on-chain storage of `contract-id` is exactly as expected for channel `cid` (including that the customer's side has been funded).
-  - Checks that the contract storage `status` has been set to `OPEN` (denoted as `1`) for at least `minimum_depth` blocks.
+  - Checks that the originated contract `contract-id` contains the expected zkchannels [contract](XX link to contract).
+  - Checks that the on-chain storage of `contract-id` is exactly as expected for channel `cid` (including that the customer's side has been funded).(XX list the exact checks that need to happen)
+  - In the customer-funded case, checks that the contract storage `status` has been set to `OPEN` (denoted as `1`) for at least `minimum_depth` blocks.
+  - In the dual-funded case, the merchant funds their side of the escrow account (see [2-contract-origination.md](2-contract-origination.md)).
 
-For a dual funded channel, the merchant will fund their side of the channel (see [2-contract-origination.md](2-contract-origination.md)).
   ## The `open_m` Message
+  This `open_m` message consists of the sole message of `zkAbacus.Activate()`.
 
 1. type: (`open_m`)
 2. data: 
@@ -136,7 +139,9 @@ For a dual funded channel, the merchant will fund their side of the channel (see
       * [`bls12_381_g1`:`s2`]
 
 ### Requirements
-When the contract is fully funded, the `status` will change to `OPEN` (denoted as `1`) indicating that the funds are locked in. At this point the merchant waits until this status has been stable for `minimum_depth` blocks before sending `funding_locked` to the customer.
+ The contract storage status must be `OPEN` (denoted as `1`) for `minimum_depth` blocks before the merchent sends `open_m` to the customer.
+(XX timeouut needed)
 
 Upon receipt, the customer:
-  - verifies the `payment_tag`.
+  - In the dual-funded case, checks that contract storage status has been `OPEN` for `minimum_depth` blocks. If this check fails, the customer should reclaim their funding by initiating a unilateral close.
+  - Checks `payment_tag` as specified in `zkAbacus.Activate`. If this check fails, the customer should reclaim their funding by initiating a unilateral close.
