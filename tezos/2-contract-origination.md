@@ -17,14 +17,14 @@
 ### Initial storage arguments
 * Merchant's fixed arguments
     * [`address`:`merch_addr`]
-    * [`key`:`merchPk`]
+    * [`key`:`merch_pk`]
     * [`bls12_381_g2`:`g2`]
-    * [`bls12_381_g2`:`merchPk0`]
-    * [`bls12_381_g2`:`merchPk1`]
-    * [`bls12_381_g2`:`merchPk2`]
-    * [`bls12_381_g2`:`merchPk3`]
-    * [`bls12_381_g2`:`merchPk4`]
-    * [`bls12_381_g2`:`merchPk5`]
+    * [`bls12_381_g2`:`X`]
+    * [`bls12_381_g2`:`Y1`]
+    * [`bls12_381_g2`:`Y2`]
+    * [`bls12_381_g2`:`Y3`]
+    * [`bls12_381_g2`:`Y4`]
+    * [`bls12_381_g2`:`Y5`]
     * [`bls12_381_fr`:`close`]
     * [`int`:`self_delay`] 
 * Channel specific arguments
