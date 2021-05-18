@@ -3,40 +3,40 @@
   * [Overview](#Overview)
   * [Global defaults](#global-defaults)
   * [Message Specifications](#message-specifications)
-    * [The `prep_c` Message](#the-`prep_c`-Message)
-    * [The `prep_m` Message](#the-`prep_m`-Message)
-    * [The `init_c` Message](#the-`init_c`-Message)
-    * [The `init_m` Message](#the-`init_m`-Message)
-    * [The `open_c` Message](#the-`open_c`-Message)
-    * [The `open_m` Message](#the-`open_m`-Message)
+    * [The `open_c` Message](#the-open_c-message)
+    * [The `open_m` Message](#the-open_m-message)
+    * [The `init_c` Message](#the-init_c-message)
+    * [The `init_m` Message](#the-init_m-message)
+    * [The `funding_confirmed` Message](#the-funding_confirmed-message)
+    * [The `activate` Message](#the-activate-message)
 
 ## Prerequistes
 The merchant has completed the [setup](#1-setup.md) phase, and the customer and merchant have established a communication session.
 
-The customer has [obtained the merchant’s setup information](1-setup.md) out of band beforehand. The merchant public parameters include the following: `g2`, `merchPk0`, `merchPk1`, `merchPk2`, `merchPk3`, `merchPk4`, `merchPk5`.
+The customer has [obtained the merchant’s setup information](1-setup.md) out of band beforehand. The merchant public parameters include the following: `g2`, `X`, `Y1`, `Y2`, `Y3`, `Y4`, `Y5`.
 
 ## Overview
 Channel establishment is a three round protocol.
 
-In the first round, the customer sends the `prep_c` message, which contains information about the initial state of the proposed channel. If the merchant agrees to open the proposed channel, they reply with the message `prep_m`, which contains the merchan'ts contribution to the channel identifier. At the end of this round, the customer and merchant have exchanged enough information to compute the channel identifer `cid`, which acts as the unique channel identifier for the on-chain Tezos escrow account and off-chain `zkAbacus` channel.
+In the first round, the customer sends the `open_c` message, which contains information about the initial state of the proposed channel. If the merchant agrees to open the proposed channel, they reply with the message `open_m`, which contains the merchan'ts contribution to the channel identifier. At the end of this round, the customer and merchant have exchanged enough information to compute the channel identifer `cid`, which acts as the unique channel identifier for the on-chain Tezos escrow account and off-chain `zkAbacus` channel.
 
 In the next round, the customer and merchant initialize the `zkAbacus` channel by running `zkAbacus.Initialize()` on the previously established parameters. In this subroutine, the customer sends `init_c`, which consists of a (hiding) commitment to the intial state and a zero-knowledge proof of correctness. In return, the merchant sends `init_m`, which contains an initial closing authorization signature for the customer. 
 
-For the final round, the customer originates the contract and funds their side of the channel. The customer sends `open_c` to the merchant, which contains the contract id `contract-ID`. The merchant checks the corresponding contract and initial storage for correctness. The merchant then funds their side of the smart contract, if applicable. Once the contract is fully funded, the funds are locked in. At this point, the merchant runs `zkAbacus.Activate()` to generate the initial payment tag and sends the customer the message `open_m`, which contains the payment tag.
+For the final round, the customer originates the contract and funds their side of the channel. The customer sends `funding_confirmed` to the merchant, which contains the contract id `contract-id`. The merchant checks the corresponding contract and initial storage for the expected values. The merchant then funds their side of the smart contract, if applicable. Once the contract is fully funded, the funds are locked in. At this point, the merchant runs `zkAbacus.Activate()` to generate the initial payment tag and sends the customer the message `activate`, which contains the payment tag.
 
-Upon completion of `zkAbacus.Activate()`, the channel is open and ready for [payments](3-channel-payments.md).  Details for `zkAbacus.Initialize` maybe found here. (XX reference)
+Upon completion of `zkAbacus.Activate()`, the channel is open and ready for [payments](3-channel-payments.md).  Details for `zkAbacus.Initialize()` maybe found here. (XX reference)
 
 
 
         +-------+                           +-------+
-        |       |---------  prep_c  ------->|       |
-        |       |<--------  prep_m  --------|       |
+        |       |---------  open_c  ------->|       |
+        |       |<--------  open_m  --------|       |
         |       |                           |       |
         |       |---------  init_c  ------->|       |
         | Cust  |<--------  init_m  --------| Merch |
         |       |                           |       |
-        |       |---------- open_c -------->|       |
-        |       |<--------- open_m ---------|       |
+        |       |---- funding_confirmed --->|       |
+        |       |<------- activate ---------|       |
         |       |                           |       |
         +-------+                           +-------+
 
@@ -51,8 +51,8 @@ Upon completion of `zkAbacus.Activate()`, the channel is open and ready for [pay
 
 ## Message Specifications
 
-### The `prep_c` Message
-1. type: (`prep_c`)
+### The `open_c` Message
+1. type: (`open_c`)
 2. data: 
     * [`string`:`cid_c`]
     * [`int`:`bal_cust_0`]
@@ -61,7 +61,7 @@ Upon completion of `zkAbacus.Activate()`, the channel is open and ready for [pay
     * [`key`:`cust_pk`]
     * [`bytes`:`merch_pk_hash`]
 
-Here, `merch_pk_hash` is set to `SHA3-256(merch_addr, merch_pk, merch_PS_pk, close)`, the hash of the merchant's Tezos account information, public parameters including their Pointcheval-Sanders public key, and `close` flag. This ensures that the customer has the correct merchant details before attempting to open a channel on chain.
+Here, `merch_pk_hash` is set to `SHA3-256(merch_addr, merch_pk, merch_PS_pk, "close")`, the hash of the merchant's Tezos account information, public parameters including their Pointcheval-Sanders public key, and `"close"` string. This ensures that the customer has the correct merchant details before attempting to open a channel on chain.
 
 #### Requirements
 The customer:
@@ -71,8 +71,8 @@ Upon receipt, the merchant:
   - Checks that `cid_c` is a valid string and `bal_cust_0` ≥ 0 and `bal_merch_0` ≥ 0 are positive integers.
   - Checks that `merch_pk_hash` is correct. 
 
-### The `prep_m` Message
-1. type: (`prep_m`)
+### The `open_m` Message
+1. type: (`open_m`)
 2. data:
     * [`string`:`cid_m`]
 
@@ -89,9 +89,9 @@ The `init_c` message is the first message of `zkAbacus.Initialize()`.
 
 1. type: (`init_c`)
 2. data: 
-    * [`bls12_381_g1`:`A'`]
-    * [`bls12_381_g1`:`A''`]
-    * [`(bls12_381_g1, bls12_381_g1, Vec<bls12_381_fr>):Pi`]
+    * [`bls12_381_g1`:`CloseStateCommitment`]
+    * [`bls12_381_g1`:`StateCommitment`]
+    * [`(bls12_381_g1, bls12_381_g1, Vec<bls12_381_fr>): PayProof`]
 
 #### Requirements
 Upon receipt, the merchant checks `init_c` and continues as specified in `zkAbacus.Initialize()`. 
@@ -111,10 +111,10 @@ Here, `closing_signature` is a closing authorization signature, usable by the cu
 Upon receipt, the customer:
   - Checks `closing_signature` and continues as specified in `zkAbacus.Initialize()`.
 
-### The `open_c` Message
+### The `funding_confirmed` Message
 This message tells the merchant that the contract has been originated and the customer's side of the escrow account has been funded. For more information about this process, please refer to [2-contract-origination.md](2-contract-origination.md).
 
-1. type: (`open_c`)
+1. type: (`funding_confirmed`)
 2. data: 
     * [`address`:`contract-id`]
 
@@ -127,7 +127,7 @@ The customer:
 Upon receipt, the merchant:
   - Checks that the originated contract `contract-id` contains the expected zkchannels [contract](https://github.com/boltlabs-inc/tezos-contract/blob/main/zkchannels-contract/zkchannel_contract.tz).
   - Checks that the on-chain storage of `contract-id` is exactly as expected for channel `cid` (including that the customer's side has been funded). Specifically, checks that:
-    - The values stored in the following fields match the merchant's PS public key values:`g2`, `merchPk0`, `merchPk1`, `merchPk2`, `merchPk3`, `merchPk4`, `merchPk5`.
+    - The values stored in the following fields match the merchant's PS public key values:`g2`, `X`, `Y1`, `Y2`, `Y3`, `Y4`, `Y5`.
     - The merchant's tezos address and public key match the fields `merch_addr` and  `merch_pk`, respectively.
     - The `self_delay` field in the contract matches the global default. 
     - The `close` field matches the merchant's `close` flag.
@@ -135,10 +135,10 @@ Upon receipt, the merchant:
   - In the customer-funded case, checks that the contract storage `status` has been set to `OPEN` (denoted as `1`) for at least `minimum_depth` blocks.
   - In the dual-funded case, the merchant funds their side of the escrow account (see [2-contract-origination.md](2-contract-origination.md)).
 
-  ### The `open_m` Message
-  This `open_m` message consists of the sole message of `zkAbacus.Activate()`.
+  ### The `activate` Message
+  This `activate` message consists of the sole message of `zkAbacus.Activate()`.
 
-1. type: (`open_m`)
+1. type: (`activate`)
 2. data: 
     * [`json`:`payment_tag`]
       * [`bls12_381_g1`:`s1`]
@@ -148,8 +148,8 @@ Upon receipt, the merchant:
 Before sending, the merchant:
   - Waits until the contract storage status has been set to `OPEN` (denoted as `1`) for `minimum_depth` blocks.
 
-If the customer fails to fund their side of the contract within 180 minutes of sending `open_c`, the merchant will abort. If the decision to abort occurs after the merchant has already funded their side of the channel, call the `@reclaimFunding` entrypoint in order to retrieve the merchant's initial funding.
+If the customer fails to fund their side of the contract within 180 minutes of sending `funding_confirmed`, the merchant will abort. If the decision to abort occurs after the merchant has already funded their side of the channel, call the `@reclaimFunding` entrypoint in order to retrieve the merchant's initial funding.
 
 Upon receipt, the customer:
-  - In the dual-funded case, checks that contract storage status has been `OPEN` for `minimum_depth` blocks. If this check fails, the customer should reclaim their funding by initiating a unilateral close.
-  - Checks `payment_tag` as specified in `zkAbacus.Activate`. If this check fails, the customer should reclaim their funding by initiating a unilateral close.
+  - In the dual-funded case, verifies that contract storage status has been `OPEN` for `minimum_depth` blocks. If this check fails, the customer should reclaim their funding by initiating a unilateral close.
+  - Verifies `payment_tag` which is the output of `zkAbacus.Activate()`. If this check fails, the customer should reclaim their funding by initiating a unilateral close.
