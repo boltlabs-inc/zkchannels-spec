@@ -46,7 +46,7 @@ Once the operation has reached the minimum number of required confirmations, the
 ## Customer funds their side of the contract
 The customer funds their side of the contract using the `@addFunding` entrypoint of the contract. The source of this transfer operation must be equal to the `cust_addr` specified in the contract's initial storage, with the transfer amount being exactly equal to `custFunding`. 
 
-Once the funding has been confirmed, the customer sends the merchant a `open_c` message containing the `contract-id` and `cid`. This is to inform the merchant that the channel is ready, either for the merchant to fund their side, or if single-funded, to consider the channel open. 
+Once the funding has been confirmed, the customer sends the merchant a `funding_confirmed` message containing the `contract-id` and `cid`. This is to inform the merchant that the channel is ready, either for the merchant to fund their side, or if single-funded, to consider the channel open. 
 
 ## Merchant verifies the contract
 When the merchant receives the `open_c` message they will:
