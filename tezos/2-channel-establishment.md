@@ -124,7 +124,7 @@ The customer:
   - Ensures that the funds have been confirmed on chain for at least `minimum_depth`.
 
 Upon receipt, the merchant:
-  - Checks that the originated contract `contract-id` contains the expected zkchannels [contract](XX link to contract).
+  - Checks that the originated contract `contract-id` contains the expected zkchannels [contract](https://github.com/boltlabs-inc/tezos-contract/blob/main/zkchannels-contract/zkchannel_contract.tz).
   - Checks that the on-chain storage of `contract-id` is exactly as expected for channel `cid` (including that the customer's side has been funded).(XX list the exact checks that need to happen)
   - In the customer-funded case, checks that the contract storage `status` has been set to `OPEN` (denoted as `1`) for at least `minimum_depth` blocks.
   - In the dual-funded case, the merchant funds their side of the escrow account (see [2-contract-origination.md](2-contract-origination.md)).

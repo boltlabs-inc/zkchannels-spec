@@ -51,7 +51,7 @@ Once the funding has been confirmed, the customer sends the merchant a `open_c` 
 ## Merchant verifies the contract
 When the merchant receives the `open_c` message they will:
 * search for the `contract-id` on chain.
-* check the contract code against their own copy of the zkchannels contract (zkchannels.tz).
+* checks that the originated contract `contract-id` contains the expected zkchannels [contract](https://github.com/boltlabs-inc/tezos-contract/blob/main/zkchannels-contract/zkchannel_contract.tz).
 * check the contract storage matches the expected [initial storage](#Initial-storage-arguments)
 
 If any of the above checks fail, the merchant aborts.
