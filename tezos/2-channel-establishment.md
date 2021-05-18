@@ -13,7 +13,7 @@
 ## Prerequistes
 The merchant has completed the [setup](#1-setup.md) phase, and the customer and merchant have established a communication session.
 
-The customer has [obtained the merchant’s setup information](1-setup.md) out of band beforehand. The merchant public parameters include the following: `g2`, `X`, `Y1`, `Y2`, `Y3`, `Y4`, `Y5`.
+The customer has [obtained the merchant’s setup information](1-setup.md) out of band beforehand including the [merchant's public parameters](1-setup.md#Public-parameters).
 
 ## Overview
 Channel establishment is a three round protocol.
@@ -22,7 +22,7 @@ In the first round, the customer sends the `open_c` message, which contains info
 
 In the next round, the customer and merchant initialize the `zkAbacus` channel by running `zkAbacus.Initialize()` on the previously established public parameters. In this subroutine, the customer sends `init_c`, which consists of a (hiding) commitment to the intial state and a zero-knowledge proof of correctness. In return, the merchant sends `init_m`, which contains an initial closing authorization signature for the customer. 
 
-For the final round, the customer originates the contract and funds their side of the channel. The customer sends `funding_confirmed` to the merchant, which contains the contract id `contract-id`. The merchant checks the corresponding contract and initial storage for the expected values. The merchant then funds their side of the smart contract, if applicable. Once the contract is fully funded, the funds are locked in. At this point, the merchant runs `zkAbacus.Activate()` to generate the initial payment tag and sends the customer the message `activate`, which contains the payment tag.
+For the final round, the customer originates the contract and funds their side of the channel (see [2-contract-origination.md](2-contract-origination.md) for more information). The customer sends `funding_confirmed` to the merchant, which contains the contract id `contract-id`. The merchant checks the corresponding contract and initial storage for the expected values. The merchant then funds their side of the smart contract, if applicable. Once the contract is fully funded, the funds are locked in. At this point, the merchant runs `zkAbacus.Activate()` to generate the initial payment tag and sends the customer the message `activate`, which contains the payment tag.
 
 Upon completion of `zkAbacus.Activate()`, the channel is open and ready for [payments](3-channel-payments.md).  Details for `zkAbacus.Initialize()` maybe found here. (XX reference)
 
@@ -87,9 +87,9 @@ The customer runs the `zkAbacus.Initialize()` with the following inputs: `cust_p
 1. type: (`init_c`)
 2. data:
     * [`string`:`cid`]
-    * [`bls12_381_g1`:`CloseStateCommitment`]
-    * [`bls12_381_g1`:`StateCommitment`]
-    * [`(bls12_381_g1, bls12_381_g1, Vec<bls12_381_fr>): PayProof`]
+    * [`bls12_381_g1`:`close_state_commitment`]
+    * [`bls12_381_g1`:`state_commitment`]
+    * [`(bls12_381_g1, bls12_381_g1, Vec<bls12_381_fr>): pay_proof`]
 
 #### Requirements
 Upon receipt, the merchant checks the correctness of the `cid` in the `init_c` message and continues as specified in `zkAbacus.Initialize()`. 

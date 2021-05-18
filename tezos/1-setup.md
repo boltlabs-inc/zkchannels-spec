@@ -46,5 +46,3 @@ The merchant publishes their public parameters in a config file. The merchant th
 
 ## Tezos-related node initialization
 We assume the merchant runs or connects to a `tezos-node` that has been initialized correctly and securely. This means that the node has successfully established a connection to the P2P network and connected to a list of bootstrapped and trusted peers. It is assumed that the node runs a version of tezos that includes support for the **Edo** protocol or later.
-
-merch_addr, merch_pk, merch_PS_pk, close
