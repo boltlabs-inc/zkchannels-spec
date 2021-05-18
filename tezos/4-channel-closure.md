@@ -60,7 +60,7 @@ For the customer to initial a unilateral channel closure, they call the smart co
 * [`bls12_381_g1`:`s1`]
 * [`bls12_381_g1`:`s2`]
 
-When the `@custClose` entrypoint has been called, the merchant's balace (`bal_merch`) will automatically be transferred to the `merch_addr` by the smart contract. The customer's balance (`bal_cust`) begins a timeout period to allow the merchant to [dispute](#merchant-dispute) the latest balance. The length of the timeout period is determined by `selfDelay` set in the smart contract at origination.
+When the `@custClose` entrypoint has been called, the merchant's balace (`bal_merch`) will automatically be transferred to the `merch_addr` by the smart contract. The customer's balance (`bal_cust`) begins a timeout period to allow the merchant to [dispute](#merchant-dispute) the latest balance. The length of the timeout period is determined by `self_delay` set in the smart contract at origination.
 
 If the merchant does not call `@merchDispute` within the timeout period, the customer will claim their balance by calling the `@custClaim` entrypoint, at which point the smart contract with transfer the customer's balance to `cust_addr`.
 
@@ -71,7 +71,7 @@ As soon as the merchant detects that the customer has called the `@custClose` en
 if `rev_secret` hashes to `rev_lock`, the smart contract will send the customer's pending balance to the merchant. 
 
 ## Unilateral Merchant Close
-As the merchant does not know the latest state of a payment channel, the merchant initiates a unilateral closure by effectively forcing the customer to close the channel within a timeout period. The length of the timeout period is determined by `selfDelay` (the same as the timeout period for `@custClose`).
+As the merchant does not know the latest state of a payment channel, the merchant initiates a unilateral closure by effectively forcing the customer to close the channel within a timeout period. The length of the timeout period is determined by `self_delay` (the same as the timeout period for `@custClose`).
 
 The merchant can initiate closure by calling the `@expiry` entrypoint.
 

@@ -42,10 +42,10 @@ Upon completion of `zkAbacus.Activate()`, the channel is open and ready for [pay
         
 
 ## Global defaults
-* [`int`:`selfDelay`] 
+* [`int`:`self_delay`] 
 * [`int`:`minimum_depth`]
 
-`selfDelay` sets the length of the dispute period. The same delay is applied to the `expiry` and `custClose` entrypoints. The value is interpreted in seconds. 
+`self_delay` sets the length of the dispute period. The same delay is applied to the `expiry` and `custClose` entrypoints. The value is interpreted in seconds. 
 `minimum_depth` sets the minimum number of confirmations for the funding to be considered final.
 
 
@@ -125,8 +125,13 @@ The customer:
 
 Upon receipt, the merchant:
   - Checks that the originated contract `contract-id` contains the expected zkchannels [contract](https://github.com/boltlabs-inc/tezos-contract/blob/main/zkchannels-contract/zkchannel_contract.tz).
-  - Checks that the on-chain storage of `contract-id` is exactly as expected for channel `cid` (including that the customer's side has been funded).(XX list the exact checks that need to happen)
-  - In the customer-funded case, checks that the contract storage `status` has been set to `OPEN` (denoted as `1`) for at least `minimum_depth` blocks.
+  - Checks that the on-chain storage of `contract-id` is exactly as expected for channel `cid` (including that the customer's side has been funded). Specifically, check that:
+    - The values stored in the following fields match the merchant's PS public key values:`g2`, `merchPk0`, `merchPk1`, `merchPk2`, `merchPk3`, `merchPk4`, `merchPk5`.
+    - The merchant's tezos address and public key match the fields `merch_addr` and  `merch_pk`, respectively.
+    - The `self_delay` field in the contract matches the global default. 
+    - The `close` field matches the merchant's `close` flag.
+    - `custFunding` and `merchFunding` match the initial balances `bal_cust_0` and `bal_merch_0`, respectively.
+  - In the customer-funded case, check that the contract storage `status` has been set to `OPEN` (denoted as `1`) for at least `minimum_depth` blocks.
   - In the dual-funded case, the merchant funds their side of the escrow account (see [2-contract-origination.md](2-contract-origination.md)).
 
   ## The `open_m` Message

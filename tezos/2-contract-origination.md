@@ -25,8 +25,8 @@
     * [`bls12_381_g2`:`merchPk3`]
     * [`bls12_381_g2`:`merchPk4`]
     * [`bls12_381_g2`:`merchPk5`]
-    * [`bls12_381_fr`:`hashCloseB`]
-    * [`int`:`selfDelay`] 
+    * [`bls12_381_fr`:`close`]
+    * [`int`:`self_delay`] 
 * Channel specific arguments
     * [`bls12_381_fr`:`cid`]
     * [`address`:`cust_addr`]
