@@ -17,10 +17,12 @@ We use SHA3-256 hashes to instantiate our hash-based commitments.
 
 # Merchant Setup
 
-A party who wishes to act as a zkChannel merchant must create and publish the following parameters for use across all of their zkChannels: 
+A party who wishes to act as a zkChannel merchant must generate and publish the following parameters for use across all of their zkChannels: 
 
 * **Blind signature public key pair.** The merchant must use this key pair to sign all channel state initializations and updates in `zkAbacus`. This keypair is also used as a condition in the Tezos smart contract for each channel. 
-* **Range proof public key and signatures.** The `zkAbacus.Pay` protocol requires a separate set of parameters to prove that updated channel balances are valid. A range proof demonstrates that a value (in our case, an updated channel balance) is non-negative. Specifically, we use range proofs to show that an integer is in the range `[0, u^l)`, for integer values `u`, `l`. We set `u = 128` and `l = 9`. This primitive relies on Poincheval Sanders signatures.
+* **Range proof public key pair and signatures.** The `zkAbacus.Pay` protocol requires a separate set of parameters to prove that updated channel balances are valid. A range proof demonstrates that a value (in our case, an updated channel balance) is non-negative. Specifically, we use range proofs to show that an integer is in the range `[0, u^l)`, for integer values `u`, `l`. We set `u = 128` and `l = 9`. This primitive relies on Poincheval Sanders signatures.
+
+* **EdDSA public key pair and Tezos tz1 address.** The merchant uses this keypair for escrow account set up and closing as specified in `TezosEscrowAgent`.
 
 The merchant completes setup as follows.
 ## Blind signing key generation
@@ -35,14 +37,13 @@ With this keypair, separately [sign](https://github.com/boltlabs-inc/libzkchanne
 
 The resulting public key and signatures form the the merchant's range proof parameters. This keypair must not be used for any other purpose.
 
-## Public parameters
-The merchant's public parameters consists of their:
-* Poincheval Sanders public keys (denoted as `merch_PS_pk`). This consists of the parameters `g2`, `X`, `Y1`, `Y2`, `Y3`, `Y4`, and `Y5`.
-* Tezos tz1 address and EdDSA pubkey (denoted as `merch_addr` and `merch_pk`, respectively).
-* close tag (denoted as `close`).
+## EdDSA and Tezos address generation
+Generate an EdDSA keypair and associated Tezos tz1 address using the `tezos-client`.
 
 ## Publishing public parameters
-The merchant publishes their public parameters in a config file. The merchant then advertises their server IP address and port for customers to open channels using the `<hash_pp>@<ip>:<port>` format, where `hash_pp` is set to `SHA3-256(merch_PS_pk, merch_addr, merch_pk, close)`.
+The merchant's public parameters consists of their blind signing public key `merch_PS_pk`, range proof parameters `range_proof_params`, EdDSA public key `merch_pk`, and Tezos tz1 address `merch_addr`. 
+
+The merchant publishes their public parameters in a config file. The merchant then advertises their server IP address and port for customers to open channels using the `<hash_pp>@<ip>:<port>` format, where `hash_pp` is set to `SHA3-256(merch_PS_pk, merch_addr, merch_pk)`.
 
 ## Tezos-related node initialization
 We assume the merchant runs or connects to a `tezos-node` that has been initialized correctly and securely. This means that the node has successfully established a connection to the P2P network and connected to a list of bootstrapped and trusted peers. It is assumed that the node runs a version of tezos that includes support for the **Edo** protocol or later.
