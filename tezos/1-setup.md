@@ -24,6 +24,8 @@ A party who wishes to act as a zkChannel merchant must generate and publish the 
 
 * **EdDSA public key pair and Tezos tz1 address.** The merchant uses this keypair for escrow account set up and closing as specified in `TezosEscrowAgent`.
 
+The merchant must also initialize a database `revocation_DB` for use with all their zkChannel operations.
+
 The merchant completes setup as follows.
 ## Blind signing key generation
 
@@ -47,3 +49,6 @@ The merchant publishes their public parameters in a config file. The merchant th
 
 ## Tezos-related node initialization
 We assume the merchant runs or connects to a `tezos-node` that has been initialized correctly and securely. This means that the node has successfully established a connection to the P2P network and connected to a list of bootstrapped and trusted peers. It is assumed that the node runs a version of tezos that includes support for the **Edo** protocol or later.
+
+## Revocation database initialization
+The merchant must initialize a database `revocation_DB`. This database is used by both the `zkAbacus` and `TezosEscrowAgent` components, for processing payments and closing escrow accounts, respectively.
