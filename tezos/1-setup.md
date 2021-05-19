@@ -12,8 +12,9 @@ We use SHA3-256 hashes to instantiate our hash-based commitments.
 ## Global defaults
 ### `TezosEscrowAgent` global defaults
 * `self_delay`: an integer that represents the length of the dispute period. The same delay is applied to the `expiry` and `custClose` entrypoints. The value is interpreted in seconds. 
-
 * `minimum_depth`: an integer that represents the minimum number of confirmations for the funding to be considered final.
+### `zkAbacus` global defaults
+* `close`: a scalar that represents a fixed flag used to differentiate the message signed for the closing authorization signature compared to message signed for the payment tag. 
 
 # Merchant Setup
 
