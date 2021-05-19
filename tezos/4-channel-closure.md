@@ -24,7 +24,7 @@ For the customer:
 
 Upon receipt, the merchant:
   - checks that `rev_lock` has not been seen before.
-  - verifies the signature (`s1` and `s2`) against the proposed state and the merchant's PS public key.
+  - verifies the `closing_signature` against the proposed state and the merchant's PS public key `merch_PS_pk`.
 
 If the merchant fails either of these checks, abort.
 
