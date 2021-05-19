@@ -2,6 +2,7 @@
 
 A zkChannel can close either via a mutual close, in which both the customer and merchant coordinate to close the channel, or via a unilateral close, in which either the merchant or customer initates the closure flow. 
 
+[zkChannels Private Payments Protocol](0-overview-and-index.md#[1])
 ## Mutual Close
 
 ### The `mutual_close_c` Message
@@ -52,7 +53,7 @@ Once the customer has the merchant's signature on the latest state, they perform
 * [`signature`:`mutual_close_signature`]
 
 ## Unilateral Customer Close
-For the customer to initial a unilateral channel closure, they call the smart contract via `@custClose` with the latest state and the merchant's `closing_signature` (`s1` and `s2`) on it:
+For the customer to initiate a unilateral channel closure, they call the smart contract via `@custClose` with the latest state and the merchant's `closing_signature` (`s1` and `s2`) on it. Note that an operation calling the `@custClose` entrypoint will only be successful if the sender is `cust_addr`, as defined in the smart contract. The following arguments are passed into `@custClose`:
 * [`bls12_381_fr`:`cid`]
 * [`mutez`:`bal_cust`]
 * [`mutez`:`bal_merch`]
@@ -68,12 +69,12 @@ If the merchant does not call `@merchDispute` within the timeout period, the cus
 As soon as the merchant detects that the customer has called the `@custClose` entrypoint, `rev_lock` is read from the contract storage and checked to see if it corresponds to a known `rev_secret` where H(`rev_secret`) == `rev_lock`, using the hash function SHA3-256. If `rev_secret` is known, this means the customer is attempting to close on an outdated state and the merchant will call the `@merchDispute` entrypoint with:
 * [`bytes`:`rev_secret`]
 
-if `rev_secret` hashes to `rev_lock`, the smart contract will send the customer's pending balance to the merchant. 
+If `rev_secret` hashes to `rev_lock`, the smart contract will send the customer's pending balance to the merchant. 
 
 ## Unilateral Merchant Close
 As the merchant does not know the latest state of a payment channel, the merchant initiates a unilateral closure by effectively forcing the customer to close the channel within a timeout period. The length of the timeout period is determined by `self_delay` (the same as the timeout period for `@custClose`).
 
-The merchant can initiate closure by calling the `@expiry` entrypoint.
+The merchant can initiate closure by calling the `@expiry` entrypoint. Note that an operation calling the `@expiry` entrypoint will only be successful if the sender is `merch_addr`, as defined in the smart contract.
 
 As soon as the customer observes the `@expiry` entrypoint on the smart contract being called, they will prevent any payments on the channel from happening and call `@custClose` with the latest channel state and closing signature (as described in [Unilateral Customer Close](#unilateral-customer-close)).
 
