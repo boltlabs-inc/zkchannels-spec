@@ -52,4 +52,4 @@ The merchant publishes their public parameters in a config file. The merchant th
 We assume the merchant runs or connects to a `tezos-node` that has been initialized correctly and securely. This means that the node has successfully established a connection to the P2P network and connected to a list of bootstrapped and trusted peers. It is assumed that the node runs a version of tezos that includes support for the **Edo** protocol or later.
 
 ## Revocation database initialization
-The merchant must initialize a database `revocation_DB`. This database is used by both the `zkAbacus` and `TezosEscrowAgent` components, for processing payments and closing escrow accounts, respectively.
+The merchant must initialize a database `revocation_DB`. This database is used by both the `zkAbacus` and `TezosEscrowAgent` components, for processing payments and closing escrow accounts, respectively. More information on the merchant's longterm database is provided [here](merch-db.md).
