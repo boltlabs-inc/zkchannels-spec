@@ -14,7 +14,7 @@ We use SHA3-256 hashes to instantiate our hash-based commitments.
 * `self_delay`: an integer that represents the length of the dispute period. The same delay is applied to the `expiry` and `custClose` entrypoints. The value is interpreted in seconds. 
 * `minimum_depth`: an integer that represents the minimum number of confirmations for the funding to be considered final.
 ### `zkAbacus` global defaults
-* `close`: a scalar that represents a fixed flag used to differentiate the message signed for the closing authorization signature compared to message signed for the payment tag. 
+* `close`: fixed scalar used to differentiate closing state and state. 
 
 # Merchant Setup
 
@@ -46,7 +46,7 @@ Generate an EdDSA keypair and associated Tezos tz1 address using the `tezos-clie
 ## Publishing public parameters
 The merchant's public parameters consists of their blind signing public key `merch_PS_pk`, range proof parameters `range_proof_params`, EdDSA public key `merch_pk`, and Tezos tz1 address `merch_addr`. 
 
-The merchant publishes their public parameters in a config file. The merchant then advertises their server IP address and port for customers to open channels using the `<hash_pp>@<ip>:<port>` format, where `hash_pp` is set to `SHA3-256(merch_PS_pk, merch_addr, merch_pk)`.
+The merchant publishes their public parameters in a config file. The merchant then advertises their server IP address and port for customers to open channels using the `<merch_pp_hash>@<ip>:<port>` format, where `merch_pp_hash` is set to `SHA3-256(merch_PS_pk, merch_addr, merch_pk)`.
 
 ## Tezos-related node initialization
 We assume the merchant runs or connects to a `tezos-node` that has been initialized correctly and securely. This means that the node has successfully established a connection to the P2P network and connected to a list of bootstrapped and trusted peers. It is assumed that the node runs a version of tezos that includes support for the **Edo** protocol or later.
