@@ -1,22 +1,34 @@
-# System Setup
+# Setup
+  * [System Setup](#system-setup)
+    * [Commitment scheme parameters](#commitment-scheme-parameters)
+    * [Signature schemes](#signature-schemes)
+    * [Global defaults](#global-defaults)
+  * [Merchant Setup](#merchant-setup)
+    * [Blind signing key generation](#blind-signing-key-generation)
+    * [Range proof parameters generation](#range-proof-parameters-generation)
+    * [EdDSA and Tezos address generation](#EdDSA-and-tezos-address-generation)
+    * [Publishing public parameters](#publishing-public-parameters)
+    * [Tezos-related node initialization](#tezos-related-node-initialization)
+    * [Revocation database initialization](#revocation-database-initialization)
 
-## Commitment scheme parameters
+## System Setup
+### Commitment scheme parameters
 * **Pedersen commitments**: We use Pedersen commitments on messages of length one in the pairing group `G1` of BLS12-381. We set parameters as the pair `(g1, h)`, where `g1` is the standard generator defined in the BLS12-381 crate and `h` is a hash-to-curve of the string `'zkChannels Pedersen generator'`.
 * **Hash commitment parameters**:
 We use SHA3-256 hashes to instantiate our hash-based commitments.
 
-## Signature schemes
+### Signature schemes
 * Pointcheval-Sanders signatures public parameters: We use the pairing defined by the [BLS12-381](https://crates.io/crates/bls12_381) crate. 
 * EdDSA signature public parameters: We rely on the public parameters selected by the `tezos-client` for Ed25519.
 
-## Global defaults
-### `TezosEscrowAgent` global defaults
+### Global defaults
+#### `TezosEscrowAgent` global defaults
 * `self_delay`: an integer that represents the length of the dispute period. The same delay is applied to the `expiry` and `custClose` entrypoints. The value is interpreted in seconds. 
 * `minimum_depth`: an integer that represents the minimum number of confirmations for the funding to be considered final.
-### `zkAbacus` global defaults
+#### `zkAbacus` global defaults
 * `close`: fixed scalar used to differentiate closing state and state. 
 
-# Merchant Setup
+## Merchant Setup
 
 A party who wishes to act as a zkChannel merchant must generate and publish the following parameters for use across all of their zkChannels: 
 
@@ -28,28 +40,28 @@ A party who wishes to act as a zkChannel merchant must generate and publish the 
 The merchant must also initialize a database `revocation_DB` for use with all their zkChannel operations.
 
 The merchant completes setup as follows.
-## Blind signing key generation
+### Blind signing key generation
 
 Generate a [new Pointcheval-Sanders keypair](https://github.com/boltlabs-inc/libzkchannels-crypto/blob/main/libzkchannels-crypto/src/ps_keys.rs#L69) for signatures on message tuples of length five.
 This key pair must be used across all channels with the merchant.
 
-## Range proof parameters generation
+### Range proof parameters generation
 
 Generate a [new Pointcheval-Sanders keypair](https://github.com/boltlabs-inc/libzkchannels-crypto/blob/main/libzkchannels-crypto/src/ps_keys.rs#L69) for signatures on message tuples of length one.
 With this keypair, separately [sign](https://github.com/boltlabs-inc/libzkchannels-crypto/blob/main/libzkchannels-crypto/src/ps_signatures.rs#L64) each integer in the range `[0, u-1]`.
 
 The resulting public key and signatures form the the merchant's range proof parameters. This keypair must not be used for any other purpose.
 
-## EdDSA and Tezos address generation
+### EdDSA and Tezos address generation
 Generate an EdDSA keypair and associated Tezos tz1 address using the `tezos-client`.
 
-## Publishing public parameters
+### Publishing public parameters
 The merchant's public parameters consists of their blind signing public key `merch_PS_pk`, range proof parameters `range_proof_params`, EdDSA public key `merch_pk`, and Tezos tz1 address `merch_addr`. 
 
 The merchant publishes their public parameters in a config file. The merchant then advertises their server IP address and port for customers to open channels using the `<merch_pp_hash>@<ip>:<port>` format, where `merch_pp_hash` is set to `SHA3-256(merch_PS_pk, merch_addr, merch_pk)`.
 
-## Tezos-related node initialization
+### Tezos-related node initialization
 We assume the merchant runs or connects to a `tezos-node` that has been initialized correctly and securely. This means that the node has successfully established a connection to the P2P network and connected to a list of bootstrapped and trusted peers. It is assumed that the node runs a version of tezos that includes support for the **Edo** protocol or later.
 
-## Revocation database initialization
+### Revocation database initialization
 The merchant must initialize a database `revocation_DB`. This database is used by both the `zkAbacus` and `TezosEscrowAgent` components, for processing payments and closing escrow accounts, respectively. More information on the merchant's longterm database is provided [here](merch-db.md).

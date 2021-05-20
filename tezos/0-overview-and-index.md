@@ -1,10 +1,11 @@
 # zkChannels on Tezos: Overview and Index
-
-
-1. [System Setup and Merchant Initialization](1-setup.md)
-2. [Channel Establishment](2-channel-establishment.md)
-3. [Channel Payments](3-channel-payments.md)
-4. [Channel Closure](4-channel-closure.md) 
+  * [zkChannels Overview](#zkChannels-overview) 
+      1. [System Setup and Merchant Initialization](1-setup.md)
+      2. [Channel Establishment](2-channel-establishment.md)
+      3. [Channel Payments](3-channel-payments.md)
+      4. [Channel Closure](4-channel-closure.md) 
+  * [References](#references) 
+  * [Glossary](#glossary) 
 
 
 ## zkChannels Overview
@@ -47,7 +48,8 @@ There are three options for [channel closure](4-channel-closure.md):
   - Unilateral merchant close: The merchant can unilaterally initiate channel closure by calling the `@expiry` entrypoint on the smart contract. This operation triggers a timeout period, during which the customer must broadcast their latest state by calling `@custClose` (as with a unilateral customer close). If the customer fails to do so within the timeout period, the merchant may claim the entire channel balance via the `@merchClaim` entrypoint.
 
 ## References
-XX add reference to blindsigs-protocol doc.
+[zkChannels Private Payments Protocol](https://github.com/boltlabs-inc/blindsigs-protocol)
+XX: replace link with final pdf
 
 ## Glossary
 * **`cid`**:

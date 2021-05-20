@@ -1,4 +1,11 @@
 # Channel Closure
+  * [Mutual Close](#mutual-close)
+    * [The `mutual_close_c` Message](#the-`mutual_close_c`-Message)
+    * [The `mutual_close_m` Message](#the-`mutual_close_m`-message)
+    * [The `@mutualClose` entrypoint](#the-`@mutualClose`-entrypoint)
+  * [Unilateral Customer Close](#unilateral-customer-close)
+    * [Merchant Dispute](#merchant-dispute)
+  * [Unilateral Merchant Close](#unilateral-merchant-close)
 
 A zkChannel can close either via a mutual close, in which both the customer and merchant coordinate to close the channel, or via a unilateral close, in which either the merchant or customer may initiate closing. 
 
@@ -45,12 +52,11 @@ Upon receipt, the customer:
   - verifies `mutual_close_signature` is a valid signature with respect to `merch_pk`.
   - if the signature is not valid, aborts and initiates a [unilateral customer close](##unilateral-customer-close) 
 
-### The `@mutualClose` entrypoint. 
+### The `@mutualClose` entrypoint
 This entry point is called with the following arguments:
 * [`bls12_381_fr`:`cid`]
 * [`mutez`:`bal_cust`]
 * [`mutez`:`bal_merch`]
-* [`bls12_381_fr`:`rev_lock`]
 * [`signature`:`mutual_close_signature`]
 
 #### Requirements
@@ -69,7 +75,7 @@ When the `@custClose` entrypoint has been called, the merchant's balace (`bal_me
 
 If the merchant does not call `@merchDispute` within the timeout period, the customer will claim their balance by calling the `@custClaim` entrypoint, at which point the smart contract with transfer the customer's balance to `cust_addr`.
 
-## Merchant Dispute
+### Merchant Dispute
 As soon as the merchant detects that the customer has called the `@custClose` entrypoint, `rev_lock` is read from the contract storage and checked to see if it corresponds to a known `rev_secret` where H(`rev_secret`) == `rev_lock`, using the hash function SHA3-256. If `rev_secret` is known, this means the customer is attempting to close on an outdated state and the merchant will call the `@merchDispute` entrypoint with:
 * [`bytes`:`rev_secret`]
 

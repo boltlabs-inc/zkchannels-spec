@@ -1,5 +1,4 @@
 # Channel Establishment
-
   * [Overview](#Overview)
   * [Global defaults](#global-defaults)
   * [Message Specifications](#message-specifications)
