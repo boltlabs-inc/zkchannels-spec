@@ -67,7 +67,7 @@ The customer:
 
 Upon receipt, the merchant:
   - Checks that `cid_c` is a valid string and `bal_cust_0` ≥ 0 and `bal_merch_0` ≥ 0 are positive integers.
-  - Checks that `merch_pk_hash` is correct with respect to `SHA3-256(merch_PS_pk, merch_addr, merch_pk)`. 
+  - Checks that `merch_pk_hash` is correct with respect to `SHA3-256(merch_PS_pk, merch_addr, merch_pk)` and rejects channel open request if not.
 
 ### The `open_m` Message
 1. type: (`open_m`)
