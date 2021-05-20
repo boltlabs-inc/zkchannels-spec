@@ -9,7 +9,7 @@
     * [The `init_m` Message](#the-init_m-message)
     * [The `funding_confirmed` Message](#the-funding_confirmed-message)
     * [The `activate` Message](#the-activate-message)
-
+  * [Contract Origination and Funding](2-contract-origination.md)
 ## Prerequistes
 The merchant has completed the [setup](#1-setup.md) phase, and the customer and merchant have established a communication session.
 
