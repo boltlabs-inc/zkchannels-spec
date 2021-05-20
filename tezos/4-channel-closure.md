@@ -1,9 +1,11 @@
 # Channel Closure
 
-A zkChannel can close either via a mutual close, in which both the customer and merchant coordinate to close the channel, or via a unilateral close, in which either the merchant or customer initates the closure flow. 
+A zkChannel can close either via a mutual close, in which both the customer and merchant coordinate to close the channel, or via a unilateral close, in which either the merchant or customer may initiate closing. 
 
-[zkChannels Private Payments Protocol](0-overview-and-index.md#[1])
 ## Mutual Close
+Mutual close is initiated by the customer and consists of a single round of communication between the customer and the merchant, followed by a single transaction sent by the customer to the network. 
+
+The customer sends the message `mutual_close_c` and receives back `mutual_close_m` from the merchant. Once the customer receives a valid `mutual_close_m` message, they can close the smart contract by calling the `@mutualClose` entrypoint. 
 
 ### The `mutual_close_c` Message
 
@@ -20,14 +22,14 @@ A zkChannel can close either via a mutual close, in which both the customer and 
 #### Requirements
 
 For the customer:
-  - the contents of `mutual_close_c` corresponds to the latest state of the payment channel.
+  - the contents of `mutual_close_c` correspond to the latest closing state of the `zkAbacus` channel.
   - no more payments are initiated after `mutual_close_c` has been sent.
 
 Upon receipt, the merchant:
-  - checks that `rev_lock` has not been seen before.
-  - verifies the `closing_signature` against the proposed state and the merchant's PS public key `merch_PS_pk`.
-
-If the merchant fails either of these checks, abort.
+  - checks that `rev_lock` is not in their revocation database `revocation_DB`.
+  - checks that `closing_signature` is a valid signature on the proposed closing state `(cid, close, rev_lock, bal_cust, bal_merch)` with respect to the merchant's blind signing public key `merch_PS_pk`.
+  - writes `rev_lock` to the database `revocation_DB`.
+  - if any of these checks fail, the merchant aborts.
 
 ### The `mutual_close_m` Message
 
@@ -35,22 +37,24 @@ If the merchant fails either of these checks, abort.
 2. data: 
     * [`signature`:`mutual_close_signature`]
 
-Where `mutual_close_signature` is an EdDSA signature on the final state using the corresponding private key of the merchant's tezos account (denoted by `merch_addr`).
+Where `mutual_close_signature` is an EdDSA signature generated using `merch_pk`. 
 
 #### Requirements
 
 Upon receipt, the customer:
-  - verifies the merchant's `mutual_close_signature`. 
+  - verifies `mutual_close_signature` is a valid signature with respect to `merch_pk`.
+  - if the signature is not valid, aborts and initiates a [unilateral customer close](##unilateral-customer-close) 
 
-If the signature is not valid, abort and perform a unilateral closure. 
-
-### Customer performs mutual close
-Once the customer has the merchant's signature on the latest state, they perform a mutual closure on the smart contract by calling the `@mutualClose` entrypoint with the following arguments:
+### The `@mutualClose` entrypoint. 
+This entry point is called with the following arguments:
 * [`bls12_381_fr`:`cid`]
 * [`mutez`:`bal_cust`]
 * [`mutez`:`bal_merch`]
 * [`bls12_381_fr`:`rev_lock`]
 * [`signature`:`mutual_close_signature`]
+
+#### Requirements
+(XX fill me in)
 
 ## Unilateral Customer Close
 For the customer to initiate a unilateral channel closure, they call the smart contract via `@custClose` with the latest state and the merchant's `closing_signature` (`s1` and `s2`) on it. Note that an operation calling the `@custClose` entrypoint will only be successful if the sender is `cust_addr`, as defined in the smart contract. The following arguments are passed into `@custClose`:
