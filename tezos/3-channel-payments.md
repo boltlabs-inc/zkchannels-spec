@@ -1,10 +1,10 @@
 # Channel Payments
-Say a customer wishes to purchase a good or service, a description of which we denote by `x`,
-from the merchant using their zkChannel with channel identifier `cid`. 
-Assume the cost is an amount`amt`.
+
+A customer wishes to purchase a good or service from the merchant using their zkChannel with channel identifier `cid`. We denote the good or service by `x` in the description below and the cost is an amount `amt`.
+
 1. The customer sends a _payment request message_ containing the tuple `(x, amt)` to the merchant.
 2. The merchant checks the payment request message and decides whether to accept or reject. If the former, they send `accept`; if the latter, they send `reject` and abort.
-3. Upon receipt of `reject`, the customer aborts the session. Upon receipt of `accept`, the customer and merchant run `zkAbacus.Pay` for amount `amt`. (The customer must use their current channel state data to process this payment, and the merchant must have read and write access to their [revocation database](1-setup.md#Revocation-database-initialization) `revocation_DB` and their [blind signing key](1-setup.md#Blind-signing-key-generation).
+3. Upon receipt of `reject`, the customer aborts the session. Upon receipt of `accept`, the customer and merchant run `zkAbacus.Pay()` for amount `amt`. (The customer must use their current channel state data to process this payment, and the merchant must have read and write access to their [revocation database](1-setup.md#Revocation-database-initialization) `revocation_DB` and their [blind signing key](1-setup.md#Blind-signing-key-generation).
 
 
 4. The merchant receives a success indicator from `zkAbacus.Pay()`, which can be used to decide whether or not the requested service should be provided:
