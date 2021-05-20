@@ -44,7 +44,7 @@ Upon receipt, the merchant:
 2. data: 
     * [`signature`:`mutual_close_signature`]
 
-Where `mutual_close_signature` is an EdDSA signature generated using `merch_pk`. 
+Here, `mutual_close_signature` is an EdDSA signature generated using `merch_pk`. The signature is over a tuple `(cid, customer_balance, merchant_balance, contract-id, "zkChannels mutual close")`, where `contract-id` is the address of the smart contract, and `context-string` is a [global default](1-setup.md#global-defaults) set to `"zkChannels mutual close"`.
 
 #### Requirements
 
@@ -60,7 +60,7 @@ This entry point is called with the following arguments:
 * [`signature`:`mutual_close_signature`]
 
 #### Requirements
-(XX fill me in)
+The `@expiry` entrypoint will only succeed if the sender is `cust_addr`, as defined in the smart contract.
 
 ## Unilateral Customer Close
 For the customer to initiate a unilateral channel closure, they call the smart contract via `@custClose` with the latest state and the merchant's `closing_signature` (`s1` and `s2`) on it. Note that an operation calling the `@custClose` entrypoint will only be successful if the sender is `cust_addr`, as defined in the smart contract. The following arguments are passed into `@custClose`:
