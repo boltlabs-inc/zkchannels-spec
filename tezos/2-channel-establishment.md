@@ -59,6 +59,7 @@ Upon completion of `zkAbacus.Activate()`, the channel is open and ready for [pay
     * [`int`:`bal_merch_0`]
     * [`address`:`cust_addr`]
     * [`key`:`cust_pk`]
+    * [`string`: `merch_pk_hash`]
 
 #### Requirements
 The customer:
@@ -66,7 +67,7 @@ The customer:
 
 Upon receipt, the merchant:
   - Checks that `cid_c` is a valid string and `bal_cust_0` ≥ 0 and `bal_merch_0` ≥ 0 are positive integers.
-  - Checks that `merch_pk_hash` is correct. 
+  - Checks that `merch_pk_hash` is correct with respect to `SHA3-256(merch_PS_pk, merch_addr, merch_pk)`. 
 
 ### The `open_m` Message
 1. type: (`open_m`)
