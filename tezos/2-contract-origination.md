@@ -1,11 +1,19 @@
+* [Tezos Smart Contract](#tezos-smart-contract)
+* [Contract Origination and Funding](#contract-origination-and-funding)
+    * [Requirements](#requirements)
+    * [Customer forges and signs operation](#2.-customer-forges-and-signs-operation)
+    * [Customer injects origination operation](#3.-customer-injects-origination-operation)
+    * [Origination confirmed ](#4.-origination-confirmed )
+    * [Customer funds their side of the contract](#5.-customer-funds-their-side-of-the-contract)
+    * [Merchant verifies the contract](#6.-Merchant-verifies-the-contract)
+    * [Reclaim funding](#reclaim-funding)
+
+# Tezos Smart Contract
+Details of the smart contract defined by `TezosEscrowAgent` are [here](https://github.com/boltlabs-inc/tezos-contract/blob/main/zkchannels-contract/zkchannel_contract.tz).
+
+
 # Contract Origination and Funding
-* [Requirements](#requirements)
-* [Customer forges and signs operation](#2.-customer-forges-and-signs-operation)
-* [Customer injects origination operation](#3.-customer-injects-origination-operation)
-* [Origination confirmed ](#4.-origination-confirmed )
-* [Customer funds their side of the contract](#5.-customer-funds-their-side-of-the-contract)
-* [Merchant verifies the contract](#6.-Merchant-verifies-the-contract)
-* [Reclaim funding](#reclaim-funding)
+The `TezosEscrowAgent` contract origination proceeds as follows.
 
 ## Requirements
 * Both the customer and merchant:

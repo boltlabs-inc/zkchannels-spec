@@ -9,7 +9,7 @@
     * [The `funding_confirmed` Message](#the-funding_confirmed-message)
     * [The `activate` Message](#the-activate-message)
   * [Contract Origination and Funding](2-contract-origination.md)
-## Prerequistes
+## Prerequisites
 The merchant has completed the [setup](#1-setup.md) phase, and the customer and merchant have established a communication session.
 
 The customer has [obtained the merchant’s setup information](1-setup.md) out of band beforehand including the [merchant's public parameters](1-setup.md#Public-parameters). The customer must verify the merchant's public parameters are well-formed:

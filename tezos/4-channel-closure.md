@@ -12,7 +12,7 @@ A zkChannel can close either via a mutual close, in which both the customer and 
 ## Mutual Close
 Mutual close is initiated by the customer and consists of a single round of communication between the customer and the merchant, followed by a single transaction sent by the customer to the network. 
 
-The customer sends the message `mutual_close_c` and receives back `mutual_close_m` from the merchant. Once the customer receives a valid `mutual_close_m` message, they can close the smart contract by calling the `@mutualClose` entrypoint. 
+The customer initiates `zkAbacus.Close` by sending the message `mutual_close_c`. The merchant then runs `zkAbacus.Close`. If `zkAbacus.Close` fails, the merchant aborts. Otherwise, the merchant signs the appropriate closing message as specified by `TezosEscrowAgent` and sends this signature in the message `mutual_close_m` to the customer. Once the customer receives a valid `mutual_close_m` message, they can close the smart contract by calling the `@mutualClose` entrypoint. 
 
 ### The `mutual_close_c` Message
 
@@ -29,7 +29,7 @@ The customer sends the message `mutual_close_c` and receives back `mutual_close_
 #### Requirements
 
 For the customer:
-  - the contents of `mutual_close_c` correspond to the latest closing state of the `zkAbacus` channel.
+  -  `mutual_close_c` contains the most recent closing state and closing authorization signature of the `zkAbacus` channel.
   - no more payments are initiated after `mutual_close_c` has been sent.
 
 Upon receipt, the merchant:
@@ -44,7 +44,7 @@ Upon receipt, the merchant:
 2. data: 
     * [`signature`:`mutual_close_signature`]
 
-Here, `mutual_close_signature` is an EdDSA signature generated using `merch_pk`. The signature is over a tuple `(cid, customer_balance, merchant_balance, contract-id, "zkChannels mutual close")`, where `contract-id` is the address of the smart contract, and `context-string` is a [global default](1-setup.md#global-defaults) set to `"zkChannels mutual close"`.
+Here, `mutual_close_signature` is an EdDSA signature generated under `merch_pk`. The signature is over a tuple `(contract-id, "zkChannels mutual close", cid, customer_balance, merchant_balance)`, where `contract-id` is the address of the smart contract, and `context-string` is a [global default](1-setup.md#global-defaults) set to `"zkChannels mutual close"`.
 
 #### Requirements
 
@@ -63,6 +63,8 @@ This entry point is called with the following arguments:
 The `@expiry` entrypoint will only succeed if the sender is `cust_addr`, as defined in the smart contract.
 
 ## Unilateral Customer Close
+Unilateral customer closes are as specified in `TezosEscrowAgent`.
+
 For the customer to initiate a unilateral channel closure, they call the smart contract via `@custClose` with the latest state and the merchant's `closing_signature` (`s1` and `s2`) on it. Note that an operation calling the `@custClose` entrypoint will only be successful if the sender is `cust_addr`, as defined in the smart contract. The following arguments are passed into `@custClose`:
 * [`bls12_381_fr`:`cid`]
 * [`mutez`:`bal_cust`]
@@ -82,6 +84,8 @@ As soon as the merchant detects that the customer has called the `@custClose` en
 If `rev_secret` hashes to `rev_lock`, the smart contract will send the customer's pending balance to the merchant. 
 
 ## Unilateral Merchant Close
+Unilateral merchant closes are as specified in `TezosEscrowAgent`.
+
 As the merchant does not know the latest state of a payment channel, the merchant initiates a unilateral closure by effectively forcing the customer to close the channel within a timeout period. The length of the timeout period is determined by `self_delay` (the same as the timeout period for `@custClose`).
 
 The merchant can initiate closure by calling the `@expiry` entrypoint. Note that an operation calling the `@expiry` entrypoint will only be successful if the sender is `merch_addr`, as defined in the smart contract.
