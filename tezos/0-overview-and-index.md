@@ -13,7 +13,7 @@ zkChannels is a layer 2 protocol that enables anonymous and scalable payments be
 
 zkChannels on Tezos is built out two main components:
 * `zkAbacus`. This component contains the functionality for a customer and a merchant to open, track payments, and collaboratively close a channel. This component does not interact with a payment network.
-* `TezosEscrowAgent`: A Tezos realization of the `zkEscrowAgent` functionality. This component provides the functionality for a customer and a merchant to open and close a zkChannels escrow account as a Tezos smart contract. 
+* `TezosEscrowAgent`: A Tezos realization of the `zkEscrowAgent` functionality. This component provides the functionality for a customer and a merchant to open and close a zkChannels escrow account as a [Tezos smart contract](2-contract-origination.md#tezos-smart-contract). 
 
 We briefly describe the protocol in four phases:
 
@@ -43,9 +43,9 @@ The merchant is, however, confident that payments are successful only if they ar
 
 ### (4) Channel closure
 There are three options for [channel closure](4-channel-closure.md):
-  - Mutual close: The customer and merchant can collaborate off-chain to create an operation calling the `@mutualClose` entrypoint in the contract. This requires fewer on-chain operations and is therefore cheaper.
-  - Unilateral customer close: The customer can unilaterally initiate channel closure by using their current closing authorization signature to create an operation calling the `@custClose` entrypoint. The merchant's balance gets transferred to them immediately amd the customer's balance is held by the contract for a prespecified timeout period. If during this time, the merchant can prove it was an attempted double spend, by providing the revocation secret, the merchant can claim the customer's entire balance. After the timeout period, if the merchant has not claimed the customer's balance, the customer may claim it via the `@custClaim` entrypoint.
-  - Unilateral merchant close: The merchant can unilaterally initiate channel closure by calling the `@expiry` entrypoint on the smart contract. This operation triggers a timeout period, during which the customer must broadcast their latest state by calling `@custClose` (as with a unilateral customer close). If the customer fails to do so within the timeout period, the merchant may claim the entire channel balance via the `@merchClaim` entrypoint.
+  - Mutual close: The customer and merchant can collaborate off-chain to create an operation calling the `@mutualClose` entrypoint in the contract. This requires fewer on-chain operations and is therefore cheaper. This procedure is built using `zkAbacus.Close` and `TezosEscrowAgent`.
+  - Unilateral customer close: The customer can unilaterally initiate channel closure by using their current closing authorization signature to create an operation calling the `@custClose` entrypoint. The merchant's balance gets transferred to them immediately amd the customer's balance is held by the contract for a prespecified timeout period. If during this time, the merchant can prove it was an attempted double spend, by providing the revocation secret, the merchant can claim the customer's entire balance. After the timeout period, if the merchant has not claimed the customer's balance, the customer may claim it via the `@custClaim` entrypoint. This procedure is defined by the `TezosEscrowAgent`.
+  - Unilateral merchant close: The merchant can unilaterally initiate channel closure by calling the `@expiry` entrypoint on the smart contract. This operation triggers a timeout period, during which the customer must broadcast their latest state by calling `@custClose` (as with a unilateral customer close). If the customer fails to do so within the timeout period, the merchant may claim the entire channel balance via the `@merchClaim` entrypoint. This procedure is defined by the `TezosEscrowAgent`.
 
 ## References
 [zkChannels Private Payments Protocol](https://github.com/boltlabs-inc/blindsigs-protocol)
