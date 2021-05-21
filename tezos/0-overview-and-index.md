@@ -28,7 +28,7 @@ with all zkChannels as detailed [here](1-setup.md#merchant-setup).
 The customer and merchant agree on parameters, initialize a `zkAbacus` channel, open and fund a Tezos smart contract, and activate the `zkAbacus` channel as detailed [here](2-channel-establishment.md).
 
 ### (3) Channel payments
-Channel payments are specified in (XX link design doc). The customer initiates all payment requests, but both positive and negative payment values are supported. 
+Channel payments are specified in 4.4 of the [zkChannels Protocol](https://github.com/boltlabs-inc/blindsigs-protocol/releases/download/ecc-review/zkchannels-protocol-spec-v3.pdf). The customer initiates all payment requests, but both positive and negative payment values are supported. 
 
 In zkChannels, the customer offers a payment in return for a service from a merchant. If the merchant agrees to this payment and to provide the requested service, the parties run `zkAbacus.Pay` on the agreed-upon amount.
 
@@ -48,8 +48,7 @@ There are three options for [channel closure](4-channel-closure.md):
   - Unilateral merchant close: The merchant can unilaterally initiate channel closure by calling the `@expiry` entrypoint on the smart contract. This operation triggers a timeout period, during which the customer must broadcast their latest state by calling `@custClose` (as with a unilateral customer close). If the customer fails to do so within the timeout period, the merchant may claim the entire channel balance via the `@merchClaim` entrypoint. This procedure is defined by the `TezosEscrowAgent`.
 
 ## References
-[zkChannels Private Payments Protocol](https://github.com/boltlabs-inc/blindsigs-protocol)
-XX: replace link with final pdf
+[zkChannels Private Payments Protocol](https://github.com/boltlabs-inc/blindsigs-protocol/releases/download/ecc-review/zkchannels-protocol-spec-v3.pdf)
 
 ## Glossary
 * **`cid`**:

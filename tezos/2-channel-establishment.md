@@ -26,7 +26,8 @@ In the next round, the customer and merchant initialize the `zkAbacus` channel b
 
 For the final round, the customer originates the contract and funds their side of the channel (see [2-contract-origination.md](2-contract-origination.md) for more information). The customer sends `funding_confirmed` to the merchant, which contains the contract id `contract-id`. The merchant checks the corresponding contract and initial storage for the expected values. The merchant then funds their side of the smart contract, if applicable. Once the contract is fully funded, the funds are locked in. At this point, the merchant runs `zkAbacus.Activate()` to generate the initial payment tag and sends the customer the message `activate`, which contains the payment tag.
 
-Upon completion of `zkAbacus.Activate()`, the channel is open and ready for [payments](3-channel-payments.md).  Details for `zkAbacus.Initialize()` maybe found here. (XX reference)
+Upon completion of `zkAbacus.Activate()`, the channel is open and ready for [payments](3-channel-payments.md).  Details for `zkAbacus.Initialize()` may be found in section 3.3.2 of the [zkChannels Protocol](https://github.com/boltlabs-inc/blindsigs-protocol/releases/download/ecc-review/zkchannels-protocol-spec-v3.pdf).
+
 
 
 
