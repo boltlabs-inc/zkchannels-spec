@@ -54,7 +54,6 @@ Upon receipt, the customer:
 
 ### The `@mutualClose` entrypoint
 This entry point is called with the following arguments:
-* [`bls12_381_fr`:`cid`]
 * [`mutez`:`bal_cust`]
 * [`mutez`:`bal_merch`]
 * [`signature`:`mutual_close_signature`]
@@ -66,7 +65,6 @@ The `@expiry` entrypoint will only succeed if the sender is `cust_addr`, as defi
 Unilateral customer closes are as specified in `TezosEscrowAgent`.
 
 For the customer to initiate a unilateral channel closure, they call the smart contract via `@custClose` with the latest state and the merchant's `closing_signature` (`s1` and `s2`) on it. Note that an operation calling the `@custClose` entrypoint will only be successful if the sender is `cust_addr`, as defined in the smart contract. The following arguments are passed into `@custClose`:
-* [`bls12_381_fr`:`cid`]
 * [`mutez`:`bal_cust`]
 * [`mutez`:`bal_merch`]
 * [`bls12_381_fr`:`rev_lock`]
