@@ -12,7 +12,7 @@ A zkChannel can close either via a mutual close, in which both the customer and 
 ## Mutual Close
 Mutual close is initiated by the customer and consists of a single round of communication between the customer and the merchant, followed by a single transaction sent by the customer to the network. 
 
-The customer initiates `zkAbacus.Close` by sending the message `mutual_close_c`. The merchant then runs `zkAbacus.Close`. If `zkAbacus.Close` fails, the merchant aborts. Otherwise, the merchant signs the appropriate closing message as specified by `TezosEscrowAgent` and sends this signature in the message `mutual_close_m` to the customer. Once the customer receives a valid `mutual_close_m` message, they can close the smart contract by calling the `@mutualClose` entrypoint. 
+The customer initiates `zkAbacus.Close` by sending the message `mutual_close_c`. The merchant then runs `zkAbacus.Close`. If `zkAbacus.Close` fails, the merchant aborts. Otherwise, the merchant signs the appropriate closing message as specified by `TezosEscrowAgent` and sends this signature in the message `mutual_close_m` to the customer. Once the customer receives a valid `mutual_close_m` message, they can close the smart contract by calling the `@mutualClose` entrypoint in the [Tezos smart contract](2-contract-origination.md#tezos-smart-contract).
 
 ### The `mutual_close_c` Message
 
@@ -64,7 +64,8 @@ The `@expiry` entrypoint will only succeed if the sender is `cust_addr`, as defi
 ## Unilateral Customer Close
 Unilateral customer closes are as specified in `TezosEscrowAgent`.
 
-For the customer to initiate a unilateral channel closure, they call the smart contract via `@custClose` with the latest state and the merchant's `closing_signature` (`s1` and `s2`) on it. Note that an operation calling the `@custClose` entrypoint will only be successful if the sender is `cust_addr`, as defined in the smart contract. The following arguments are passed into `@custClose`:
+For the customer to initiate a unilateral channel closure, they call the [Tezos smart contract](2-contract-origination.md#tezos-smart-contract) via `@custClose` with the latest state and the merchant's `closing_signature` (`s1` and `s2`) on it. Note that an operation calling the `@custClose` entrypoint will only be successful if the sender is `cust_addr`, as defined in in the smart contract. The following arguments are passed into `@custClose`:
+* [`bls12_381_fr`:`cid`]
 * [`mutez`:`bal_cust`]
 * [`mutez`:`bal_merch`]
 * [`bls12_381_fr`:`rev_lock`]
@@ -76,7 +77,7 @@ When the `@custClose` entrypoint has been called, the merchant's balace (`bal_me
 If the merchant does not call `@merchDispute` within the timeout period, the customer will claim their balance by calling the `@custClaim` entrypoint, at which point the smart contract with transfer the customer's balance to `cust_addr`.
 
 ### Merchant Dispute
-As soon as the merchant detects that the customer has called the `@custClose` entrypoint, `rev_lock` is read from the contract storage and checked to see if it corresponds to a known `rev_secret` where H(`rev_secret`) == `rev_lock`, using the hash function SHA3-256. If `rev_secret` is known, this means the customer is attempting to close on an outdated state and the merchant will call the `@merchDispute` entrypoint with:
+As soon as the merchant detects that the customer has called the `@custClose` entrypoint, `rev_lock` is read from the contract storage and checked to see if it corresponds to a known `rev_secret` where H(`rev_secret`) == `rev_lock`, using the hash function SHA3-256. If `rev_secret` is known, this means the customer is attempting to close on an outdated state and the merchant will call the `@merchDispute` entrypoint of the [Tezos smart contract](2-contract-origination.md#tezos-smart-contract)with:
 * [`bytes`:`rev_secret`]
 
 If `rev_secret` hashes to `rev_lock`, the smart contract will send the customer's pending balance to the merchant. 
@@ -86,7 +87,7 @@ Unilateral merchant closes are as specified in `TezosEscrowAgent`.
 
 As the merchant does not know the latest state of a payment channel, the merchant initiates a unilateral closure by effectively forcing the customer to close the channel within a timeout period. The length of the timeout period is determined by `self_delay` (the same as the timeout period for `@custClose`).
 
-The merchant can initiate closure by calling the `@expiry` entrypoint. Note that an operation calling the `@expiry` entrypoint will only be successful if the sender is `merch_addr`, as defined in the smart contract.
+The merchant can initiate closure by calling the `@expiry` entrypoint of the [Tezos smart contract](2-contract-origination.md#tezos-smart-contract). Note that an operation calling the `@expiry` entrypoint will only be successful if the sender is `merch_addr`, as defined in the smart contract.
 
 As soon as the customer observes the `@expiry` entrypoint on the smart contract being called, they will prevent any payments on the channel from happening and call `@custClose` with the latest channel state and closing signature (as described in [Unilateral Customer Close](#unilateral-customer-close)).
 
