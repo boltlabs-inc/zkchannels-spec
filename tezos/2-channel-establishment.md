@@ -12,7 +12,10 @@
 ## Prerequistes
 The merchant has completed the [setup](#1-setup.md) phase, and the customer and merchant have established a communication session.
 
-The customer has [obtained the merchant’s setup information](1-setup.md) out of band beforehand including the [merchant's public parameters](1-setup.md#Public-parameters).
+The customer has [obtained the merchant’s setup information](1-setup.md) out of band beforehand including the [merchant's public parameters](1-setup.md#Public-parameters). The customer must verify the merchant's public parameters are well-formed:
+* The merchant blind signing public key `merch_PS_pk` must consist of a valid Pointcheval Sanders public key of the expected length.
+* The range proof parameters `range_proof_params` must consist of a valid Pointcheval Sanders key of the expected length and signatures on the appropriate integer range.
+* The merchant EdDSA public key `merch_pk` must be a valid EdDSA key for the curve specified by `tezos-client` and the merchant address `merch_addr` must be a Tezos tz1 address correctly derived from `merch_pk`. 
 
 ## Overview
 Channel establishment is a three round protocol.
@@ -66,6 +69,7 @@ The customer:
 
 Upon receipt, the merchant:
   - Checks that `cid_c` is a valid string and `bal_cust_0` ≥ 0 and `bal_merch_0` ≥ 0 are positive integers.
+  - Checks that `pk_cust` is a valid EdDSA public key for the curve specified by `tezos-client` and that `cust_addr` is a valid Tezos tz1 address that is correctly derived from `pk_cust`.
   - Checks that `merch_pp_hash` is correct with respect to `SHA3-256(merch_PS_pk, merch_addr, merch_pk)` and rejects channel open request if not.
 
 ### The `open_m` Message
