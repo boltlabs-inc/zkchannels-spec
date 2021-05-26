@@ -132,6 +132,10 @@ Arguments
 ```
 transfer 0 from tz1S6eSPZVQzHyPF2bRKhSKZhDZZSikB3e51 to KT1EHTCw75YWw77HffBJgArxugfeXrTZibSa --entrypoint 'custClaim' --arg 'Unit'
 ```
+#### `merchClaim`
+```
+transfer 0 from tz1VcYZwxQoyxfjhpNiRkdCUe5rzs53LMev6 to KT1EHTCw75YWw77HffBJgArxugfeXrTZibSa --entrypoint 'merchClaim' --arg 'Unit'
+```
 
 #### `mutualClose`
 ```
