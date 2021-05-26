@@ -68,7 +68,7 @@ The prefix `03` is added to the bytes. `03` is a watermark for operations in Tez
 ```
 03ce69c5713dac3537254e7be59759cf59c15abd530d10501ccf9028a5786314cf08000002298c03ed7d454a101eb7022bc95f7e5f41ac78d0860303c8010080c2d72f0000e7670f32038107a59a2b9cfefae36ea21f5aa63c00
 ```
-The operation is then hashed using blake2b to create a 32-byte digest. The digest is then signed using the private key of the `source` address using the Ed25519 elliptic curve.
+The operation is then hashed using blake2b to create a 32-byte digest. The digest is then signed using the private key of the `source` address using the EdDSA on the Ed25519 curve.
 
 ```
 637e08251cae646a42e6eb8bea86ece5256cf777c52bc474b73ec476ee1d70e84c6ba21276d41bc212e4d878615f4a31323d39959e07539bc066b84174a8ff0d
