@@ -67,11 +67,13 @@ Upon completion of `zkAbacus.Activate()`, the channel is open and ready for [pay
 #### Requirements
 The customer:
    - Generates `cid_c` randomly using a secure RNG. 
+   - Checks that `merch_addr` is an implicit Tezos account (tz1 address), and not a smart contract address (KT1 address). This is to ensure that dispersed payouts on channel closure cannot be failed by a smart contract refusing payments.
 
 Upon receipt, the merchant:
   - Checks that `cid_c` is a valid string and `bal_cust_0` ≥ 0 and `bal_merch_0` ≥ 0 are positive integers.
   - Checks that `pk_cust` is a valid EdDSA public key for the curve specified by `tezos-client` and that `cust_addr` is a valid Tezos tz1 address that is correctly derived from `pk_cust`.
   - Checks that `merch_pp_hash` is correct with respect to `SHA3-256(merch_PS_pk, merch_addr, merch_pk)` and rejects channel open request if not.
+  - Checks that `cust_addr` is an implicit Tezos account (tz1 address), and not a smart contract address (KT1 address). This is to ensure that dispersed payouts on channel closure cannot be failed by a smart contract refusing payments.
 
 ### The `open_m` Message
 1. type: (`open_m`)
