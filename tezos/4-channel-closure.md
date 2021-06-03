@@ -68,8 +68,9 @@ For the customer to initiate a unilateral channel closure, they call the [Tezos 
 * [`mutez`:`bal_cust`]
 * [`mutez`:`bal_merch`]
 * [`bls12_381_fr`:`rev_lock`]
-* [`bls12_381_g1`:`s1`]
-* [`bls12_381_g1`:`s2`]
+* [`json`:`closing_signature`]
+  * [`bls12_381_g1`:`s1`]
+  * [`bls12_381_g1`:`s2`]
 
 When the `@custClose` entrypoint has been called, the merchant's balace (`bal_merch`) will automatically be transferred to the `merch_addr` by the smart contract. The customer's balance (`bal_cust`) begins a timeout period to allow the merchant to [dispute](#merchant-dispute) the latest balance. The length of the timeout period is determined by `self_delay` set in the smart contract at origination.
 

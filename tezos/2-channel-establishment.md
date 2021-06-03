@@ -15,6 +15,7 @@ The merchant has completed the [setup](#1-setup.md) phase, and the customer and 
 The customer has [obtained the merchant’s setup information](1-setup.md) out of band beforehand including the [merchant's public parameters](1-setup.md#Public-parameters). The customer must verify the merchant's public parameters are well-formed:
 * The merchant blind signing public key `merch_PS_pk` must consist of a valid Pointcheval Sanders public key of the expected length.
 * The range proof parameters `range_proof_params` must consist of a valid Pointcheval Sanders key of the expected length and signatures on the appropriate integer range.
+* The pedersen commitment parameters must be well-formed from `G1` and of th expected length.
 * The merchant EdDSA public key `merch_pk` must be a valid EdDSA key for the curve specified by `tezos-client` and the merchant address `merch_addr` must be a Tezos tz1 address correctly derived from `merch_pk`. 
 
 ## Overview
@@ -96,7 +97,7 @@ The customer runs the `zkAbacus.Initialize()` with the following inputs: `cust_p
     * [`string`:`cid`]
     * [`bls12_381_g1`:`close_state_commitment`]
     * [`bls12_381_g1`:`state_commitment`]
-    * [`(bls12_381_g1, bls12_381_g1, Vec<bls12_381_fr>): pay_proof`]
+    * [`(bls12_381_g1, bls12_381_g1, Vec<bls12_381_fr>): establish_proof`]
 
 #### Requirements
 Upon receipt, the merchant checks the correctness of the `cid` in the `init_c` message and continues as specified in `zkAbacus.Initialize()`. 
