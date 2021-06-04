@@ -10,7 +10,7 @@ The customer database `customer_DB` is used to persist information across the st
 
 | cid | state | merchant_address | on chain credentials |
 | --- | ----- | ---------------- | -------------------- |
-| type? | Ready, Started, or Locked | everything after `zkchannel://` | TBD |
+| type? | Ready, Started, or Locked | everything after `zkchannel://` | TBD (merchant public key, ...) |
 
 ### Operations
 
