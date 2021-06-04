@@ -1,7 +1,7 @@
 ## Merchant Revocation Database
 The merchant database `revocation_DB` is used to enforce correct `zkAbacus` payments and `TezosEscrowAgent` account closes.
 
-This databse should consist of two independent tables: one storing a set of (non-null) nonces, and one storing a set of revocation lock/secret pairs (the secret may be NULL but the revocation lock must be present).
+This database should consist of two independent tables: one storing a set of (non-null) nonces, and one storing a set of revocation lock/secret pairs (the secret may be NULL but the revocation lock must be present).
 
 ### Operations
 
