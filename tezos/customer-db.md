@@ -10,8 +10,10 @@ The customer database `customer_DB` is used to persist information across the st
 
 | cid | state | merchant_address | merchant_public_key | on chain credentials |
 | --- | ----- | ---------------- | ------------------- | -------------------- |
-| type? | Ready, Started, or Locked | everything after `zkchannel://` | TBD | TBD |
+| type? | Ready, Started, or Locked | everything after `zkchannel://` | sha3_256 [1] | TBD |
 
 ### Operations
 
 TBD
+
+1: See https://github.com/boltlabs-inc/zkchannels-spec/blob/main/tezos/2-channel-establishment.md#the-open_m-message
