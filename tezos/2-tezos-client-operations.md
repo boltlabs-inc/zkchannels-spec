@@ -36,10 +36,7 @@ Below is an example of an unsigned tezos operation. The signature on this operat
       "destination": "KT1EHTCw75YWw77HffBJgArxugfeXrTZibSa",
       "parameters": {
         "entrypoint": <entrypoint>,
-        "value": {
-            "prim": "Pair",
-            "args": <arguments>
-        } 
+        "args": <arguments>
       }
     }
 }
@@ -55,9 +52,9 @@ Below is an example of an unsigned tezos operation. The signature on this operat
 - `destination`: The destination address.
 - `parameters`: Contains additional parameters used when interacting with smart contracts.
 - `entrypoint`: The entrypoint of the smart contract being called.
-- `prim`: Native JSON encoded Micheline primitives.
 - `args`: the arguments to be passed in to the entrypoint.
 
+The `fee`, `storage_limit`, and `gas_limit` are to be determined by the user (the customer or merchant) broadcasting their operation. The only requirement as far as the protocol is concerned is that the fees and limits are sufficient for the operation to be baked. The tezos client used to interact with the blockchain should be capable of calculating the gas and storage used by an operation, as well as a fee that will ensure it can get baked in a timely manner with a high probability. 
 ## Operation signature
 The operation is translated into a binary format, e.g.
 ```
@@ -77,71 +74,215 @@ In the final step, the binary format of the operation is appended to the signatu
 
 
 ## zkChannel operations
-### Contract origination
-```
-originate contract my_zkchannel transferring 0 from tz1S6eSPZVQzHyPF2bRKhSKZhDZZSikB3e51 running zkchannel_contract.tz --init <initial_storage>
-```
-- `my_zkchannel` is an alias the node can use to refer to the contract.
-- `tz1S6eSPZVQzHyPF2bRKhSKZhDZZSikB3e51` is the customer's address 
-- `<initial_storage>` would contain the initial storage parameters as listed in [2-contract-origination.md](2-contract-origination.md#initial-storage-arguments)
+### Contract origination operations
+The contract origination operation has the following format:
 
+```
+"kind": "origination",
+"source": <cust_addr>,
+"fee": <fee>,
+"counter": <counter>,
+"gas_limit": <gas_limit>,
+"storage_limit": <storage_limit>,
+"balance": "0",
+"script": {
+    "code": <zkchannel_contract>,
+    "storage": <initial_storage> 
+}
+```
+`<cust_addr>` is the customer's tz1 address and should match the `cust_addr` field in the contract initial storage. This account will also be used to fund the channel. `<zkchannel_contract>` The [zkchannels contract](https://github.com/boltlabs-inc/tezos-contract/blob/main/zkchannels-contract/zkchannel_contract.tz) in michelson. `<initial_storage>` contains the initial storage parameters as listed in [2-contract-origination.md](2-contract-origination.md#initial-storage-arguments). The expected format of the storage is:
+
+```
+(Pair 
+    (Pair 
+        (Pair 
+            (Pair <cid> <close>) 
+            (Pair 
+                <context_string> 
+                (Pair <cust_addr> <custBal>)
+            )
+        ) 
+        (Pair 
+            (Pair 
+                <cust_funding> 
+                (Pair <cust_pk> <delayExpiry>)
+            ) 
+            (Pair 
+                <g2> 
+                (Pair <merch_addr> <merchBal>)
+            )
+        )
+    ) 
+    (Pair 
+        (Pair 
+            (Pair <merch_funding> <merch_pk>) 
+            (Pair 
+                <merchPk0> 
+                (Pair <merchPk1> <merchPk2>)
+            )
+        ) 
+        (Pair 
+            (Pair 
+                <merchPk3> 
+                (Pair <merchPk4> <merchPk5>)
+            ) 
+            (Pair 
+                <rev_lock> 
+                (Pair <self_delay> <status>)
+            )
+        )
+    )
+)
+```
 
 ### Contract calls
+Contract calls are transfer operations where the destination is the smart contract. Entrypoints can be specified in the transaction and any additional arguments can be included with the `--arg` flag, `"Unit"` is the default value for when there are no additional arguments. 
 
-Contract calls are 0 value transfer operations where the destination is the smart contract. Entrypoints can be specified in the transaction and any additional arguments can be included with the `--arg` flag, `'Unit'` is the default value for when there are no additional arguments. 
-
-In the following examples, 
-- `KT1EHTCw75YWw77HffBJgArxugfeXrTZibSa` : smart contract address
-- `tz1S6eSPZVQzHyPF2bRKhSKZhDZZSikB3e51` : customer's address 
-- `tz1VcYZwxQoyxfjhpNiRkdCUe5rzs53LMev6` : merchant's address
+In the following operations, `<contract_id>`  is the contract ID (KT1 address) of the zkChannel contract.
 
 
 #### `addFunding`
 ```
-transfer 10 from tz1S6eSPZVQzHyPF2bRKhSKZhDZZSikB3e51 to KT1EHTCw75YWw77HffBJgArxugfeXrTZibSa --entrypoint 'addFunding' --arg 'Unit'
+"kind": "transaction",
+"source": <cust_addr>,
+"fee": <fee>,
+"counter": <counter>,
+"gas_limit": <gas_limit>,
+"storage_limit": <storage_limit>,
+"amount": <cust_funding>,
+"destination": <contract_id>,
+"parameters": {
+  "entrypoint": "addFunding",
+  "args": "Unit"
+}
 ```
-
+`<cust_funding>` specifies the amount to be transferred to fund the contract in mutez. This amount must be exactly equal to the `cust_funding` specified in the contract's initial storage.
 #### `reclaimFunding`
-```
-transfer 0 from tz1S6eSPZVQzHyPF2bRKhSKZhDZZSikB3e51 to KT1AxxzbDAk8k3eTbLidgbkoukt6RTMFFVuf --entrypoint 'reclaimFunding' --arg 'Unit'
-```
 
+```
+"kind": "transaction",
+"source": <cust_addr>,
+"fee": <fee>,
+"counter": <counter>,
+"gas_limit": <gas_limit>,
+"storage_limit": <storage_limit>,
+"amount": "0",
+"destination": <contract_id>,
+"parameters": {
+  "entrypoint": "reclaimFunding",
+  "args": "Unit"
+}
+```
 #### `expiry`
 ```
-transfer 0 from tz1VcYZwxQoyxfjhpNiRkdCUe5rzs53LMev6 to KT1EHTCw75YWw77HffBJgArxugfeXrTZibSa --entrypoint 'expiry' --arg 'Unit'
+"kind": "transaction",
+"source": <merch_addr>,
+"fee": <fee>,
+"counter": <counter>,
+"gas_limit": <gas_limit>,
+"storage_limit": <storage_limit>,
+"amount": "0",
+"destination": <contract_id>,
+"parameters": {
+  "entrypoint": "expiry",
+  "args": "Unit"
+}
 ```
 
 #### `custClose`
 ```
-transfer 0 from tz1S6eSPZVQzHyPF2bRKhSKZhDZZSikB3e51 to KT1EHTCw75YWw77HffBJgArxugfeXrTZibSa --entrypoint 'custClose' --arg 'Pair (Pair 5000000 25000000) 0x50dc0701ca265bc9dcec0e8227932edf2f67ab8e10a199830f10963da1f0772a 0x12793e9a17f581a7c4ab23aae1bb63d8b2a4c743e0d84eb655ce5f984e4c6b70efa82795360c3231fd99e1a750ff93161050944b741b8e417da09409dc67a12da50505a65b37885cfd6993cd11f98312ac283b0b8b25526278572e21a77c98e4 0x0a4d50d372cd83c7d4bb32fe2e009f2534fcedec655690df53d05dfa280d76067b4fec53804f7e784503aeefd2d84e1006db47b5292042d433cef04c2494a484702f566a456315308d82621b3bf8f95a3d0bd10c1f9b91c4bab18b341648fadb'
+"kind": "transaction",
+"source": <cust_addr>,
+"fee": <fee>,
+"counter": <counter>,
+"gas_limit": <gas_limit>,
+"storage_limit": <storage_limit>,
+"amount": <cust_funding>,
+"destination": <contract_id>,
+"parameters": {
+  "entrypoint": "custClose",
+  "args": 
+}
 ```
-Arguments
-- `5000000` : customer closing balance
-- `25000000` : merchant closing balance
-- `0x50dc0701ca265bc9dcec0e8227932edf2f67ab8e10a199830f10963da1f0772a` : revocation lock
-- `0x12793e9a17f581a7c4ab23aae1bb63d8b2a4c743e0d84eb655ce5f984e4c6b70efa82795360c3231fd99e1a750ff93161050944b741b8e417da09409dc67a12da50505a65b37885cfd6993cd11f98312ac283b0b8b25526278572e21a77c98e4` : merchant's closing authorization siganture (s1)
-- `0x0a4d50d372cd83c7d4bb32fe2e009f2534fcedec655690df53d05dfa280d76067b4fec53804f7e784503aeefd2d84e1006db47b5292042d433cef04c2494a484702f566a456315308d82621b3bf8f95a3d0bd10c1f9b91c4bab18b341648fadb` : merchant's closing authorization siganture (s2)
+The arguments passed into `custClose` are: 
+- the closing balances, `cust_bal` and `merch_bal`, 
+- the revocation lock for that state, `rev_lock`,
+- and the merchant's closing authorization signatures, `s1` and `s2`.
 
+The expected format for `<cust_close_storage>` is:
+```
+(Pair 
+    (Pair <cust_bal> <merch_bal>) 
+    (Pair 
+        <rev_lock> 
+        (Pair <s1> <s2>))
+)
+```
 #### `merchDispute`
 ```
-transfer 0 from tz1VcYZwxQoyxfjhpNiRkdCUe5rzs53LMev6 to KT1EHTCw75YWw77HffBJgArxugfeXrTZibSa --entrypoint 'merchDispute' --arg '0x1f0178304fea6045e851ca6d1bb613a093ea4e0e6f92010c44473a56807993ed'
+"kind": "transaction",
+"source": <merch_addr>,
+"fee": <fee>,
+"counter": <counter>,
+"gas_limit": <gas_limit>,
+"storage_limit": <storage_limit>,
+"amount": "0",
+"destination": <contract_id>,
+"parameters": {
+  "entrypoint": "merchDispute",
+  "args": <revocation_secret>
+}
 ```
-Arguments
-- `0x1f0178304fea6045e851ca6d1bb613a093ea4e0e6f92010c44473a56807993ed` : revocation secret
+`<revocation_secret>` is the SHA3 preimage for `rev_lock` that had been broadcasted by the customer as part of the `custClose` entrypoint call.
 #### `custClaim`
 ```
-transfer 0 from tz1S6eSPZVQzHyPF2bRKhSKZhDZZSikB3e51 to KT1EHTCw75YWw77HffBJgArxugfeXrTZibSa --entrypoint 'custClaim' --arg 'Unit'
+"kind": "transaction",
+"source": <cust_addr>,
+"fee": <fee>,
+"counter": <counter>,
+"gas_limit": <gas_limit>,
+"storage_limit": <storage_limit>,
+"amount": "0",
+"destination": <contract_id>,
+"parameters": {
+  "entrypoint": "custClaim",
+  "args": "Unit"
+}
 ```
 #### `merchClaim`
 ```
-transfer 0 from tz1VcYZwxQoyxfjhpNiRkdCUe5rzs53LMev6 to KT1EHTCw75YWw77HffBJgArxugfeXrTZibSa --entrypoint 'merchClaim' --arg 'Unit'
+"kind": "transaction",
+"source": <cust_addr>,
+"fee": <fee>,
+"counter": <counter>,
+"gas_limit": <gas_limit>,
+"storage_limit": <storage_limit>,
+"amount": "0",
+"destination": <contract_id>,
+"parameters": {
+  "entrypoint": "merchClaim",
+  "args": "Unit"
+}
 ```
-
 #### `mutualClose`
 ```
-transfer 0 from tz1S6eSPZVQzHyPF2bRKhSKZhDZZSikB3e51 to KT1EHTCw75YWw77HffBJgArxugfeXrTZibSa --entrypoint 'mutualClose' --arg (Pair 5000000 (Pair 25000000 "edsigtb8SMsNQQYaRkvzvHxZhY2eNVHBoUieZ3PykEEm4Arj47YAqPPP9iqiDH54bxBxprXQMVjVyUuN9GRWqapxiSopWGq4M1t"))
+"kind": "transaction",
+"source": <cust_addr>,
+"fee": <fee>,
+"counter": <counter>,
+"gas_limit": <gas_limit>,
+"storage_limit": <storage_limit>,
+"amount": "0",
+"destination": <contract_id>,
+"parameters": {
+  "entrypoint": "mutualClose",
+  "args": <mutual_close_storage>
+}
 ```
-Arguments
-- `5000000` : customer closing balance
-- `25000000` : merchant closing balance
-- `"edsigtb8SMsNQQYaRkvzvHxZhY2eNVHBoUieZ3PykEEm4Arj47YAqPPP9iqiDH54bxBxprXQMVjVyUuN9GRWqapxiSopWGq4M1t"` : merchant's mutual close signature
+`<mutual_close_storage>` contains the closing balances that have been agreed upon by the customer and merchant, `cust_bal` and `merch_bal`, and the merchant's EdDSA signature, `merch_sig`. The expected format for `<mutual_close_storage>` is:
+```
+(Pair 
+    <cust_bal> 
+    (Pair <merch_bal> <merch_sig>)
+)
+```
