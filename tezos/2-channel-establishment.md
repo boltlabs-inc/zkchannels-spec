@@ -131,7 +131,7 @@ The customer:
 Upon receipt, the merchant:
   - Checks that the originated contract `contract-id` contains the expected zkchannels [contract](https://github.com/boltlabs-inc/tezos-contract/blob/main/zkchannels-contract/zkchannel_contract.tz).
   - Checks that the on-chain storage of `contract-id` is exactly as expected for channel `cid` (including that the customer's side has been funded). Specifically, checks that:
-    - The values stored in the following fields match the merchant's PS public key values:`g2`, `X`, `Y1`, `Y2`, `Y3`, `Y4`, `Y5`.
+    - The contract storage contains the merchant's PS public key.
     - The merchant's tezos address and public key match the fields `merch_addr` and  `merch_pk`, respectively.
     - The `self_delay` field in the contract matches the global default. 
     - The `close` field matches the merchant's `close` flag.
