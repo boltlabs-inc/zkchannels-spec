@@ -8,7 +8,6 @@
     * [The `init_m` Message](#the-init_m-message)
     * [The `funding_confirmed` Message](#the-funding_confirmed-message)
     * [The `activate` Message](#the-activate-message)
-  * [Contract Origination and Funding](2-contract-origination.md)
 ## Prerequisites
 The merchant has completed the [setup](#1-setup.md) phase, and the customer and merchant have established a communication session.
 
@@ -25,7 +24,7 @@ In the first round, the customer sends the `open_c` message, which contains info
 
 In the next round, the customer and merchant initialize the `zkAbacus` channel by running `zkAbacus.Initialize()` on the previously established public parameters. In this subroutine, the customer sends `init_c`, which consists of a (hiding) commitment to the intial state and a zero-knowledge proof of correctness. In return, the merchant sends `init_m`, which contains an initial closing authorization signature for the customer. 
 
-For the final round, the customer originates the contract and funds their side of the channel (see [2-contract-origination.md](2-contract-origination.md) for more information). The customer sends `funding_confirmed` to the merchant, which contains the contract id `contract-id`. The merchant checks the corresponding contract and initial storage for the expected values. The merchant then funds their side of the smart contract, if applicable. Once the contract is fully funded, the funds are locked in. At this point, the merchant runs `zkAbacus.Activate()` to generate the initial payment tag and sends the customer the message `activate`, which contains the payment tag.
+For the final round, the customer originates the contract and funds their side of the channel (see [5-tezos-escrowagent.md](5-tezos-escrowagent.md#contract-origination-and-funding) for more information). The customer sends `funding_confirmed` to the merchant, which contains the contract id `contract-id`. The merchant checks the corresponding contract and initial storage for the expected values. The merchant then funds their side of the smart contract, if applicable. Once the contract is fully funded, the funds are locked in. At this point, the merchant runs `zkAbacus.Activate()` to generate the initial payment tag and sends the customer the message `activate`, which contains the payment tag.
 
 Upon completion of `zkAbacus.Activate()`, the channel is open and ready for [payments](3-channel-payments.md).  Details for `zkAbacus.Initialize()` may be found in section 3.3.2 of the [zkChannels Protocol](https://github.com/boltlabs-inc/blindsigs-protocol/releases/download/ecc-review/zkchannels-protocol-spec-v3.pdf).
 
@@ -116,7 +115,7 @@ Upon receipt, the customer:
   - Verifies `closing_signature` and continues as specified in `zkAbacus.Initialize()`.
 
 ### The `funding_confirmed` Message
-This message tells the merchant that the contract has been originated and the customer's side of the escrow account has been funded. For more information about this process, please refer to [2-contract-origination.md](2-contract-origination.md).
+This message tells the merchant that the contract has been originated and the customer's side of the escrow account has been funded. For more information about this process, please refer to [5-tezos-escrowagent.md](5-tezos-escrowagent.md#contract-origination-and-funding) for more information).
 
 1. type: (`funding_confirmed`)
 2. data: 
@@ -137,7 +136,7 @@ Upon receipt, the merchant:
     - The `close` field matches the merchant's `close` flag.
     - `custFunding` and `merchFunding` match the initial balances `bal_cust_0` and `bal_merch_0`, respectively.
   - In the customer-funded case, checks that the contract storage `status` has been set to `OPEN` (denoted as `1`) for at least `minimum_depth` blocks.
-  - In the dual-funded case, the merchant funds their side of the escrow account (see [2-contract-origination.md](2-contract-origination.md)).
+  - In the dual-funded case, the merchant funds their side of the escrow account (see [5-tezos-escrowagent.md](5-tezos-escrowagent.md#contract-origination-and-funding) for more information)).
 
   ### The `activate` Message
   This `activate` message consists of the sole message of `zkAbacus.Activate()`.
