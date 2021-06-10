@@ -1,9 +1,10 @@
 # zkChannels on Tezos: Overview and Index
   * [zkChannels Overview](#zkChannels-overview) 
-   1. [System Setup and Merchant Initialization](1-setup.md)
-   2. [Channel Establishment](2-channel-establishment.md)
-   3. [Channel Payments](3-channel-payments.md)
-   4. [Channel Closure](4-channel-closure.md) 
+  * [System Setup and Merchant Initialization](1-setup.md)
+  * [Channel Establishment](2-channel-establishment.md)
+  * [Channel Payments](3-channel-payments.md)
+  * [Channel Closure](4-channel-closure.md) 
+  * [Tezos EscrowAgent Realization](5-tezos-escrowagent.md) 
   * [References](#references) 
   * [Glossary](#glossary) 
 
