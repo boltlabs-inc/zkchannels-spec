@@ -206,18 +206,18 @@ On execution:
 Allows the customer close the channel and get their balance immediately with the merchant's authorization.
 
 Inputs:
-* The closing balances, `cust_bal` and `merch_bal`
-* The merchants signature, `merch_sig`, over the tuple (`contract-id`, `context-string`, `cid`, `cust_bal`, `merch_bal`) with respect to `merch_pk`
+* The closing balances, `cust_bal` and `merch_bal`, are the proposed amounts to be paid out to `cust_addr` and `merch_addr`, respectively, when the channel closes
+* A merchant EdDSA signature, `merch_sig`, which is used to authorize the closing balances
 
 `<mutual_close_storage>` contains the closing balances that have been agreed upon by the customer and merchant, [`mutez`:`cust_bal`] and [`mutez`:`merch_bal`], and the merchant's EdDSA signature, [`signature`:`merch_sig`]. The expected format for `<mutual_close_storage>` is:
 
 Requirements:
 * The entrypoint may only be called by `cust_addr`
 * The status must be set to `OPEN`
-* `merch_sig` must be valid 
+* `merch_sig` must be valid over the tuple (`contract-id`, `context-string`, `cid`, `cust_bal`, `merch_bal`) with respect to `merch_pk`
 
 On execution:
-* `cust_bal` and `merch_bal` are sent to `cust_addr` and `merch_addr` respectively
+* `cust_bal` and `merch_bal` are sent to `cust_addr` and `merch_addr`, respectively
 * The channel status is set to `CLOSED`
 
 
