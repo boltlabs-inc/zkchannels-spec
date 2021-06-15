@@ -24,7 +24,7 @@
 
 ## Tezos operation background
 
-Every tezos operations has only one `source` and one destination `destination`, and the operation must be signed by the private key of the `source` account. There are two `kind` of operations used in zkChannels, `origination` for originating the contract, and `transaction` for funding and calling the various entrypoints of the contract. 
+Every tezos operations has only one `source` and one `destination`, and the operation must be signed by the private key of the `source` account. There are two `kind` of operations used in zkChannels, `origination` for originating the contract, and `transaction` for funding and calling the various entrypoints of the contract. 
 ### Operation structure
 
 Below is an example of an unsigned tezos operation. The signature on this operation is created by serializing the operation and signing it with the private key associated with the `source` address. For detailed description of how Tezos operations get serialized and signed see [this post](https://www.ocamlpro.com/2018/11/21/an-introduction-to-tezos-rpcs-signing-operations/).
@@ -136,6 +136,7 @@ Requirements:
 
 On execution:
 * The funding amount is deducted from the customer or merchant's balance.
+* The status is set to `CLOSED`
 #### `expiry`
 Allows the merchant to initiate a unilateral channel closure.
 
@@ -280,4 +281,4 @@ If it is a dual-funded channel, the merchant funds their side of the channel usi
 At this point, the merchant checks the contract storage and ensure that `status` is set to `OPEN` (denoted as `1`), meaning the funding is locked in. When this status has at least `minimum_depth` confirmations, the merchant will send `open_m` to the customer.
 
 ## Reclaim funding
-If during the funding process, either the customer or merchant are in the position where they have funded their own side, but the other side has not been funded, they can abort the process and reclaim their initial funds by calling the `@reclaimFunding` entrypoint. However, if both sides have funded the contract, the funds are locked in and `@reclaimFunding` will fail when called. 
+If during the funding process, either the customer or merchant are in the position where they have funded their own side, but the other side has not been funded, they can abort the process and reclaim their initial funds by calling the `@reclaimFunding` entrypoint. However, if both sides have funded the contract, the funds are locked in and `@reclaimFunding` will fail when called. Note that once `@reclaimFunding` has been called, the channel status will be set to `CLOSED`, preventing any further activity with the contract.

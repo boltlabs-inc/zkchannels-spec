@@ -10,13 +10,13 @@
 
 
 ## zkChannels Overview
-zkChannels is a layer 2 protocol that enables anonymous and scalable payments between a customer and a merchant. The customer has the ability to make payments anonymously as long as they have an open channel with sufficient balance. That is, the customer’s anonymity set for a payment is the set of all customers with whom the given merchant has a channel open.
+zkChannels is a layer 2 protocol that enables anonymous and scalable payments between a customer and a merchant. The customer has the ability to make payments anonymously as long as they have an open channel with sufficient balance. That is, the customer’s anonymity set for a payment is the set of all customers with whom the given merchant has a channel open. The merchant's set of zkChannels follows a 'hub and spoke' topology, where the merchant is the 'hub' and the customers are the 'spokes'.
 
 zkChannels on Tezos is built out two main components:
 * `zkAbacus`. This component contains the functionality for a customer and a merchant to open, track payments, and collaboratively close a channel. This component does not interact with a payment network.
 * `TezosEscrowAgent`: A Tezos realization of the `zkEscrowAgent` functionality. This component provides the functionality for a customer and a merchant to open and close a zkChannels escrow account as a [Tezos smart contract](2-contract-origination.md#tezos-smart-contract). 
 
-We briefly describe the protocol in four phases: System Setup and Merchant Initialization, Channel establishment, Channel payments, and Channel closure
+We briefly describe the protocol in four phases: System Setup and Merchant Initialization, Channel Establishment, Channel Payments, and Channel Closure
 
 ## System Setup and Merchant Initialization
 Primitive specification and defaults are given [here](1-setup.md#system-setup)
@@ -24,11 +24,11 @@ Each merchant using zkChannels generates long-lived public keys and parameters f
 with all zkChannels as detailed [here](1-setup.md#merchant-setup). 
 
 
-## Channel establishment
+## Channel Establishment
 
 The customer and merchant agree on parameters, initialize a `zkAbacus` channel, open and fund a Tezos smart contract, and activate the `zkAbacus` channel as detailed [here](2-channel-establishment.md).
 
-## Channel payments
+## Channel Payments
 Channel payments are specified in 4.4 of the [zkChannels Protocol](https://github.com/boltlabs-inc/blindsigs-protocol/releases/download/ecc-review/zkchannels-protocol-spec-v3.pdf). The customer initiates all payment requests, but both positive and negative payment values are supported. 
 
 In zkChannels, the customer offers a payment in return for a service from a merchant. If the merchant agrees to this payment and to provide the requested service, the parties run `zkAbacus.Pay` on the agreed-upon amount.
@@ -42,7 +42,7 @@ A zkChannel may be thought of a _sequence of _states__; the `zkAbacus` component
 From the merchant’s perspective, each successful payment results in a revocation secret that allows the merchant to track whether a given state has been invalidated, but the merchant learns nothing else about the payment except the amount. 
 The merchant is, however, confident that payments are successful only if they are initiated on a valid, current state of sufficient balance. As long as `zkAbacus.Pay` completes successfully, the merchant should provide the requested service.
 
-## Channel closure
+## Channel Closure
 There are three options for [channel closure](4-channel-closure.md):
   - Mutual close: The customer and merchant can collaborate off-chain to create an operation calling the `@mutualClose` entrypoint in the contract. This requires fewer on-chain operations and is therefore cheaper. This procedure is built using `zkAbacus.Close` and `TezosEscrowAgent`.
   - Unilateral customer close: The customer can unilaterally initiate channel closure by using their current closing authorization signature to create an operation calling the `@custClose` entrypoint. The merchant's balance gets transferred to them immediately amd the customer's balance is held by the contract for a prespecified timeout period. If during this time, the merchant can prove it was an attempted double spend, by providing the revocation secret, the merchant can claim the customer's entire balance. After the timeout period, if the merchant has not claimed the customer's balance, the customer may claim it via the `@custClaim` entrypoint. This procedure is defined by the `TezosEscrowAgent`.
@@ -56,7 +56,7 @@ There are three options for [channel closure](4-channel-closure.md):
 [Introduction to Tezos Signing Operations](https://www.ocamlpro.com/2018/11/21/an-introduction-to-tezos-rpcs-signing-operations/)
 
 ## Glossary
-### Tezos glossary 
+### Tezos Glossary 
 *  **bake**:
    'Baking' refers to the process of producing a new block in the Tezos blockchain. It is the equivalent of 'mining' on a proof of work blockchain.
 * **`contract-id`**:
@@ -65,17 +65,29 @@ There are three options for [channel closure](4-channel-closure.md):
    The process of creating a serialized Tezos operation.
 *  **inject**:
    The process of broadcasting an operation on the Tezos blockchain.
+*  **mutez**:
+   The smallest denomination of Tez. 1 Tez is equal to 1 million mutez.
+*  **operation**:
+   'Operations' in Tezos are the equivalent of 'transactions' in Ethereum. Operations are used for originating contracts, calling entrypoints, and transferring tez.
 *  **storage**:
    The memory held by the smart contract.
+*  **tez**:
+   The unit of currency in Tezo.
 
-### zkChannels glossary 
-* **`cid`**:
-   A unique channel identifier generated as a SHA3-256 hash of random contributions from both parties, together with `zkAbacus` channel parameters and `TezosEscrowAgent` escrow account parameters. It is set during [Channel Establishment](2-channel-establishment.md) after creating the [`open_m` message](2-channel-establishment.md#the-open_m-message).
+### zkChannels Glossary 
 * **customer**:
-   In the zkChannels protocol, the 'customer' is the name given to the user who has the full view of the channel state and can initiate payments. Customers are the 'spokes' in the zkChannel 'hub and spoke' network topology.
+   A customer is a user who opens a zkChannel with a merchant. The customer has a complete view of the channel state and can initiate private payments to the given merchant. The customer's anonymity set is the set of users with whom a given merchant has an open channel. Customers are the 'spokes' in the zkChannel 'hub and spoke' network topology.
 * **merchant**:
-   In the zkChannels protocol, the 'merchant' is the name given to the user who has the partial full view of the channel state and blindly signs off on state updates (payments initiated by the customer). Merchants are the 'hubs' in the zkChannel 'hub and spoke' network topology.
-* **`merch_PS_pk`**:
-   The merchant's blind signing public key.
+   In the zkChannels protocol, the 'merchant' is the name given to the entity who has the partial full view of the channel state and blindly signs off on state updates (payments initiated by the customer). Merchants are the 'hubs' in the zkChannel 'hub and spoke' network topology. The merchant uses zkChannels to receive private payments from users acting as customers. Depending on the how the merchant allows customers to open channels, the merchant may or may not know the real-world identities of their customers.
+* **channel**:
+   A channel, also known as a 'payment channel', comprises of two parts: an on-chain smart contract and an off-chain protocol between the customer and merchant. When the two parts are in sync and the contract is funded, the channel is considered open and the customer can initiate payments on it. 
+* **`cid`**:
+   A unique channel identifier generated as a SHA3-256 hash of random contributions from both parties, together with `zkAbacus` channel parameters and `TezosEscrowAgent` escrow account parameters. It is set during [Channel Establishment](2-channel-establishment.md) by the merchant after creating the [`open_m` message](2-channel-establishment.md#the-open_m-message), and by the customer after the receipt of the [`open_m` message](2-channel-establishment.md#the-open_m-message).
 * **`cust_pk`, `merch_pk`**:
    These refer to the customer and merchant's tezos account public keys.
+* **`merch_PS_pk`**:
+   The merchant's blind signing public key defined during [Merchant Setup](1-setup.md#Merchant-Setup)
+* **`self_delay`**: 
+   This value sets the length of the timeout period during a unilateral closure where the other party must respond. The same timeout period is used for [customer initiated](4-channel-closure.md##unilateral-customer-close) unilateral closes and [merchant initiated](4-channel-closure.md##unilateral-merchant-close). The value is defined as part of the [global defaults](1-setup.md#Global-defaults).
+* **revocation lock**: 
+   The revocation lock is used to prevent the customer from double spending. If the customer attempts to initiate a unilateral closure on a revoked balance (i.e. attempt a double spend), the merchant will be able to claim the customer's entire balance by providing the revocation secret when calling the smart contract. The revocation secret is the `SHA3-256` preimage of the revocation lock. 
