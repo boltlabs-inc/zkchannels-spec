@@ -55,6 +55,8 @@ Upon completion of `zkAbacus.Activate()`, the channel is open and ready for [pay
 ## Message Specifications
 
 ### The `open_c` Message
+Channel establishment begins with the customer sending an `open_c` message to the merchant which describes properties about the channel it wishes to open. The proposed initial balances for the customer and merchant are denoted by `bal_cust_0` and `bal_merch_0`, respectively. `cid_c` is the customer's randomly generated contribution to what will form the channel id (`cid`). `cust_addr` is the customer's tezos account address, and `cust_pk` is the customer's tezos account public key. 
+
 1. type: (`open_c`)
 2. data: 
     * [`string`:`cid_c`]

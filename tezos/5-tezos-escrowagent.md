@@ -24,7 +24,7 @@
 
 ## Tezos background
 
-Every tezos operation has only one source and one destination, and the operation must be signed by the private key that corresponds to the `source` account. There are two kind of operations used in zkChannels, `origination` for originating the contract, and `transaction` for funding and calling the various entrypoints of the contract. 
+Every tezos operation has only one source and one destination, and the operation must be signed by the private key that corresponds to the source account. There are two kinds of operations used in zkChannels, origination for originating the contract, and transaction for funding and calling the various entrypoints of the contract.
 ### Operation structure
 
 Below is an example of an unsigned tezos operation. The signature on this operation is created by serializing the operation and signing it with the private key associated with the `source` address. For detailed description of how Tezos operations get serialized and signed see [this post](https://www.ocamlpro.com/2018/11/21/an-introduction-to-tezos-rpcs-signing-operations/).
@@ -56,9 +56,9 @@ Below is an example of an unsigned tezos operation. The signature on this operat
 - [`int64`:`storage_limit`]: Caller-defined storage limit. 
 - [`mutez`:`amount`]: The value being transferred (in mutez).
 - [`address`:`destination`]: The destination address.
-- [`object`:`parameters`]: Contains additional parameters used when interacting with smart contracts.
-- [`object`:`entrypoint`]: The entrypoint of the smart contract being called.
-- [`object`:`args`]: The arguments to be passed in to the entrypoint.
+- [`micheline object`:`parameters`]: Contains additional parameters used when interacting with smart contracts. The `micheline object` type is native to tezos smart contract and is comparable to JSON. For more information [click here](https://tezos.gitlab.io/shell/micheline.html).
+- [`micheline object`:`entrypoint`]: The entrypoint of the smart contract being called.
+- [`micheline object`:`args`]: The arguments to be passed in to the entrypoint.
 
 ### Forging an operation
 Forging is the process of creating a serialized (but unsigned) operation in tezos. Typically this process involves interacting with a tezos node as it requires getting recent data from the blockchain and simulating the result of the operation.
@@ -86,9 +86,9 @@ In the final step, the binary format of the operation is appended to the signatu
 ## Contract requirements
 
 * The contract keeps track of its current `status` that can be used to determine which entrypoint can be called. The initial status is set to `AWAITING_FUNDING`. The possible statuses are: `AWAITING_FUNDING`, `OPEN`, `EXPIRY`, `CUST_CLOSE`, `CLOSED`.
-* The contract keeps track of a dispute timeout period (denoted by `selfDelay`) that is used to determine whether an entrypoint call of type `custClaim` or `merchClaim` is legitimate.
+* The contract keeps track of a timeout period (denoted by `selfDelay`) that is used to determine whether an entrypoint call of type `custClaim` or `merchClaim` is legitimate.
 * The contract stores `rev_lock` when submitted by `cust_addr` during `custClose`. 
-* The contract stores the customer's balance during the period after `custClose` is called.
+* The contract stores the customer's closing balance after `custClose` is called.
 ### Initial contract arguments
 The zkChannel contract is originated with the following channel-specific arguments:
 * `cid`
@@ -101,7 +101,8 @@ The zkChannel contract is originated with the following channel-specific argumen
 * `merch_PS_pk`
 
 `custFunding` and `merchFunding` are the customer and merchant's funding contributions to the channel defined during [channel establishment](2-channel-establishment.md#the-funding_confirmed-message).
-`cust_pk` is the customer's tezos account public key defined during [channel establishment](2-channel-establishment.md#the-open_c-message). `merch_pk` is the merchant's tezos account public key, and `merch_PS_pk` is the merchant's blind signing public key, both defined during [merchant setup](1-setup.md#Merchant-Setup).
+`cust_pk` is the customer's tezos account public key defined during [channel establishment](2-channel-establishment.md#the-open_c-message). 
+`merch_pk` is the merchant's tezos account public key, and `merch_PS_pk` is the merchant's blind signing public key, both defined during [merchant setup](1-setup.md#Merchant-Setup).
 
 ### Global default arguments
 These [global default](1-setup.md#global-defaults) arguments are constant for every implementation of a zkChannels contract, regardless of the customer or merchant. 
@@ -124,7 +125,7 @@ Requirements:
 
 On execution:
 * The customer or merchant's balance is updated with the funding amount.
-* If after the entrypoint has been called, the customer and merchant's sides are funded, the `status` is set to `OPEN`.
+* After the entrypoint has been called, if the customer and merchant's sides are funded, the `status` is set to `OPEN`.
 
 #### `reclaimFunding`
 The `reclaimFunding` entrypoint allows the customer or merchant to reclaim their funding if the other party has not funded their initial balance. 
@@ -138,14 +139,14 @@ On execution:
 * The funding amount is deducted from the customer or merchant's balance and sent to the source of the entrypoint caller.
 * The status is set to `CLOSED`.
 #### `expiry`
-The `expiry` entrypoing allows the merchant to initiate a unilateral channel closure.
+The `expiry` entrypoint allows the merchant to initiate a unilateral channel closure.
 
 Requirements:
 * The entrypoint may only be called by `merch_addr`.
 * The status must be set to `OPEN`.
 
 On execution:
-* The delay period (defined by `selfDelay`) is triggered.
+* The timestamp marking the start of the delay period (defined by `selfDelay`) is recorded.
 * The status is set to `EXPIRY`.
 #### `custClose`
 The `custClose` entrypoint allows the customer to initate a unilateral channel closure.
@@ -165,7 +166,7 @@ On execution:
 * The customer's balance from the close state, `cust_bal`, is stored in the contract.
 * `rev_lock` from the close state is stored in the contract.
 * The merchant's close balance, `merch_bal`, is sent to `merch_addr`.
-* The delay period (defined by `selfDelay`) is triggered.
+* The timestamp marking the start of the delay period (defined by `selfDelay`) is recorded.
 * The status is set to `CUST_CLOSE`.
 
 #### `merchDispute`

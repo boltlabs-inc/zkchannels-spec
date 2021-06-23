@@ -10,7 +10,7 @@
 
 
 ## zkChannels Overview
-zkChannels is a layer 2 protocol that enables anonymous and scalable payments between a customer and a merchant. The customer has the ability to make payments anonymously as long as they have an open channel with sufficient balance. That is, the customer’s anonymity set for a payment is the set of all customers with whom the given merchant has a channel open. The merchant's set of zkChannels follows a 'hub and spoke' topology, where the merchant is the 'hub' and the customers are the 'spokes'.
+zkChannels is a layer 2 protocol that enables anonymous and scalable payments between a customer and a merchant. The customer has the ability to make payments anonymously as long as they have an open channel with sufficient balance. That is, the customer’s anonymity set for a payment is the set of all customers with whom the given merchant has a channel open. A zkChannels network follows a 'hub-and-spoke' topology. A hub-and-spoke network has a central component that's connected to multiple networks around it. In zkChannels, merchant is the central 'hub' connected to multiple customers or 'spokes'. 
 
 zkChannels on Tezos is built out two main components:
 * [`zkAbacus`](https://github.com/boltlabs-inc/blindsigs-protocol/releases/download/ecc-review/zkchannels-protocol-spec-v3.pdf). This component contains the functionality for a customer and a merchant to open, track payments, and collaboratively close a channel. This component does not interact with a payment network.
@@ -54,6 +54,7 @@ There are three options for [channel closure](4-channel-closure.md):
 [libzkchannels-crypto Repository](https://github.com/boltlabs-inc/libzkchannels-crypto/blob/main/libzkchannels-crypto) <br>
 [Tezos zkChannel Contract Repository](https://github.com/boltlabs-inc/tezos-contract/blob/main/zkchannels-contract) <br>
 [Introduction to Tezos Signing Operations](https://www.ocamlpro.com/2018/11/21/an-introduction-to-tezos-rpcs-signing-operations/)
+[Micheline data format](https://tezos.gitlab.io/shell/micheline.html).
 
 ## Glossary
 ### Tezos Glossary 
@@ -83,12 +84,16 @@ There are three options for [channel closure](4-channel-closure.md):
    A channel, also known as a 'payment channel', comprises of two parts: an on-chain smart contract and an off-chain protocol between the customer and merchant. When the two parts are in sync and the contract is funded, the channel is considered open and the customer can initiate payments on it. 
 * **`cid`**:
    A unique channel identifier generated as a SHA3-256 hash of random contributions from both parties, together with `zkAbacus` channel parameters and `TezosEscrowAgent` escrow account parameters. It is set during [channel establishment](2-channel-establishment.md) by the merchant after creating the [`open_m` message](2-channel-establishment.md#the-open_m-message), and by the customer after the receipt of the [`open_m` message](2-channel-establishment.md#the-open_m-message).
+* **`close`**: 
+   A fixed scalar used to differentiate closing state and state. It is defined as a [global default](1-setup.md#Global-defaults) in `zkAbacus`.
 * **`context-string`**:
    A string set to `"zkChannels mutual close"`. This is contained in the tuple that gets signed when creating `mutual_close_signature`. The value is defined as part of the [global defaults](1-setup.md#Global-defaults).
 * **`cust_pk`, `merch_pk`**:
    These refer to the customer and merchant's tezos account public keys. For the customer, it is defined during [channel establishment](2-channel-establishment.md#the-open_c-message), and for the merchant during [merchant setup](1-setup.md#Merchant-Setup).
 * **`merch_PS_pk`**:
    The merchant's blind signing public key defined during [merchant setup](1-setup.md#Merchant-Setup)
+* **`merch_pp_hash`**:
+   This is the hash of the merchant's public parameters. It is used as a unique identifier for the merchant and is used by the customer to connect to them. `merch_pp_hash` is set to `SHA3-256(merch_PS_pk, merch_addr, merch_pk)` during the [merchant setup](1-setup.md#Merchant-Setup).
 * **`minimum_depth`**:
    An integer that represents the minimum number of confirmations for the funding to be considered final. The value is defined as part of the [global defaults](1-setup.md#Global-defaults).
 * **`rev_lock`**: 
