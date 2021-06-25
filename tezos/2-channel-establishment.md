@@ -47,10 +47,10 @@ Upon completion of `zkAbacus.Activate()`, the channel is open and ready for [pay
 
 ## Global defaults
 * [`int`:`self_delay`] 
-* [`int`:`minimum_depth`]
+* [`int`:`required_confirmations`]
 
 `self_delay` sets the length of the dispute period. The same delay is applied to the `expiry` and `custClose` entrypoints. The value is interpreted in seconds. 
-`minimum_depth` sets the minimum number of confirmations for the funding to be considered final.
+`required_confirmations` sets the minimum number of confirmations for the funding to be considered final.
 
 ## Message Specifications
 
@@ -127,7 +127,7 @@ This message tells the merchant that the contract has been originated and the cu
 #### Requirements
 
 The customer:
-  - Ensures that the funds have been confirmed on chain for at least `minimum_depth`.
+  - Ensures that the funds have been confirmed on chain for at least `required_confirmations`.
 
 Upon receipt, the merchant:
   - Checks that the originated contract `contract-id` contains the expected zkchannels [contract](https://github.com/boltlabs-inc/tezos-contract/blob/main/zkchannels-contract/zkchannel_contract.tz).
@@ -137,7 +137,7 @@ Upon receipt, the merchant:
     - The `self_delay` field in the contract matches the global default. 
     - The `close` field matches the merchant's `close` flag.
     - `custFunding` and `merchFunding` match the initial balances `bal_cust_0` and `bal_merch_0`, respectively.
-  - In the customer-funded case, checks that the contract storage `status` has been set to `OPEN` (denoted as `1`) for at least `minimum_depth` blocks.
+  - In the customer-funded case, checks that the contract storage `status` has been set to `OPEN` (denoted as `1`) for at least `required_confirmations` blocks.
   - In the dual-funded case, the merchant funds their side of the escrow account (see [5-tezos-escrowagent.md](5-tezos-escrowagent.md#contract-origination-and-funding) for more information)).
 
   ### The `activate` Message
@@ -151,10 +151,10 @@ Upon receipt, the merchant:
 
 #### Requirements
 Before sending, the merchant:
-  - Waits until the contract storage status has been set to `OPEN` (denoted as `1`) for `minimum_depth` blocks.
+  - Waits until the contract storage status has been set to `OPEN` (denoted as `1`) for `required_confirmations` blocks.
 
 If the customer fails to fund their side of the contract within 180 minutes of sending `funding_confirmed`, the merchant will abort. If the decision to abort occurs after the merchant has already funded their side of the channel, call the `@reclaimFunding` entrypoint in order to retrieve the merchant's initial funding.
 
 Upon receipt, the customer:
-  - In the dual-funded case, verifies that contract storage status has been `OPEN` for `minimum_depth` blocks. If this check fails, the customer should reclaim their funding by initiating a unilateral close.
+  - In the dual-funded case, verifies that contract storage status has been `OPEN` for `required_confirmations` blocks. If this check fails, the customer should reclaim their funding by initiating a unilateral close.
   - Verifies `payment_tag` which is the output of `zkAbacus.Activate()`. If this check fails, the customer should reclaim their funding by initiating a unilateral close.

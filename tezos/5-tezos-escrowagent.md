@@ -146,7 +146,7 @@ Requirements:
 * The status must be set to `OPEN`.
 
 On execution:
-* The timestamp marking the start of the delay period (defined by `selfDelay`) is recorded.
+* The timestamp marking the start of the delay period (defined by `selfDelay`) is recorded by the contract.
 * The status is set to `EXPIRY`.
 #### `custClose`
 The `custClose` entrypoint allows the customer to initate a unilateral channel closure.
@@ -166,7 +166,7 @@ On execution:
 * The customer's balance from the close state, `cust_bal`, is stored in the contract.
 * `rev_lock` from the close state is stored in the contract.
 * The merchant's close balance, `merch_bal`, is sent to `merch_addr`.
-* The timestamp marking the start of the delay period (defined by `selfDelay`) is recorded.
+* The timestamp marking the start of the delay period (defined by `selfDelay`) is recorded by the contract.
 * The status is set to `CUST_CLOSE`.
 
 #### `merchDispute`
@@ -273,11 +273,11 @@ When the merchant receives the `open_c` message they will:
 
 If any of the above checks fail, the merchant aborts.
 
-If the customer has funded their side of the channel but there are not at least `minimum_depth` confirmations, wait until there are before proceeding. 
+If the customer has funded their side of the channel but there are not at least `required_confirmations` confirmations, wait until there are before proceeding. 
 
 If it is a dual-funded channel, the merchant funds their side of the channel using the `@addFunding` entrypoint and waits for that operation to confirm. The source of this transfer operation must be equal to the `merch_addr` specified in the contract's initial storage, with the transfer amount being exactly equal to `merchFunding`. 
 
-At this point, the merchant checks the contract storage and ensure that `status` is set to `OPEN` (denoted as `1`), meaning the funding is locked in. When this status has at least `minimum_depth` confirmations, the merchant will send `open_m` to the customer.
+At this point, the merchant checks the contract storage and ensure that `status` is set to `OPEN` (denoted as `1`), meaning the funding is locked in. When this status has at least `required_confirmations` confirmations, the merchant will send `open_m` to the customer.
 
 ## Reclaim funding
 If during the funding process, either the customer or merchant are in the position where they have funded their own side, but the other side has not been funded, they can abort the process and reclaim their initial funds by calling the `@reclaimFunding` entrypoint. However, if both sides have funded the contract, the funds are locked in and `@reclaimFunding` will fail when called. Note that once `@reclaimFunding` has been called, the status will be set to `CLOSED`, preventing any further activity with the contract.

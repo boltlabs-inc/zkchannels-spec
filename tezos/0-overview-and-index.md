@@ -94,7 +94,7 @@ There are three options for [channel closure](4-channel-closure.md):
    The merchant's blind signing public key defined during [merchant setup](1-setup.md#Merchant-Setup)
 * **`merch_pp_hash`**:
    This is the hash of the merchant's public parameters. It is used as a unique identifier for the merchant and is used by the customer to connect to them. `merch_pp_hash` is set to `SHA3-256(merch_PS_pk, merch_addr, merch_pk)` during the [merchant setup](1-setup.md#Merchant-Setup).
-* **`minimum_depth`**:
+* **`required_confirmations`**:
    An integer that represents the minimum number of confirmations for the funding to be considered final. The value is defined as part of the [global defaults](1-setup.md#Global-defaults).
 * **`rev_lock`**: 
    The revocation lock is used to prevent the customer from double spending. If the customer attempts to initiate a unilateral closure on a revoked balance (i.e. attempt a double spend), the merchant will be able to claim the customer's entire balance by providing the revocation secret when calling the [`merchDispute` entrypoint](4-channel-closure.md#merchant-dispute) of the contract. The revocation secret is the `SHA3-256` preimage of the revocation lock. 
