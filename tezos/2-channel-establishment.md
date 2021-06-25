@@ -135,7 +135,7 @@ Upon receipt, the merchant:
     - The contract storage contains the merchant's Pointcheval Sanders public key.
     - The merchant's tezos address and public key match the fields `merch_addr` and  `merch_pk`, respectively.
     - The `self_delay` field in the contract matches the global default. 
-    - The `close` field matches the merchant's `close` flag.
+    - The `close` field in the contract matches the merchant's `close` flag defined as a global default. The `close` flag represents a fixed scalar used by the merchant to differentiate closing state and state.
     - `custFunding` and `merchFunding` match the initial balances `bal_cust_0` and `bal_merch_0`, respectively.
   - In the customer-funded case, checks that the contract storage `status` has been set to `OPEN` (denoted as `1`) for at least `required_confirmations` blocks.
   - In the dual-funded case, the merchant funds their side of the escrow account (see [5-tezos-escrowagent.md](5-tezos-escrowagent.md#contract-origination-and-funding) for more information).
