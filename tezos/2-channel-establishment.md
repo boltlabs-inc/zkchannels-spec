@@ -71,11 +71,12 @@ The customer:
    - Generates `cid_c` randomly using a secure RNG. 
    - Checks that `merch_addr` is an implicit Tezos account (tz1 address), and not a smart contract address (KT1 address). This is to ensure that dispersed payouts on channel closure cannot be failed by a smart contract refusing payments.
 
-Upon receipt, the merchant:
-  - Checks that `cid_c` is a valid string and `bal_cust_0` ≥ 0 and `bal_merch_0` ≥ 0 are positive integers.
-  - Checks that `cust_pk` is a valid EdDSA public key for the curve specified by `tezos-client` and that `cust_addr` is a valid Tezos tz1 address that is correctly derived from `cust_pk`.
-  - Checks that `merch_pp_hash` is correct with respect to `SHA3-256(merch_PS_pk, merch_addr, merch_pk)` and rejects channel open request if not.
-  - Checks that `cust_addr` is an implicit Tezos account (tz1 address), and not a smart contract address (KT1 address). This is to ensure that dispersed payouts on channel closure cannot be failed by a smart contract refusing payments.
+#### Merchant abort conditions
+Upon receipt, the merchant checks that the following are true. If any are false, the merchant aborts:
+  - `cid_c` is a valid string and `bal_cust_0` ≥ 0 and `bal_merch_0` ≥ 0 are positive integers.
+  - `cust_pk` is a valid EdDSA public key for the curve specified by `tezos-client` and that `cust_addr` is a valid Tezos tz1 address that is correctly derived from `cust_pk`.
+  - `merch_pp_hash` is correct with respect to `SHA3-256(merch_PS_pk, merch_addr, merch_pk)` and rejects channel open request if not.
+  - `cust_addr` is an implicit Tezos account (tz1 address), and not a smart contract address (KT1 address). This is to ensure that dispersed payouts on channel closure cannot be failed by a smart contract refusing payments.
 
 ### The `open_m` Message
 1. type: (`open_m`)
@@ -87,8 +88,8 @@ Before sending, the merchant:
   - Generates `cid_m` randomly using a secure RNG.
   - Sets `cid` to `SHA3-256(cid_c, cid_m, cust_pk, merch_pk, merch_PS_pk)` where `cust_pk`, `merch_pk` refer to the customer and merchant's Tezos account public keys respectively, and `merch_PS_pk` refers to the merchant's public PS public keys.
 
-Upon receipt, the customer:
-  - Checks that `cid_m` is a valid string. If yes, sets `cid` to `SHA3-256(cid_c, cid_m, cust_pk, merch_pk, merch_PS_pk)`.
+#### Customer abort conditions
+Upon receipt, the customer checks the that `cid_m` is a valid string. If yes, the customer sets `cid` to `SHA3-256(cid_c, cid_m, cust_pk, merch_pk, merch_PS_pk)`. If no, the customer aborts.
 
 ### The `init_c` Message
 The customer runs the `zkAbacus.Initialize()` with the following inputs: `cust_pk`, `cid`, `bal_cust` and `bal_merch`. The customer sends an `init_c` message which consists of the output of `Initialize()`: a pair of (hiding) commitments to the intial state and a zero-knowledge proof.
@@ -100,8 +101,8 @@ The customer runs the `zkAbacus.Initialize()` with the following inputs: `cust_p
     * [`bls12_381_g1`:`state_commitment`]
     * [`(bls12_381_g1, bls12_381_g1, Vec<bls12_381_fr>): establish_proof`]
 
-#### Requirements
-Upon receipt, the merchant checks the correctness of the `cid` in the `init_c` message and continues as specified in `zkAbacus.Initialize()`. 
+#### Merchant abort conditions
+Upon receipt, the merchant checks the correctness of the `cid` in the `init_c` message and continues as specified in `zkAbacus.Initialize()`. If they are incorrect, the merchant aborts.
 
 ### The `init_m` Message
 The merchant sends back an `init_m` message that consists of a closing authorization signature `closing_signature` on the initial state if `zkAbacus.Initialize()` was successful.
@@ -112,33 +113,35 @@ The merchant sends back an `init_m` message that consists of a closing authoriza
       * [`bls12_381_g1`:`s1`]
       * [`bls12_381_g1`:`s2`]
 
-#### Requirements
-Upon receipt, the customer:
-  - Verifies `closing_signature` and continues as specified in `zkAbacus.Initialize()`.
+#### Customer abort conditions
+Upon receipt, the customer verifies `closing_signature`. If the signature is valid, the customer continues as specified in `zkAbacus.Initialize()`. If the siganture is invalid, the customer aborts.
 
 ### The `funding_confirmed` Message
-This message tells the merchant that the contract has been originated and the customer's side of the escrow account has been funded. For more information about this process, please refer to [5-tezos-escrowagent.md](5-tezos-escrowagent.md#contract-origination-and-funding) for more information).
+This message tells the merchant that the contract has been originated and the customer's side of the escrow account has been funded. The customer sends the contract identifier, `contract-id`, as well as the origination block height, `block-height`, to make it easier for the merchant to find the operation on chain. For more information about this process, please refer to [5-tezos-escrowagent.md](5-tezos-escrowagent.md#contract-origination-and-funding) for more information).
 
 1. type: (`funding_confirmed`)
 2. data: 
     * [`address`:`contract-id`]
-
+    * [`int`:`originated-block-height`]
 
 #### Requirements
 
 The customer:
-  - Ensures that the funds have been confirmed on chain for at least `required_confirmations`.
+  - Ensures that the funds have been confirmed on chain for at least `required_confirmations` before sending `funding_confirmed`.
 
-Upon receipt, the merchant:
-  - Checks that the originated contract `contract-id` contains the expected zkchannels [contract](https://github.com/boltlabs-inc/tezos-contract/blob/main/zkchannels-contract/zkchannel_contract.tz).
-  - Checks that the on-chain storage of `contract-id` is exactly as expected for channel `cid` (including that the customer's side has been funded). Specifically, checks that:
+#### Merchant abort conditions
+Upon receipt, the merchant checks that the following are true. If any are false, the merchant aborts:
+  - The originated contract `contract-id` contains the expected zkchannels [contract](https://github.com/boltlabs-inc/tezos-contract/blob/main/zkchannels-contract/zkchannel_contract.tz).
+  - The on-chain storage of `contract-id` is exactly as expected for channel `cid` (including that the customer's side has been funded). Specifically, checks that:
     - The contract storage contains the merchant's Pointcheval Sanders public key.
     - The merchant's tezos address and public key match the fields `merch_addr` and  `merch_pk`, respectively.
     - The `self_delay` field in the contract matches the global default. 
     - The `close` field in the contract matches the merchant's `close` flag defined as a global default. The `close` flag represents a fixed scalar used by the merchant to differentiate closing state and state.
     - `custFunding` and `merchFunding` match the initial balances `bal_cust_0` and `bal_merch_0`, respectively.
-  - In the customer-funded case, checks that the contract storage `status` has been set to `OPEN` (denoted as `1`) for at least `required_confirmations` blocks.
-  - In the dual-funded case, the merchant funds their side of the escrow account (see [5-tezos-escrowagent.md](5-tezos-escrowagent.md#contract-origination-and-funding) for more information).
+
+Before proceeding, the merchant waits until the customer's side of the contract has been funded for at least `required_confirmations` blocks. If this has not occured within an arbitrary timeout period (longer than the time expected to satisfy `required_confirmations`), the merchant stops waiting for the customer to fund the channel and aborts.
+
+In the dual-funded case, the merchant funds their side of the escrow account (see [5-tezos-escrowagent.md](5-tezos-escrowagent.md#contract-origination-and-funding) for more information).
 
   ### The `activate` Message
   This `activate` message consists of the sole message of `zkAbacus.Activate()`.
@@ -149,12 +152,10 @@ Upon receipt, the merchant:
       * [`bls12_381_g1`:`s1`]
       * [`bls12_381_g1`:`s2`]
 
-#### Requirements
 Before sending, the merchant:
   - Waits until the contract storage status has been set to `OPEN` (denoted as `1`) for `required_confirmations` blocks.
 
-If the customer fails to fund their side of the contract within 180 minutes of sending `funding_confirmed`, the merchant will abort. If the decision to abort occurs after the merchant has already funded their side of the channel, call the `@reclaimFunding` entrypoint in order to retrieve the merchant's initial funding.
-
-Upon receipt, the customer:
-  - In the dual-funded case, verifies that contract storage status has been `OPEN` for `required_confirmations` blocks. If this check fails, the customer should reclaim their funding by initiating a unilateral close.
-  - Verifies `payment_tag` which is the output of `zkAbacus.Activate()`. If this check fails, the customer should reclaim their funding by initiating a unilateral close.
+#### Customer abort conditions
+Upon receipt, the customer checks that the following are true. If any are false, the customer aborts:
+  - In the dual-funded case, the customer must wait for the contract storage status has been `OPEN` for `required_confirmations` blocks before proceeding. If this has not occured within an arbitrary timeout period (longer than the time expected to satisfy `required_confirmations`), the customer stops waiting for the merchant to fund the channel and aborts. To reclaim the funds that the customer had added, the customer calls the `reclaimFunding` entrypoint on the contract.
+  - The `payment_tag`, which is the output of `zkAbacus.Activate()`, is valid. If not, the customer aborts by initiating a unilateral close.
