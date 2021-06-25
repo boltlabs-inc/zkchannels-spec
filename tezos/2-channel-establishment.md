@@ -67,9 +67,10 @@ Channel establishment begins with the customer sending an `open_c` message to th
     * [`string`: `merch_pp_hash`]
 
 #### Requirements
-The customer:
-   - Generates `cid_c` randomly using a secure RNG. 
-   - Checks that `merch_addr` is an implicit Tezos account (tz1 address), and not a smart contract address (KT1 address). This is to ensure that dispersed payouts on channel closure cannot be failed by a smart contract refusing payments.
+The customer generates `cid_c` randomly using a secure RNG. 
+
+#### Customer abort conditions
+The customer checks that `merch_addr` is an implicit Tezos account (tz1 address), and not a smart contract address (KT1 address). If `merch_addr` is not an implicit Tezos account, abort. This is to ensure that dispersed payouts on channel closure cannot be failed by a smart contract refusing payments.
 
 #### Merchant abort conditions
 Upon receipt, the merchant checks that the following are true. If any are false, the merchant aborts:
@@ -89,7 +90,7 @@ Before sending, the merchant:
   - Sets `cid` to `SHA3-256(cid_c, cid_m, cust_pk, merch_pk, merch_PS_pk)` where `cust_pk`, `merch_pk` refer to the customer and merchant's Tezos account public keys respectively, and `merch_PS_pk` refers to the merchant's public PS public keys.
 
 #### Customer abort conditions
-Upon receipt, the customer checks the that `cid_m` is a valid string. If yes, the customer sets `cid` to `SHA3-256(cid_c, cid_m, cust_pk, merch_pk, merch_PS_pk)`. If no, the customer aborts.
+Upon receipt, the customer checks the that `cid_m` is a valid string. If it is, the customer sets `cid` to `SHA3-256(cid_c, cid_m, cust_pk, merch_pk, merch_PS_pk)`. If it is not, the customer aborts.
 
 ### The `init_c` Message
 The customer runs the `zkAbacus.Initialize()` with the following inputs: `cust_pk`, `cid`, `bal_cust` and `bal_merch`. The customer sends an `init_c` message which consists of the output of `Initialize()`: a pair of (hiding) commitments to the intial state and a zero-knowledge proof.
@@ -102,7 +103,7 @@ The customer runs the `zkAbacus.Initialize()` with the following inputs: `cust_p
     * [`(bls12_381_g1, bls12_381_g1, Vec<bls12_381_fr>): establish_proof`]
 
 #### Merchant abort conditions
-Upon receipt, the merchant checks the correctness of the `cid` in the `init_c` message and continues as specified in `zkAbacus.Initialize()`. If they are incorrect, the merchant aborts.
+Upon receipt, the merchant checks the correctness of the `cid` in the `init_c` message and continues as specified in `zkAbacus.Initialize()`. If `cid` is incorrect, the merchant aborts.
 
 ### The `init_m` Message
 The merchant sends back an `init_m` message that consists of a closing authorization signature `closing_signature` on the initial state if `zkAbacus.Initialize()` was successful.
@@ -117,7 +118,7 @@ The merchant sends back an `init_m` message that consists of a closing authoriza
 Upon receipt, the customer verifies `closing_signature`. If the signature is valid, the customer continues as specified in `zkAbacus.Initialize()`. If the siganture is invalid, the customer aborts.
 
 ### The `funding_confirmed` Message
-This message tells the merchant that the contract has been originated and the customer's side of the escrow account has been funded. The customer sends the contract identifier, `contract-id`, as well as the origination block height, `block-height`, to make it easier for the merchant to find the operation on chain. For more information about this process, please refer to [5-tezos-escrowagent.md](5-tezos-escrowagent.md#contract-origination-and-funding) for more information).
+This message tells the merchant that the contract has been originated and the customer's side of the escrow account has been funded. The customer sends the contract identifier, `contract-id`, as well as the origination block height, `block-height`, to make it easier for the merchant to find the origination operation on chain. For more information about this process, please refer to [5-tezos-escrowagent.md](5-tezos-escrowagent.md#contract-origination-and-funding) for more information).
 
 1. type: (`funding_confirmed`)
 2. data: 
@@ -132,12 +133,15 @@ The customer:
 #### Merchant abort conditions
 Upon receipt, the merchant checks that the following are true. If any are false, the merchant aborts:
   - The originated contract `contract-id` contains the expected zkchannels [contract](https://github.com/boltlabs-inc/tezos-contract/blob/main/zkchannels-contract/zkchannel_contract.tz).
-  - The on-chain storage of `contract-id` is exactly as expected for channel `cid` (including that the customer's side has been funded). Specifically, checks that:
+  - The on-chain storage of `contract-id` at `originated-block-height` is exactly as expected for channel `cid` (including that the customer's side has been funded). Specifically, checks that:
     - The contract storage contains the merchant's Pointcheval Sanders public key.
+    - The customer's tezos address and public key match the fields `cust_addr` and  `cust_pk`, respectively.
     - The merchant's tezos address and public key match the fields `merch_addr` and  `merch_pk`, respectively.
-    - The `self_delay` field in the contract matches the global default. 
-    - The `close` field in the contract matches the merchant's `close` flag defined as a global default. The `close` flag represents a fixed scalar used by the merchant to differentiate closing state and state.
+    - The `self_delay` field in the contract matches the value specified in the [global defaults](1-setup.md#Global-defaults). 
+    - The `close` field in the contract matches the merchant's `close` flag defined as defined in the [global defaults](1-setup.md#Global-defaults). The `close` flag represents a fixed scalar used by the merchant to differentiate closing state and state.
     - `custFunding` and `merchFunding` match the initial balances `bal_cust_0` and `bal_merch_0`, respectively.
+    - The `status` field of the contract is set to `0`, which corresponds to `AWAITING_FUNDING`.
+    - The `context-string` is set to "zkChannels mutual close", as defined in the [global defaults](1-setup.md#Global-defaults). 
 
 Before proceeding, the merchant waits until the customer's side of the contract has been funded for at least `required_confirmations` blocks. If this has not occured within an arbitrary timeout period (longer than the time expected to satisfy `required_confirmations`), the merchant stops waiting for the customer to fund the channel and aborts.
 
