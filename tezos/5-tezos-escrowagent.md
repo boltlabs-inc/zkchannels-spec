@@ -84,7 +84,6 @@ In the final step, the binary format of the operation is appended to the signatu
 
 
 ## Contract requirements
-
 * The contract keeps track of its current `status` that can be used to determine which entrypoint can be called. The initial status is set to `AWAITING_FUNDING`. The possible statuses are: `AWAITING_FUNDING`, `OPEN`, `EXPIRY`, `CUST_CLOSE`, `CLOSED`.
 * The contract keeps track of a timeout period (denoted by `selfDelay`) that is used to determine whether an entrypoint call of type `custClaim` or `merchClaim` is legitimate.
 * The contract stores `rev_lock` when submitted by `cust_addr` during `custClose`. 
@@ -110,6 +109,11 @@ These [global default](1-setup.md#global-defaults) arguments are constant for ev
 * `context_string`
 * `self_delay` 
 
+### Fixed arguments
+* `status`
+* `rev_lock`
+
+`status`, described in [contract requirements](#contract-requirements), keeps track of the contracts state. The contract must be initialized with a value of `0` corresponding to `AWAITING_FUNDING`. `rev_lock` has the type `bytes` and must be initialized with the value `0x00`.
 
 ### Entry point requirements
 
@@ -244,6 +248,7 @@ The `TezosEscrowAgent` contract origination proceeds as follows.
     * [`bls12_381_g2`:`Y4`]
     * [`bls12_381_fr`:`close`]
     * [`int`:`self_delay`] 
+    
 * Channel specific arguments
     * [`bls12_381_fr`:`cid`]
     * [`address`:`cust_addr`]
@@ -251,6 +256,9 @@ The `TezosEscrowAgent` contract origination proceeds as follows.
     * [`mutez`:`custFunding`]
     * [`mutez`:`merchFunding`]
 
+* Fixed arguments
+    * [`int`:`status`]
+    * [`bytes`:`rev_lock`]
 ## Customer creates and signs operation
 The customer will forge and sign the operation with the zkchannels contract and the initial storage arguments listed above. The operation fees are to be handled by the customer's tezos client.
 
