@@ -138,7 +138,7 @@ Upon receipt, the merchant:
     - The `close` field matches the merchant's `close` flag.
     - `custFunding` and `merchFunding` match the initial balances `bal_cust_0` and `bal_merch_0`, respectively.
   - In the customer-funded case, checks that the contract storage `status` has been set to `OPEN` (denoted as `1`) for at least `required_confirmations` blocks.
-  - In the dual-funded case, the merchant funds their side of the escrow account (see [5-tezos-escrowagent.md](5-tezos-escrowagent.md#contract-origination-and-funding) for more information)).
+  - In the dual-funded case, the merchant funds their side of the escrow account (see [5-tezos-escrowagent.md](5-tezos-escrowagent.md#contract-origination-and-funding) for more information).
 
   ### The `activate` Message
   This `activate` message consists of the sole message of `zkAbacus.Activate()`.
