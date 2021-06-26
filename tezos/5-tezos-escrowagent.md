@@ -5,21 +5,21 @@
     * [Signing an operation](#signing-an-operation)
 * [Contract requirements](#contract-requirements)
 * [Entry point requirements](#entry-point-requirements)
-    * [`addFunding`](#`addfunding`)
-    * [`reclaimFunding`](#`reclaimFunding`)
-    * [`expiry`](#`expiry`)
-    * [`custClose`](#`custClose`)
-    * [`merchDispute`](#`merchDispute`)
-    * [`custClaim`](#`custClaim`)
-    * [`merchClaim`](#`merchClaim`)
-    * [`mutualClose`](#`mutualClose`)
+    * [`addFunding`](#addfunding)
+    * [`reclaimFunding`](#reclaimfunding)
+    * [`expiry`](#expiry)
+    * [`custClose`](#custclose)
+    * [`merchDispute`](#merchdispute)
+    * [`custClaim`](#custclaim)
+    * [`merchClaim`](#merchclaim)
+    * [`mutualClose`](#mutualclose)
 * [Contract Origination and Funding](#contract-origination-and-funding)
     * [Requirements](#requirements)
     * [Customer creates and signs operation](#customer-creates-and-signs-operation)
     * [Customer injects origination operation](#customer-injects-origination-operation)
     * [Origination confirmed ](#origination-confirmed )
     * [Customer funds their side of the contract](#customer-funds-their-side-of-the-contract)
-    * [Merchant verifies the contract](#Merchant-verifies-the-contract)
+    * [Merchant verifies the contract](#merchant-verifies-the-contract)
     * [Reclaim funding](#reclaim-funding)
 
 ## Tezos background
@@ -83,37 +83,31 @@ The operation is then hashed using blake2b to create a 32-byte digest. The diges
 In the final step, the binary format of the operation is appended to the signature to create the signed operation which is ready to be broadcast by the Tezos node.
 
 
-## Contract requirements
+## Contract Requirements
 * The contract keeps track of its current `status` that can be used to determine which entrypoint can be called. The initial status is set to `AWAITING_FUNDING`. The possible statuses are: `AWAITING_FUNDING`, `OPEN`, `EXPIRY`, `CUST_CLOSE`, `CLOSED`.
 * The contract keeps track of a timeout period (denoted by `selfDelay`) that is used to determine whether an entrypoint call of type `custClaim` or `merchClaim` is legitimate.
 * The contract stores `rev_lock` when submitted by `cust_addr` during `custClose`. 
 * The contract stores the customer's closing balance after `custClose` is called.
 ### Initial contract arguments
-The zkChannel contract is originated with the following channel-specific arguments:
-* `cid`
-* `cust_addr`
-* `custFunding`
-* `custPk`
-* `merch_addr`
-* `merchFunding`
-* `merch_pk`
-* `merch_PS_pk`
-
-`custFunding` and `merchFunding` are the customer and merchant's funding contributions to the channel defined during [channel establishment](2-channel-establishment.md#the-funding_confirmed-message).
-`cust_pk` is the customer's tezos account public key defined during [channel establishment](2-channel-establishment.md#the-open_c-message). 
-`merch_pk` is the merchant's tezos account public key, and `merch_PS_pk` is the merchant's blind signing public key, both defined during [merchant setup](1-setup.md#Merchant-Setup).
+The zkChannel contract is originated with the following channel-specific arguments as specified [channel establishment](2-channel-establishment.md):
+* `cid`: The channel identifier.
+* `cust_addr`: The customer's Tezos tz1 address.
+* `custFunding`: The customer's initial balance.
+* `custPk`: The customer's Tezos public key.
+* `merch_addr`: The merchant's Tezos tz1 address.
+* `merchFunding`: The merchant's initial balance.
+* `merch_pk`: The merchan'ts Tezos public key.
+* `merch_PS_pk`: The merchant's zkAbacus Pointcheval Sanders public key.
 
 ### Global default arguments
 These [global default](1-setup.md#global-defaults) arguments are constant for every implementation of a zkChannels contract, regardless of the customer or merchant. 
-* `close`
-* `context_string`
-* `self_delay` 
+* `close`: TODO.
+* `context_string`: TODO.
+* `self_delay`: TODO.
 
 ### Fixed arguments
-* `status`
-* `rev_lock`
-
-`status`, described in [contract requirements](#contract-requirements), keeps track of the contracts state. The contract must be initialized with a value of `0` corresponding to `AWAITING_FUNDING`. `rev_lock` has the type `bytes` and must be initialized with the value `0x00`.
+* `status`: A status indicator that is initialized to a value of `0` corresponding to `AWAITING_FUNDING`. This keeps track of the zkChannel contract's state, as described in [contract requirements].(#contract-requirements). 
+* `rev_lock`: A placeholder for revocation locks revealed during a unilateral customer close. `rev_lock` has the type `bytes` and must be initialized with the value `0x00`.
 
 ### Entry point requirements
 
@@ -262,7 +256,7 @@ The `TezosEscrowAgent` contract origination proceeds as follows.
 ## Customer creates and signs operation
 The customer will forge and sign the operation with the zkchannels contract and the initial storage arguments listed above. The operation fees are to be handled by the customer's tezos client.
 
-## Customer broadcasts origination operation
+## Customer injects origination operation
 When the customer broadcasts (or 'injects') their operation, they begin watching the blockchain to ensure that the operation is confirmed. If the operation is not confirmed within 60 blocks of the block header referenced in the operation, the operation will be dropped from the mempool and the customer must go back to the previous step to forge and sign a new operation.
 
 ## Origination confirmed 

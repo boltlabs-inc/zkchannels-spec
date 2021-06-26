@@ -6,7 +6,7 @@
   * [Merchant Setup](#merchant-setup)
     * [Blind signing key generation](#blind-signing-key-generation)
     * [Range proof parameters generation](#range-proof-parameters-generation)
-    * [EdDSA and Tezos address generation](#EdDSA-and-tezos-address-generation)
+    * [EdDSA and Tezos address generation](#eddsa-and-tezos-address-generation)
     * [Publishing public parameters](#publishing-public-parameters)
     * [Tezos-related node initialization](#tezos-related-node-initialization)
     * [Revocation database initialization](#revocation-database-initialization)
