@@ -6,7 +6,7 @@
   * [Merchant Setup](#merchant-setup)
     * [Blind signing key generation](#blind-signing-key-generation)
     * [Range proof parameters generation](#range-proof-parameters-generation)
-    * [EdDSA and Tezos address generation](#EdDSA-and-tezos-address-generation)
+    * [EdDSA and Tezos address generation](#eddsa-and-tezos-address-generation)
     * [Publishing public parameters](#publishing-public-parameters)
     * [Tezos-related node initialization](#tezos-related-node-initialization)
     * [Revocation database initialization](#revocation-database-initialization)
@@ -24,7 +24,7 @@ We use SHA3-256 hashes to instantiate our hash-based commitments.
 ### Global defaults
 #### `TezosEscrowAgent` global defaults
 * `self_delay`: an integer that represents the length of the dispute period. The same delay is applied to the `expiry` and `custClose` entrypoints. The value is interpreted in seconds. 
-* `minimum_depth`: an integer that represents the minimum number of confirmations for the funding to be considered final.
+* `required_confirmations`: an integer that represents the minimum number of confirmations for the funding to be considered final.
 * `context-string`: a string set to `"zkChannels mutual close"`. This is contained in the tuple that gets signed when creating `mutual_close_signature`.
 #### `zkAbacus` global defaults
 * `close`: fixed scalar used to differentiate closing state and state. 

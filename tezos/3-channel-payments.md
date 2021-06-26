@@ -18,5 +18,5 @@ A customer wishes to purchase a good or service from the merchant using their zk
 
 5. The customer also receives a success indicator from `zkAbacuz.Pay()` and does the following:
     * If the customer receives `revocation-incomplete`, the customer sets their channel status to `frozen` and initiates a [unilateral customer close](4-channel-closure.md##unilateral-customer-close) on their current state.
-    * If the customer receives `revocation-complete`, the customer sets their channel status to `frozen` and initiates a[unilateral customer close](4-channel-closure.md#unilateral-customer-close) on the updated state, the balances of which reflect a payment of amount `amt`.
+    * If the customer receives `revocation-complete`, the customer sets their channel status to `frozen` and initiates a [unilateral customer close](4-channel-closure.md#unilateral-customer-close) on the updated state, the balances of which reflect a payment of amount `amt`.
     * If the customer receives `state-updated`, then the customer should expect to receive the requested good or service, and may continue to make additional payments on the channel.

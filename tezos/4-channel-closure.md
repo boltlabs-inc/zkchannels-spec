@@ -1,8 +1,8 @@
 # Channel Closure
   * [Mutual Close](#mutual-close)
-    * [The `mutual_close_c` Message](#the-`mutual_close_c`-Message)
-    * [The `mutual_close_m` Message](#the-`mutual_close_m`-message)
-    * [The `@mutualClose` entrypoint](#the-`@mutualClose`-entrypoint)
+    * [The `mutual_close_c` Message](#the-mutualclosec-message)
+    * [The `mutual_close_m` Message](#the-mutualclosem-message)
+    * [The `@mutualClose` entrypoint](#the-mutualclose-entrypoint)
   * [Unilateral Customer Close](#unilateral-customer-close)
     * [Merchant Dispute](#merchant-dispute)
   * [Unilateral Merchant Close](#unilateral-merchant-close)
