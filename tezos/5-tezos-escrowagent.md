@@ -268,7 +268,7 @@ The customer funds their side of the contract using the `@addFunding` entrypoint
 Once the funding has been confirmed, the customer sends the merchant a `funding_confirmed` message containing the `contract-id` and `cid`. This is to inform the merchant that the channel is ready, either for the merchant to fund their side, or if single-funded, to consider the channel open. 
 
 ## Merchant verifies the contract
-When the merchant receives the `open_c` message they will:
+When the merchant receives the `funding_confirmed` message they will:
 * search for the `contract-id` on chain.
 * checks that the originated contract `contract-id` contains the expected zkchannels [contract](https://github.com/boltlabs-inc/tezos-contract/blob/main/zkchannels-contract/zkchannel_contract.tz).
 * check the contract storage matches the expected [initial storage](#Initial-storage-arguments)

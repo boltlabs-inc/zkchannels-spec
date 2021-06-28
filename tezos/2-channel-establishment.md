@@ -129,7 +129,7 @@ If `cid` is incorrect, the merchant aborts.
 The merchant sends an `init_m` message to the customer.
 
 1. type: `init_m`
-2. data: [`(bls12_381_g1, bls12_381_g1:closing_signature`]. A closing authorization signature on the initial closing state.
+2. data: [`(bls12_381_g1, bls12_381_g1):closing_signature`]. A closing authorization signature on the initial closing state.
  
 #### Customer requirements
 Upon receipt, the customer verifies `closing_signature` is a valid signature with respect to the merchant zkAbacus Pointcheval Sanders public key. If the signature is valid, the customer continues as specified in `zkAbacus.Initialize()`. If the signaure is invalid, the customer aborts.
@@ -139,8 +139,6 @@ The merchant runs `zkAbacus.Initialize` on inputs `cid`, `bal_cust`, and `bal_me
 
 ### The `funding_confirmed` Message
 The customer sends the `funding_confirmed` message to the merchant.
-
-This message tells the merchant that the contract has been originated and the customer's side of the escrow account has been funded. The customer sends the contract identifier, `contract-id`, as well as the origination block height, `block-height`, to make it easier for the merchant to find the origination operation on chain. For more information about this process, please refer to [5-tezos-escrowagent.md](5-tezos-escrowagent.md#contract-origination-and-funding) for more information).
 
 1. type: `funding_confirmed`
 2. data: 
