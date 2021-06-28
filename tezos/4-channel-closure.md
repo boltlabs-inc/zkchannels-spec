@@ -44,7 +44,7 @@ Upon receipt, the merchant:
 2. data: 
     * [`signature`:`mutual_close_signature`]
 
-Here, `mutual_close_signature` is an EdDSA signature generated under `merch_pk`. The signature is over a tuple `(contract-id, "zkChannels mutual close", cid, customer_balance, merchant_balance)`, where `contract-id` is the address of the smart contract, and `context-string` is a [global default](1-setup.md#global-defaults) set to `"zkChannels mutual close"`.
+Here, `mutual_close_signature` is an EdDSA signature generated under `merch_pk`. The signature is over a tuple `(contract-id, "zkChannels mutual close", cid, bal_cust, bal_merch)`, where `contract-id` is the address of the smart contract, and `context-string` is a [global default](1-setup.md#global-defaults) set to `"zkChannels mutual close"`.
 
 #### Requirements
 
@@ -59,7 +59,10 @@ This entry point is called with the following arguments:
 * [`signature`:`mutual_close_signature`]
 
 #### Requirements
-The `@expiry` entrypoint will only succeed if the sender is `cust_addr`, as defined in the smart contract.
+The `@mutualClose` entrypoint will only succeed if all of the following are true:
+* The sender is `cust_addr`, as defined in the smart contract.
+* The contract has been fully funded and `@custClose` or `@expiry` have not been called.
+* `mutual_close_signature` is a valid signature is a tuple `(contract-id, "zkChannels mutual close", cid, bal_cust, bal_merch)`, where `contract-id` is the address of the smart contract, and `context-string` is a [global default](1-setup.md#global-defaults) set to `"zkChannels mutual close"`.
 
 ## Unilateral Customer Close
 Unilateral customer closes are as specified in `TezosEscrowAgent`.
