@@ -164,7 +164,7 @@ Upon receipt, the merchant:
     - `custFunding` and `merchFunding` match the initial balances `bal_cust` and `bal_merch`, respectively.
     - The `status` field of the contract is set to `0`, which corresponds to `AWAITING_FUNDING`.
     - The `context-string` is set to "zkChannels mutual close", as defined in the [global defaults](1-setup.md#Global-defaults). 
-  - Checks that the customer has funded the channel and waits until the customer's side of the contract has been funded for at least `required_confirmations` blocks. TODO: describe what this step entails in more detail.
+  - Checks that the customer has funded the channel and waits until the customer's side of the contract has been funded for at least `required_confirmations` blocks. This involves checking that the customer's operation to add their funds is the last operation to have interacted with the smart contract, and that in the most recent blocks of the blockchain (up to `required_confirmations` blocks in the past) there have been no further operations interacting with the contract. 
   - In the dual-funded case, funds their side of the escrow account as specified in [Contract Origination and Funding](5-tezos-escrowagent.md#contract-origination-and-funding).
   - Aborts if any of the above checks fail or if a prespecified timeout passes.
 

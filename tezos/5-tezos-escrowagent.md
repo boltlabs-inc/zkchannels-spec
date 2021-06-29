@@ -101,9 +101,9 @@ The zkChannel contract is originated with the following channel-specific argumen
 
 ### Global default arguments
 These [global default](1-setup.md#global-defaults) arguments are constant for every implementation of a zkChannels contract, regardless of the customer or merchant. 
-* `close`: TODO.
-* `context_string`: TODO.
-* `self_delay`: TODO.
+* `close`: 0x365d084a3d3a3d810606983a7690a8a119bacad72340122fa3449b1400f20f31
+* `context_string`: "zkChannels mutual close"
+* `self_delay`: 172800 (48 hours in seconds)
 
 ### Fixed arguments
 * `status`: A status indicator that is initialized to a value of `0` corresponding to `AWAITING_FUNDING`. This keeps track of the zkChannel contract's state, as described in [contract requirements].(#contract-requirements). 

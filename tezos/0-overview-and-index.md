@@ -53,50 +53,64 @@ There are three options for [channel closure](4-channel-closure.md):
 ## References
 [zkChannels Private Payments Protocol](https://github.com/boltlabs-inc/blindsigs-protocol/releases/download/ecc-review/zkchannels-protocol-spec-v3.pdf) <br>
 [BLS12-381 Rust Crate](https://crates.io/crates/bls12_381) <br>
-[libzkchannels-crypto Repository](https://github.com/boltlabs-inc/libzkchannels-crypto/blob/main/libzkchannels-crypto) <br>
+[libzkchannels-crypto Repository](https://github.com/boltlabs-inc/libzkchannels-crypto) <br>
 [Tezos zkChannel Contract Repository](https://github.com/boltlabs-inc/tezos-contract/blob/main/zkchannels-contract) <br>
 [Introduction to Tezos Signing Operations](https://www.ocamlpro.com/2018/11/21/an-introduction-to-tezos-rpcs-signing-operations/)
 [Micheline data format](https://tezos.gitlab.io/shell/micheline.html).
 
 ## Glossary
 ### Tezos Glossary 
-* **account**: TODO.
+*  **account**: 
+   An account is a unique identifier within the protocol. There are 'Implicit accounts' that have addresses beginning with 'tz1', and there are 'Smart Contract' accounts that have addresses beginning with 'KT1'. 
 *  **bake**:
    _Baking_ is the process of producing a new block in the Tezos blockchain. It is the equivalent of _mining_ on a proof of work blockchain.
 * **contract identifier**:
    A smart contract's KT1 address. This acts as a unique identifier for a given contract that may be used to look up the latest state as well as any previous operations that interact with that contract.
-* **confirmation**: TODO. 
-* **confirmation depth**: TODO.
-* **destination**: TODO.
+* **confirmation**:
+   A 'confirmation' refers the moment an operation has been included in a baked block. 
+* **confirmation depth**:
+   'Confirmation depth' refers to the number of blocks between the block where operation was included and the current block height. 
+* **destination**:
+   Every operation has one source and one destination. The destination is the receiver's tezos address. 
 *  **forging**:
    The process of creating a serialized Tezos operation.
+*  **implicit account**:
+   An account that is linked to a public key. Contrary to a smart contract, an Implicit account cannot include a script and it cannot reject incoming transactions.
 *  **inject**:
-   The process of broadcasting an operation on the Tezos blockchain. TODO: expand description.
-*  **KT1 address**: TODO.
+   The process of broadcasting a signed operation to other Tezos nodes in the network. After a successful injection, the operation will be waiting to get confirmed.
+*  **KT1 address**: 
+   The address of a smart contract always starts with 'KT1'. These addresses can be referred to as 'KT1 addresses'.
 *  **mutez**:
    The smallest denomination of Tez. 1 Tez is equal to 1 million mutez.
 *  **operation**:
-   An _operation_ in Tezos is the equivalent of a _transaction_ in Ethereum. Operations are used for originating contracts, calling entrypoints to contracts, and transferring tez. TODO: list types of supported transfers.
-* **smart contract** TODO.
-* **source** TODO.
+   An _operation_ in Tezos is the equivalent of a _transaction_ in Ethereum. Operations are used for originating contracts, calling entrypoints to contracts, and transferring tez. The list of all types of operations are: origination, transaction, reveal, delegation. 
+* **smart contract**:
+   Account which is associated to a Michelson script. They are created with an explicit origination operation and are therefore sometimes called originated accounts. The address of a smart contract always starts with the letters KT1.
+* **source**:
+   Every operation has one source and one destination. The source is the sender's tezos address and the operation must be signed by the source account's private key. 
 *  **storage**:
    The memory held by the smart contract.
 *  **tez**:
    The unit of currency in Tezo.
-*  **tezos account public key** TODO.
-* **tz1 address**: TODO.
+*  **tezos account public key** 
+   Every implict account is linked to a public key. The public key is used to verify that an operation was signed by the owner of the source's address.
+*  **tz1 address**: 
+   Implicit accounts using an EdDSA signature scheme always begin with 'tz1'. These addresses can be reffered to as a 'tz1 addresses'.
 
 ### zkChannels Glossary 
-* **channel identifer**: A unique identifier for a zkChannel.
-* **closing state**: TODO.
+* **channel identifer**: 
+   A unique identifier for a zkChannel.
+* **closing state**:
+   The closing state contains the channel identifier (`cid`), close flag (`close`), revocation lock (`rev_lock`), customer balance (`bal_cust`), and merchant balance (`bal_merch`). The merchant's blind signature over the closing state is what allows the customer to post the final balances to the smart contract during a unilateral customer close. The revocation lock provides a mechanism for the merchant to dispute revoked closing states posted by the customer.
 * **customer**:
    A _customer_ is a user who opens a zkChannel with a merchant. The customer has a complete view of the channel state and can initiate private payments to the given merchant over their zkChannel. The customer trusts the merchant to provide a requested good or service, but does not trust the merchant with their payment history. The customer's anonymity set for payments is the set of users with whom a given merchant has an open channel. Customers are the 'spokes' in the zkChannel 'hub and spoke' network topology.
-* **dispute period**: TODO.
-* **merchant**:
+*  **timeout period**: 
+   The timeout period refers to the length of time the customer or merchant has to respond to a unilateral close from the other party. In the case of a merchant unilateral close (via the 'expiry' entrypoint), the timeout period is the time the customer has to update the contract with their latest closing state. In the case of a unilateral customer close (via the 'custClose' entrypoint), the timeout period is the time the merchant has to dispute the closing balance via the 'dispute' entrypoint. The length of the timeout period is set by `self_delay`.
+*  **merchant**:
    A _merchant_ is an entity with the ability to accept payments and issue refunds over a zkChannel. A merchant has a limited view of channel state at any given time: they know the total amount of money allocated to a zkChannel by each participant, but cannot associate payment or refund activity to individual zkChannels. Depending on the merchant's approval process for opening channels, the merchant may or may not know the real-world identities of their customers. Merchants are the 'hubs' in the zkChannel 'hub and spoke' network topology. 
 *  **revocation lock scheme**: A _revocation lock scheme_ is a scheme used to prevent a customer from double spending. Each zkChannel state is associated with a _revocation lock_; when a customer makes a payment, they can revoke their previous state by revealing an associated _revocation secret_. Then if a customer attempts to make a payment on a previously revoked state, the merchant can detect and fail the requested payment. If a customer attempts to close the escrow account on a previously revoked state, the merchant may claim the customer's entire balance by providing the associated _revocation secret_ when disputing. 
-* **state**: Abstractly, a zkchannel is a sequence of states, where a _state_ consists of the channel identifier, a nonce, a revocation lock, and a balance allocation.
- * **zkChannel**:
+*  **state**: Abstractly, a zkchannel is a sequence of states, where a _state_ consists of the channel identifier, a nonce, a revocation lock, and a balance allocation.
+*  **zkChannel**:
    A _zkChannel_ is a special type of payment channel that provides privacy for a customer when interacting with a merchant. More generally, a _payment channel_ allows two participants to send and receive payments to each other: when realized using cryptocurrencies, these channels typically consist of an on-chain escrow account and an off-chain state update protocol. A zkChannel is similarly comprised of two parts: an on-network escrow account and an off-network state update protocol, but the state update protocol does not allow the merchant to learn which specific channel is updated or how.
 
 ### zkChannels Notation
