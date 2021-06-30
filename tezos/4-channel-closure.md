@@ -64,6 +64,8 @@ The `@mutualClose` entrypoint will only succeed if all of the following are true
 * The contract has been fully funded and `@custClose` or `@expiry` have not been called.
 * `mutual_close_signature` is a valid signature is a tuple `(contract-id, "zkChannels mutual close", cid, bal_cust, bal_merch)`, where `contract-id` is the address of the smart contract, and `context-string` is a [global default](1-setup.md#global-defaults) set to `"zkChannels mutual close"`.
 
+Once the `@mutualClose` operation has reached `required_confirmations`, the customer and merchant consider the channel closed and no longer need to monitor the contract.
+
 ## Unilateral Customer Close
 Unilateral customer closes are as specified in `TezosEscrowAgent`.
 
@@ -79,11 +81,15 @@ When the `@custClose` entrypoint has been called, the merchant's balace (`bal_me
 
 If the merchant does not call `@merchDispute` within the timeout period, the customer will claim their balance by calling the `@custClaim` entrypoint, at which point the smart contract with transfer the customer's balance to `cust_addr`. Note that the transfer to `cust_addr` will be part of the same operation group as when `@custClaim` was called. Therefore, if the `@custClaim` operation is successful, the trasfer to `cust_addr` will also be successful. 
 
+Once the `@custClaim` operation has reached `required_confirmations`, the customer and merchant consider the channel closed and no longer need to monitor the contract.
+
 ### Merchant Dispute
 As soon as the merchant detects that the customer has called the `@custClose` entrypoint, `rev_lock` is read from the contract storage and checked to see if it corresponds to a known `rev_secret` where H(`rev_secret`) == `rev_lock`, using the hash function SHA3-256. If `rev_secret` is known, this means the customer is attempting to close on an outdated state and the merchant will call the `@merchDispute` entrypoint of the [Tezos smart contract](2-contract-origination.md#tezos-smart-contract)with:
 * [`bytes`:`rev_secret`]
 
 If `rev_secret` hashes to `rev_lock`, the smart contract will send the customer's pending balance to the merchant. Note that this transfer initiated by the smart contract will be part of the same operation group as when `@merchDispute` was called. Therefore, if the `@merchDispute` operation is successful, the trasfer to `merch_addr` will also be successful. 
+
+Once the `@merchDispute` operation has reached `required_confirmations`, the customer and merchant consider the channel closed and no longer need to monitor the contract.
 
 ## Unilateral Merchant Close
 Unilateral merchant closes are as specified in `TezosEscrowAgent`.
@@ -95,3 +101,5 @@ The merchant can initiate closure by calling the `@expiry` entrypoint of the [Te
 As soon as the customer observes the `@expiry` entrypoint on the smart contract being called, they will prevent any payments on the channel from happening and call `@custClose` with the latest channel state and closing signature (as described in [Unilateral Customer Close](#unilateral-customer-close)).
 
 If the timeout period has passed without the customer calling `@custClose`, the merchant will close the channel and receive the entire channel balance by calling the `@merchClaim` entrypoint. When `@merchClaim` is called, the smart contract will initiate a transfer to the `merch_addr`. Note that this transfer will be part of the same operation group as when `@merchClaim` was called. Therefore, if the `@merchClaim` operation is successful, the trasfer to `merch_addr` will also be successful. 
+
+Once the `@merchClaim` operation has reached `required_confirmations`, the customer and merchant consider the channel closed and no longer need to monitor the contract.

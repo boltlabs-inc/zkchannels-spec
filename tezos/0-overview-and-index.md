@@ -131,7 +131,7 @@ There are three options for [channel closure](4-channel-closure.md):
 * **`merch_pp_hash`**:
    This is the hash of the merchant's public parameters. It is used as a unique identifier for the merchant and is used by the customer to connect to them. `merch_pp_hash` is set to `SHA3-256(merch_PS_pk, merch_addr, merch_pk)` during the [merchant setup](1-setup.md#Merchant-Setup).
 * **`required_confirmations`**:
-   An integer that represents the minimum number of confirmations for the funding to be considered final. The value is defined as part of the [global defaults](1-setup.md#Global-defaults).
+   An integer that represents the minimum number of confirmations for any operation on the blockchain to be considered final. The value is defined as part of the [global defaults](1-setup.md#Global-defaults).
 * **`rev_lock`**: 
    The revocation lock contained in a zkChannel state, generated as the SHA3-256 hash digest of the revocation secret.
 * **`rev_secret`**: The revocation secret that corresponds to a revocation lock. The revocation secret is a randomly generated value.  

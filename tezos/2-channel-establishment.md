@@ -47,7 +47,7 @@ For the final round, the customer originates the contract and funds their side o
 
 ## Global Defaults
 * [`int`:`self_delay`]: The default timeout length applied to the customer closing entrypoint `custClose` and the merchant expiry entrypoint `expiry`. The value is interpreted in sections.
-* [`int`:`required_confirmations`]: The minimum number of confirmations for the funding to be considered final.
+* [`int`:`required_confirmations`]: The minimum number of confirmations for any operation to be considered final.
 
 ## Message Specifications
 
