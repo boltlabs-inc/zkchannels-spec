@@ -14,7 +14,7 @@ The merchant has completed the [setup](1-setup.md#merchant-setup) phase, and the
 The customer has [obtained the merchant’s setup information](1-setup.md#publishing-public-parameters) out of band. The customer must verify the merchant's public parameters are well-formed and valid:
 * The merchant blind signing public key `merch_PS_pk` must consist of a valid Pointcheval Sanders public key of the expected length with components in the BLS12-381 pairing subgroups G1 and G2.
 * The range proof parameters `range_proof_params` must consist of a valid Pointcheval Sanders key of the expected length with components in the BLS12-381 pairing subgroup G1, and valid signatures on the appropriate integer range.
-* The pedersen commitment parameters must be well-formed, of the expected length, and consist of elements from the BLS12-381 pairing subgroup G1.
+* The revocation lock commitment parameters `revlock_com_params` must be well-formed Pedersen parameters of the expected length, and consist of elements in the BLS12-381 pairing subgroup G1.
 * The merchant EdDSA public key `merch_pk` must be a valid EdDSA key for the curve specified by `tezos-client` and the merchant address `merch_addr` must be a Tezos tz1 address correctly derived from `merch_pk`. 
 
 ## Overview
