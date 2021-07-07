@@ -46,9 +46,9 @@ The merchant is, however, confident that payments are successful only if they ar
 
 ## Channel Closure
 There are three options for [channel closure](4-channel-closure.md):
-  - Mutual close: The customer and merchant can collaborate off-chain to create an operation calling the `@mutualClose` entrypoint in the contract. This requires fewer on-chain operations and is therefore cheaper. This procedure is built using `zkAbacus.Close` and `TezosEscrowAgent`.
-  - Unilateral customer close: The customer can unilaterally initiate channel closure by using their current closing authorization signature to create an operation calling the `@custClose` entrypoint. The merchant's balance gets transferred to them immediately amd the customer's balance is held by the contract for a prespecified timeout period. If during this time, the merchant can prove it was an attempted double spend, by providing the revocation secret, the merchant can claim the customer's entire balance. After the timeout period, if the merchant has not claimed the customer's balance, the customer may claim it via the `@custClaim` entrypoint. This procedure is defined by the `TezosEscrowAgent`.
-  - Unilateral merchant close: The merchant can unilaterally initiate channel closure by calling the `@expiry` entrypoint on the smart contract. This operation triggers a timeout period, during which the customer must broadcast their latest state by calling `@custClose` (as with a unilateral customer close). If the customer fails to do so within the timeout period, the merchant may claim the entire channel balance via the `@merchClaim` entrypoint. This procedure is defined by the `TezosEscrowAgent`.
+  - Mutual close: The customer and merchant can collaborate off-chain to create an operation calling the `mutualClose` entrypoint in the contract. This requires fewer on-chain operations and is therefore cheaper. This procedure is built using `zkAbacus.Close` and `TezosEscrowAgent`.
+  - Unilateral customer close: The customer can unilaterally initiate channel closure by using their current closing authorization signature to create an operation calling the `custClose` entrypoint. The merchant's balance gets transferred to them immediately amd the customer's balance is held by the contract for a prespecified timeout period. If during this time, the merchant can prove it was an attempted double spend, by providing the revocation secret, the merchant can claim the customer's entire balance. After the timeout period, if the merchant has not claimed the customer's balance, the customer may claim it via the `custClaim` entrypoint. This procedure is defined by the `TezosEscrowAgent`.
+  - Unilateral merchant close: The merchant can unilaterally initiate channel closure by calling the `expiry` entrypoint on the smart contract. This operation triggers a timeout period, during which the customer must broadcast their latest state by calling `custClose` (as with a unilateral customer close). If the customer fails to do so within the timeout period, the merchant may claim the entire channel balance via the `merchClaim` entrypoint. This procedure is defined by the `TezosEscrowAgent`.
 
 ## References
 [zkChannels Private Payments Protocol](https://github.com/boltlabs-inc/blindsigs-protocol/releases/download/ecc-review/zkchannels-protocol-spec-v3.pdf) <br>
@@ -61,53 +61,51 @@ There are three options for [channel closure](4-channel-closure.md):
 ## Glossary
 ### Tezos Glossary 
 *  **account**: 
-   An account is a unique identifier within the protocol. There are 'Implicit accounts' that have addresses beginning with 'tz1', and there are 'Smart Contract' accounts that have addresses beginning with 'KT1'. 
+   An account is a unique identifier within the protocol. There are _implicit accounts_ that have addresses beginning with 'tz1', and there are _smart contract_ accounts that have addresses beginning with 'KT1'. Implicit accounts are linked to a public key and cannot include a script.
 *  **bake**:
    _Baking_ is the process of producing a new block in the Tezos blockchain. It is the equivalent of _mining_ on a proof of work blockchain.
 * **contract identifier**:
    A smart contract's KT1 address. This acts as a unique identifier for a given contract that may be used to look up the latest state as well as any previous operations that interact with that contract.
-* **confirmation**:
-   A 'confirmation' refers the moment an operation has been included in a baked block. 
-* **confirmation depth**:
-   'Confirmation depth' refers to the number of blocks between the block where operation was included and the current block height. 
+* **confirmations**:
+   _Confirmations_ represent the number of blocks in the blockchain that have been accepted by the network since the block that includes the operation (including first the block it appeared in). An operation is said to have received its first confirmation when it has been included in the blockchain. Each subsequent block represents an additional confirmation.
 * **destination**:
-   Every operation has one source and one destination. The destination is the receiver's tezos address. 
+   Every operation has one destination. The destination is of an operation is the receiver's tezos address. 
 *  **forging**:
    The process of creating a serialized Tezos operation.
 *  **implicit account**:
-   An account that is linked to a public key. Contrary to a smart contract, an Implicit account cannot include a script and it cannot reject incoming transactions.
+   An account that is linked to a public key. Contrary to a smart contract, an implicit account cannot include a script and it cannot reject incoming transactions. Implicit accounts can use one of three curves for its signature verification. The curve being used by an account is reflected in the prefix of the account's address: 'tz1' for Ed25519, 'tz2' for Secp256k1, and 'tz3' for P256. 
 *  **inject**:
-   The process of broadcasting a signed operation to other Tezos nodes in the network. After a successful injection, the operation will be waiting to get confirmed.
+   The process of broadcasting a signed operation to other Tezos nodes in the network. This must be performed by a Tezos node connected to other Tezos nodes on the network. After a successful injection, the operation will be waiting to get confirmed.
 *  **KT1 address**: 
-   The address of a smart contract always starts with 'KT1'. These addresses can be referred to as 'KT1 addresses'.
+   The address of a smart contract always starts with 'KT1'. These addresses can be referred to as _KT1 addresses_. The KT1 address is derived from the operation hash from which the contract was originated.
 *  **mutez**:
    The smallest denomination of Tez. 1 Tez is equal to 1 million mutez.
 *  **operation**:
-   An _operation_ in Tezos is the equivalent of a _transaction_ in Ethereum. Operations are used for originating contracts, calling entrypoints to contracts, and transferring tez. The list of all types of operations are: origination, transaction, reveal, delegation. 
+   An _operation_ in Tezos is the equivalent of a _transaction_ in Ethereum. Operations are used for originating contracts, calling entrypoints to contracts, and transferring tez. The list of all types of operations are: origination, transaction, reveal, and delegation. 
 *  **operation group**:
-   An _operation group_ in Tezos refers to a group of operations that have been authorized by the same signature. In the zkChannels protocol, the operations that are created by the smart contract in response to a contract call are considered as being part of the same operation group. The operations in an operation group are applied to the blockchain atomically - either they all get applied or they all fail together. 
+   An _operation group_ in Tezos refers to operations that have been authorized by the same signature. Operations that are created by the smart contract in response to a contract call are considered as being part of the same group. Operations in the same group are applied to the blockchain atomically - either they all get applied or they all fail together. 
 * **smart contract**:
-   Account which is associated to a Michelson script. They are created with an explicit origination operation and are therefore sometimes called originated accounts. The address of a smart contract always starts with the letters KT1.
+   An account which is associated with a Michelson script. They are created with an explicit origination operation and are therefore sometimes called originated accounts. The address of a smart contract always starts with the letters 'KT1'.
 * **source**:
-   Every operation has one source and one destination. The source is the sender's tezos address and the operation must be signed by the source account's private key. 
+   Every operation has one source. The source is the sender's tezos address and the operation must be signed by the source account's private key. 
 *  **storage**:
    The memory held by the smart contract.
 *  **tez**:
    The unit of currency in Tezo.
 *  **tezos account public key** 
-   Every implict account is linked to a public key. The public key is used to verify that an operation was signed by the owner of the source's address.
+   Every implict account is linked to a public key. The public key is used to verify that an operation was signed by the owner of the source's address. Since an account's address is derived from the hash of a public key, it is impossible to derive the public key from the address. Therefore, a new account must first perform a _reveal_ operation to broadcast its public key on chain, before broadcasting any subsequent operations.
 *  **tz1 address**: 
-   Implicit accounts using an EdDSA signature scheme always begin with 'tz1'. These addresses can be reffered to as a 'tz1 addresses'.
+   The address of an implicit account using an EdDSA signature scheme. The address is derived from the hash of the public key and always begin with the prefix 'tz1'.
 
 ### zkChannels Glossary 
 * **channel identifer**: 
    A unique identifier for a zkChannel.
 * **closing state**:
-   The closing state contains the channel identifier (`cid`), close flag (`close`), revocation lock (`rev_lock`), customer balance (`bal_cust`), and merchant balance (`bal_merch`). The merchant's blind signature over the closing state is what allows the customer to post the final balances to the smart contract during a unilateral customer close. The revocation lock provides a mechanism for the merchant to dispute revoked closing states posted by the customer.
+   A closing state contains a channel identifier (`cid`), close flag (`close`), revocation lock (`rev_lock`), customer balance (`bal_cust`), and merchant balance (`bal_merch`). The merchant's blind signature over the closing state is what allows the customer to post the final balances to the smart contract during a unilateral customer close. The revocation lock provides a mechanism for the merchant to dispute revoked closing states posted by the customer.
 * **customer**:
    A _customer_ is a user who opens a zkChannel with a merchant. The customer has a complete view of the channel state and can initiate private payments to the given merchant over their zkChannel. The customer trusts the merchant to provide a requested good or service, but does not trust the merchant with their payment history. The customer's anonymity set for payments is the set of users with whom a given merchant has an open channel. Customers are the 'spokes' in the zkChannel 'hub and spoke' network topology.
 *  **timeout period**: 
-   The timeout period refers to the length of time the customer or merchant has to respond to a unilateral close from the other party. In the case of a merchant unilateral close (via the 'expiry' entrypoint), the timeout period is the time the customer has to update the contract with their latest closing state. In the case of a unilateral customer close (via the 'custClose' entrypoint), the timeout period is the time the merchant has to dispute the closing balance via the 'dispute' entrypoint. The length of the timeout period is set by `self_delay`.
+   A timeout period refers to the length of time the customer or merchant has to respond to a unilateral close from the other party. In the case of a merchant unilateral close (by calling the `expiry` entrypoint), the timeout period is the time the customer has to update the contract with their latest closing state. In the case of a unilateral customer close (by calling the `custClose` entrypoint), the timeout period is the time the merchant has to dispute the closing balance by calling the `merchDispute` entrypoint. The length of the timeout period is set by `self_delay` which is defined in the [global defaults](1-setup.md#Global-defaults).
 *  **merchant**:
    A _merchant_ is an entity with the ability to accept payments and issue refunds over a zkChannel. A merchant has a limited view of channel state at any given time: they know the total amount of money allocated to a zkChannel by each participant, but cannot associate payment or refund activity to individual zkChannels. Depending on the merchant's approval process for opening channels, the merchant may or may not know the real-world identities of their customers. Merchants are the 'hubs' in the zkChannel 'hub and spoke' network topology. 
 *  **revocation lock scheme**: 
@@ -131,7 +129,7 @@ There are three options for [channel closure](4-channel-closure.md):
 * **`merch_pp_hash`**:
    This is the hash of the merchant's public parameters. It is used as a unique identifier for the merchant and is used by the customer to connect to them. `merch_pp_hash` is set to `SHA3-256(merch_PS_pk, merch_addr, merch_pk)` during the [merchant setup](1-setup.md#Merchant-Setup).
 * **`required_confirmations`**:
-   An integer that represents the minimum number of confirmations for any operation on the blockchain to be considered final. The value is defined as part of the [global defaults](1-setup.md#Global-defaults).
+   An integer that represents the minimum number of confirmations for an operation on the blockchain to be considered final. The value is defined as part of the [global defaults](1-setup.md#Global-defaults).
 * **`rev_lock`**: 
    The revocation lock contained in a zkChannel state, generated as the SHA3-256 hash digest of the revocation secret.
 * **`rev_secret`**: The revocation secret that corresponds to a revocation lock. The revocation secret is a randomly generated value.  

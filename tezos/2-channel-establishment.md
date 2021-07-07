@@ -47,7 +47,7 @@ For the final round, the customer originates the contract and funds their side o
 
 ## Global Defaults
 * [`int`:`self_delay`]: The default timeout length applied to the customer closing entrypoint `custClose` and the merchant expiry entrypoint `expiry`. The value is interpreted in sections.
-* [`int`:`required_confirmations`]: The minimum number of confirmations for any operation to be considered final.
+* [`int`:`required_confirmations`]: The minimum number of confirmations for an operation to be considered final.
 
 ## Message Specifications
 
@@ -163,8 +163,8 @@ Upon receipt, the merchant:
     - The `close` field in the contract matches the merchant's `close` flag defined as defined in the [global defaults](1-setup.md#Global-defaults). The `close` flag represents a fixed scalar used by the merchant to differentiate closing state and state.
     - `custFunding` and `merchFunding` match the initial balances `bal_cust` and `bal_merch`, respectively.
     - The `status` field of the contract is set to `0`, which corresponds to `AWAITING_FUNDING`.
-    - The `context-string` is set to "zkChannels mutual close", as defined in the [global defaults](1-setup.md#Global-defaults). 
-  - Checks that the customer has funded the channel and waits until the customer's side of the contract has been funded for at least `required_confirmations` blocks. This involves checking that the customer's operation to add their funds is the last operation to have interacted with the smart contract, and that in the most recent blocks of the blockchain (up to `required_confirmations` blocks in the past) there have been no further operations interacting with the contract. 
+    - The `context-string` is set to `"zkChannels mutual close"`, as defined in the [global defaults](1-setup.md#Global-defaults). 
+  - Checks that the customer has funded the channel and waits until the customer's side of the contract has been funded for at least `required_confirmations` blocks. This requires checking that the customer's operation to add their funds is the last operation to have interacted with the smart contract, and that in the most recent blocks of the blockchain (up to `required_confirmations` blocks in the past) there have been no further operations interacting with the contract. 
   - In the dual-funded case, funds their side of the escrow account as specified in [Contract Origination and Funding](5-tezos-escrowagent.md#contract-origination-and-funding).
   - Aborts if any of the above checks fail or if a prespecified timeout passes.
 
