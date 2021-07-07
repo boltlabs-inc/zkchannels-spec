@@ -77,7 +77,7 @@ There are three options for [channel closure](4-channel-closure.md):
 *  **inject**:
    The process of broadcasting a signed operation to other Tezos nodes in the network. This must be performed by a Tezos node connected to other Tezos nodes on the network. After a successful injection, the operation will be waiting to get confirmed.
 *  **KT1 address**: 
-   The address of a smart contract always starts with 'KT1'. These addresses can be referred to as _KT1 addresses_. The KT1 address is derived from the operation hash from which the contract was originated.
+   The address of a smart contract account, which always starts with 'KT1'. The KT1 address is derived from the operation hash from which the contract was originated.
 *  **mutez**:
    The smallest denomination of Tez. 1 Tez is equal to 1 million mutez.
 *  **operation**:
