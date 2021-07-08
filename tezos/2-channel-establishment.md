@@ -2,11 +2,11 @@
   * [Overview](#overview)
   * [Global defaults](#global-defaults)
   * [Message Specifications](#message-specifications)
-    * [The `open_c` Message](#the-openc-message)
-    * [The `open_m` Message](#the-openm-message)
-    * [The `init_c` Message](#the-initc-message)
-    * [The `init_m` Message](#the-initm-message)
-    * [The `funding_confirmed` Message](#the-fundingconfirmed-message)
+    * [The `open_c` Message](#the-open_c-message)
+    * [The `open_m` Message](#the-open_m-message)
+    * [The `init_c` Message](#the-init_c-message)
+    * [The `init_m` Message](#the-init_m-message)
+    * [The `funding_confirmed` Message](#the-funding_confirmed-message)
     * [The `activate` Message](#the-activate-message)
 ## Prerequisites
 The merchant has completed the [setup](1-setup.md#merchant-setup) phase, and the customer and merchant have established a communication session.
@@ -26,7 +26,7 @@ In the next round, the customer and merchant initialize the `zkAbacus` channel b
 
 For the final round, the customer originates the contract and funds their side of the channel as specified in [Contract Origination and Funding](5-tezos-escrowagent.md#contract-origination-and-funding). The customer sends `funding_confirmed` to the merchant, which contains the contract identifier `contract-id`. The merchant checks the corresponding contract and initial storage for the expected values. The merchant then funds their side of the smart contract, if applicable. Once the contract is fully funded, the funds are locked in. At this point, the merchant runs `zkAbacus.Activate()` to generate the initial payment tag and sends the customer the message `activate`, which contains the payment tag. Upon completion of `zkAbacus.Activate()`, the channel is open and ready for [payments](3-channel-payments.md). 
 
- Details for `zkAbacus` may be found in Chapter 3.3.3 of the [zkChannels Protocol document](https://github.com/boltlabs-inc/blindsigs-protocol/releases/download/ecc-review/zkchannels-protocol-spec-v3.pdf).
+ Details for `zkAbacus` may be found in Chapter 3.3.3 of the [zkChannels Protocol document](https://github.com/boltlabs-inc/blindsigs-protocol/releases/download/ecc-review-v1/zkchannels-protocol-spec-v3.1.pdf).
 
 
 
