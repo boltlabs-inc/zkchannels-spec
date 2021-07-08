@@ -32,7 +32,7 @@ across different sessions.
 
 ### Insert Nonce
 
-This operation should be atomic to prevent race conditions. For example, if
+`zkAbacus.Pay` calls this operation. This operation should be atomic to prevent race conditions. For example, if
 multiple Pay sessions try to insert the same nonce concurrently, only the first
 should succeed. Subsequent inserts should fail because the nonce is already
 present.
@@ -43,27 +43,25 @@ This is used in a couple situations:
 
 1. `zkAbacus.Pay` calls this operation with the lock and secret that the
    customer reveals. If there were any previously stored pairs - in other
-   words, if the merchant had previously seen this revocation lock - then the
+   words, if the merchant has previously seen this revocation lock - then the
    merchant aborts the Pay session.
-2. When the merchant receives notification of a unilateral customer close, they
-   call this operation with the revocation lock found in the on-chain
-   transaction and no revocation secret. The merchant then checks the output:
+2. When the merchant receives notification that a customer has called the `custClose` entry point for a given channel, either as part of a unilateral customer close or a unilateral merchant close, they
+   call this operation with the revocation lock found in the customer's entrypoint call and no revocation secret. The merchant then processes the output as specified in the [channel closing section](4-channel-closure.md#):
    - _If the returned list is empty_, then the merchant has never seen the
-     revocation lock before. This means the customer closed on the most
-     recent state of the channel and we proceed as expected.
+     revocation lock before. This means the customer is closing on the most
+     recent state of the channel and proceeds as specified.
    - _If the returned list contains a revocation secret_, then the customer is
      trying to resubmit old channel state. The merchant uses the secret to
-     enact a punitive close.
+     enact a punitive close by calling the `merchDispute` entrypoint as specified.
    - _If the returned list contains only locks (without any corresponding
      secrets)_, this means the customer simultaneously performed a mutual
      close while closing unilaterally, both on the most recent state. This is
      weird behavior, but not problematic to the integrity of the protocol.
-3. When the merchant processes a mutual close, they call this operation just
-   like in a unilateral customer close (2). The merchant then checks the
-   output:
+3. When the merchant processes a mutual close request, they call this operation just
+   like in an on-chain close (2). The merchant then checks the
+   output and proceeds as specified in the [mutual close section](4-channel-closure.md#mutual-close):
    - _If the returned list is empty_, then the merchant has never seen the
-     revocation lock before. This is expected, so the merchant proceeds to
-     close.
+     revocation lock before. This is expected, so the merchant continues the mutual close session as specified.
    - _If the returned list contains a revocation secret_, then the customer is
      trying to mutual-close on old channel state. The merchant aborts the
      mutual close. If the merchant knows the identity of the customer, they
@@ -71,14 +69,13 @@ This is used in a couple situations:
    - _If the returned list contains only locks (without any corresponding
      secrets)_, this means there is an on-chain customer close transaction on
      the most recent channel state at the time of the mutual close session.
-     This is weird behavior, but not problematic to the integrity of the
-     protocol.
+     In this case, the merchant aborts the mutual close session as specified.
 
 #### Optimizations
 
 This operation may be separated into two, specialized queries if necessary. Since
 Pay (1) only cares whether the set is empty or not, it could return a boolean
-denoting success. Similarly, in unilateral close (2) and mutual close (3), we
+denoting success. Similarly, in processing an on-chain close (2) or a mutual close (3), we
 could optionally return a single revocation secret if one exists.
 
 These optimizations would minimize the rows fetched from the database and may
@@ -95,7 +92,7 @@ the state of open channels.
 - **Merchant Deposit**: ?
 - **Customer Deposit**: ?
 - **Status**: Used to determine valid operations on the channel. For example,
-  an channel with the "originated" status should not be merchant funded
+  a channel with the status "originated" should not be merchant funded
   (because it has not yet been customer funded). This is the only column that
   can be modified.
 
