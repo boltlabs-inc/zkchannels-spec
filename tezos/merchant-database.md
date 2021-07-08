@@ -7,7 +7,7 @@
 The merchant database `revocation_DB` is used to enforce correct `zkAbacus`
 payments and `TezosEscrowAgent` account closes.
 
-This database should consist of two independent tables: one storing a set of
+This database consists of two independent tables: one storing a set of
 (non-null) nonces, and one storing a set of revocation lock/optional-secret
 pairs (the secret may be NULL but the revocation lock must be present).
 
@@ -15,6 +15,21 @@ pairs (the secret may be NULL but the revocation lock must be present).
 
 The channels database is used to remember details about a channel across
 different sessions.
+
+- **Channel ID**: Used to look up the channel in subsequent steps to update the
+  status.
+- **Contract ID**: Used to perform operations on-chain.
+- **Initial Merchant Balance**: The amount initially deposited by the merchant
+  upon establishing the channel. The merchant may use this for its own
+  accounting purposes, outside the scope of the protocol.
+- **Initial Customer Balance**: The amount initially deposited by the customer
+  upon establishing the channel. The merchant may use this for its own
+  accounting purposes, outside the scope of the protocol.
+- **Status**: Used to determine valid operations on the channel. For example,
+  a channel with the status "originated" is not merchant funded (because it has
+  not yet been customer funded). This is the only column that can be updated.
+  The possible statuses are: "originated", "customer funded", "merchant
+  funded", "active", and "closed".
 
 ## Operations
 
@@ -32,10 +47,10 @@ different sessions.
 
 ### Insert Nonce
 
-`zkAbacus.Pay` calls this operation. This operation should be atomic to prevent
+`zkAbacus.Pay` calls this operation. This operation must be atomic to prevent
 race conditions. For example, if multiple Pay sessions try to insert the same
-nonce concurrently, only the first should succeed. Subsequent inserts should
-fail because the nonce is already present.
+nonce concurrently, only the first will succeed. Subsequent inserts will fail
+because the nonce is already present.
 
 ### Insert Revocation Lock + Optional Secret
 
@@ -89,34 +104,27 @@ lead to performance improvements.
 
 ### Insert Channel
 
-This operation is called at the end of Establish so the merchant can remember
-the state of open channels.
-
-- **Channel ID**: Used to look up the channel in subsequent steps to update the
-  state.
-- **Contract ID**: Used to perform operations on-channel.
-- **Initial Merchant Balance**: The amount initially deposited by the merchant
-  upon establishing the channel. The merchant may use this for its own
-  accounting purposes, outside the scope of the protocol.
-- **Initial Customer Balance**: The amount initially deposited by the customer
-  upon establishing the channel. The merchant may use this for its own
-  accounting purposes, outside the scope of the protocol.
-- **Status**: Used to determine valid operations on the channel. For example,
-  a channel with the status "originated" should not be merchant funded
-  (because it has not yet been customer funded). This is the only column that
-  can be modified.
+This operation is called at the end of Establish so the merchant can store the
+status of open channels. It stores the input Channel ID, Contract ID, Merchant
+Balance, Customer Balance, and the "originated" status.
 
 ### Update Channel Status
 
-This operation is used to update the channel status. The expected progression
-of a channel is:
+This operation updates the channel status. The expected progression of a
+channel is:
 
 originated → customer funded → merchant funded → active → closed
 
-In addition, any non-closed state may transition to closed when either the
-merchant or customer perform a unilateral close. For full details about when
-the merchant transitions from one state to the next, [refer to the overview of
-the protocol](0-overview-and-index.md).
+In addition, any channel that's not already closed may transition to closed
+when either the merchant or customer perform a unilateral close.
+
+Any update must be an atomic compare-and-swap that asserts the previous status
+to prevent race conditions. For example, if multiple sessions try to close the
+same channel concurrently, only one of them will succeed. The other channel
+will read the updated status, see that it's already closed, and fail.
+
+For full details about when the merchant transitions from one status to the
+next, [refer to the overview of the protocol](0-overview-and-index.md).
 
 ## Schema
 
