@@ -45,12 +45,12 @@ This is used in a couple situations:
    customer reveals. If there were any previously stored pairs - in other
    words, if the merchant has previously seen this revocation lock - then the
    merchant aborts the Pay session.
-2. When the merchant receives notification that a customer has called the
-   `custClose` entry point for a given channel, either as part of a unilateral
-   customer close or a unilateral merchant close, they call this operation with
-   the revocation lock found in the customer's entrypoint call and no
-   revocation secret. The merchant then processes the output as specified in
-   the [channel closing section](4-channel-closure.md#):
+2. When the merchant receives a notification that a customer has called the
+   `custClose` entry point for a given channel-- either as part of a unilateral
+   customer close or a unilateral merchant close-- they call this operation to
+   insert the revocation lock from the customer's entrypoint call (without a
+   corresponding revocation secret). The merchant then processes the output as
+   specified in the [channel closing section](4-channel-closure.md):
    - _If the returned list is empty_, then the merchant has never seen the
      revocation lock before. This means the customer is closing on the most
      recent state of the channel and proceeds as specified.
