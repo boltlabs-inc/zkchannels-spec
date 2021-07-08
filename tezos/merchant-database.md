@@ -105,8 +105,8 @@ lead to performance improvements.
 ### Insert Channel
 
 This operation is called at the end of Establish so the merchant can store the
-status of open channels. It stores the input Channel ID, Contract ID, Merchant
-Balance, Customer Balance, and the "originated" status.
+status of the newly created channel. It stores the input Channel ID, Contract
+ID, Merchant Balance, Customer Balance, and the "originated" status.
 
 ### Update Channel Status
 
