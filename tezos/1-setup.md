@@ -26,7 +26,7 @@ We use SHA3-256 hashes to instantiate our hash-based commitments.
 * `required_confirmations`: an integer that represents the minimum number of confirmations for an operation to be considered final. The default value is set to 20.
 * `context-string`: a string set to `"zkChannels mutual close"`. This is contained in the tuple that gets signed when creating `mutual_close_signature`.
 #### `zkAbacus` global defaults
-* `close`: fixed scalar used to differentiate closing state and state. The default value is 0x000000000000000000000000000000000000000000000000000000434c4f5345, which is derived from the binary encoding of the string 'CLOSE'.
+* `close`: a fixed scalar used to differentiate closing state and state. The default value is 0x000000000000000000000000000000000000000000000000000000434c4f5345, which is derived from the binary encoding of the string 'CLOSE'.
 
 ## Merchant Setup
 

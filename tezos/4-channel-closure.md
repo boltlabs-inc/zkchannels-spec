@@ -10,9 +10,14 @@
 A zkChannel can close either via a mutual close, in which both the customer and merchant coordinate to close the channel, or via a unilateral close, in which either the merchant or customer may initiate closing. 
 
 ## Mutual Close
-Mutual close is initiated by the customer and consists of a single round of communication between the customer and the merchant, followed by a single transaction sent by the customer to the network. 
+Mutual close is initiated by the customer and consists of a single round of communication between the customer and the merchant, followed by a single operation sent to the Tezos network.
 
-The customer initiates `zkAbacus.Close` by sending the message `mutual_close_c`. The merchant then runs `zkAbacus.Close`. If `zkAbacus.Close` fails, the merchant aborts. Otherwise, the merchant signs the appropriate closing message as specified by `TezosEscrowAgent` and sends this signature in the message `mutual_close_m` to the customer. Once the customer receives a valid `mutual_close_m` message, they can close the smart contract by calling the `mutualClose` entrypoint in the [Tezos smart contract](2-contract-origination.md#tezos-smart-contract).
+That is:
+1. The customer initiates `zkAbacus.Close` by sending the message `mutual_close_c` to the merchant.
+2. The merchant runs `zkAbacus.Close`. If `zkAbacus.Close` fails, the merchant aborts. Otherwise, the merchant signs the appropriate closing message as specified below and sends this signature in the message `mutual_close_m` to the customer. 
+3. The customer checks the validity of the received `mutual_close_m` message and closes the smart contract by calling the `mutualClose` entrypoint in the [Tezos smart contract](2-contract-origination.md#tezos-smart-contract).
+
+The details of each message are as follows.
 
 ### The `mutual_close_c` Message
 
@@ -22,49 +27,56 @@ The customer initiates `zkAbacus.Close` by sending the message `mutual_close_c`.
     * [`mutez`:`bal_cust`]
     * [`mutez`:`bal_merch`]
     * [`bls12_381_fr`:`rev_lock`]
-    * [`json`:`closing_signature`]
-      * [`bls12_381_g1`:`s1`]
-      * [`bls12_381_g1`:`s2`]
+    * [`(bls12_381_g1, bls12_381_g1)`:`closing_signature`]
+      
+#### Customer Requirements
+The customer:
+  - Forms the message `mutual_close_c` using the most recent closing state and closing authorization signature for the `zkAbacus` channel with identifier `cid`.
+  - Updates the channel status to `PendingClose` and does not initiate any more payments for the channel with identifier `cid`.
 
-#### Requirements
-
-For the customer:
-  -  `mutual_close_c` contains the most recent closing state and closing authorization signature of the `zkAbacus` channel.
-  - no more payments are initiated after `mutual_close_c` has been sent.
-
+#### Merchant Requirements
 Upon receipt, the merchant:
-  - checks that `rev_lock` is not in their revocation database `revocation_DB`.
-  - checks that `closing_signature` is a valid signature on the proposed closing state `(cid, close, rev_lock, bal_cust, bal_merch)` with respect to the merchant's blind signing public key `merch_PS_pk`.
-  - writes `rev_lock` to the database `revocation_DB`.
-  - if any of these checks fail, the merchant aborts.
-
+  - Aborts if no channel with identifier `cid` and status `Active` exists.
+  - Sets the status for the channel with identifier `cid` to `PendingClose`.
+  - Atomically checks the revocation database `revocation_DB` for `rev_lock` and inserts the value if it is not already there. If the value already exists in the database, the merchant aborts the mutual close session.
+  - Checks that `closing_signature` is a valid Pointcheval Sanders signature on the proposed closing state `(cid, close, rev_lock, bal_cust, bal_merch)` with respect to the merchant's blind signing public key `merch_PS_pk`. If this check fails, the merchant aborts.
+ 
 ### The `mutual_close_m` Message
 
 1. type: (`mutual_close_m`)
-2. data: 
-    * [`signature`:`mutual_close_signature`]
+2. data: [`signature`:`mutual_close_signature`]
 
-Here, `mutual_close_signature` is an EdDSA signature generated under the merchant's Tezos public key pair (`merch_pk`). The signature is over a tuple `(contract-id, "zkChannels mutual close", cid, bal_cust, bal_merch)`, where `contract-id` is the address of the smart contract, and `context-string` is a [global default](1-setup.md#global-defaults) set to `"zkChannels mutual close"`.
-
-#### Requirements
+#### Customer Requirements
 
 Upon receipt, the customer:
-  - verifies `mutual_close_signature` is a valid signature with respect to `merch_pk`.
-  - if the signature is not valid, aborts and initiates a [unilateral customer close](##unilateral-customer-close) 
+  - Verifies `mutual_close_signature` is a valid EdDSA signature with respect to `merch_pk`.
+  - If the signature is not valid, aborts and initiates a [unilateral customer close](##unilateral-customer-close).
+
+#### Merchant Requirements
+The merchant generates `mutual_close_signature` as an EdDSA signature under the merchant's Tezos public key pair (`merch_pk`, `merch_sk`) on the tuple `(contract-id, "zkChannels mutual close", cid, bal_cust, bal_merch)`, where `contract-id` is the address of the smart contract and `context-string` is a [global default](1-setup.md#global-defaults) set to `"zkChannels mutual close"`.
 
 ### The `mutualClose` entrypoint
-This entry point is called with the following arguments:
+This entry point sends `bal_cust` funds to the customer's Tezos account (associated to `cust_pk`) and `bal_merch` funds to the merchant's Tezos account (associated to `merch_pk `).
+
+A call to the `mutualClose` entrypoint will only succeed if and only if all of the following are true:
+* The sender is `cust_addr`, as defined in the smart contract.
+* The contract has been funded (either by the customer for a single-funded channel, or both the customer and merchant for a dual-funded channel) and `custClose` or `expiry` have not been called.
+* The signature `mutual_close_signature` is a valid EdDSA signature under the merchant's Tezos public key pair on the tuple `(contract-id, "zkChannels mutual close", cid, bal_cust, bal_merch)`, where:
+  * `contract-id` is the address of the smart contract;
+  * `cid` is the channel identifier contained in the contract storage;
+  * `context-string` is a [global default](1-setup.md#global-defaults) set to `"zkChannels mutual close"`;
+  * the sum `bal_cust + bal_merch` does not exceed the balance associated to the smart contract.
+
+#### Customer Requirements
+The customer calls this entrypoint with the following arguments:
 * [`mutez`:`bal_cust`]
 * [`mutez`:`bal_merch`]
 * [`signature`:`mutual_close_signature`]
 
-#### Requirements
-A call to the `mutualClose` entrypoint will only succeed if and only if all of the following are true:
-* The sender is `cust_addr`, as defined in the smart contract.
-* The contract has been funded (either by the customer for a single-funded channel, or both the customer and merchant for a dual-funded channel) and `custClose` or `expiry` have not been called.
-* `mutual_close_signature` is a valid signature under the merchant's Tezos public key pair on a tuple `(contract-id, "zkChannels mutual close", cid, bal_cust, bal_merch)`, where `contract-id` is the address of the smart contract, and `context-string` is a [global default](1-setup.md#global-defaults) set to `"zkChannels mutual close"`.
+The customer waits until this operation has reached a confirmation depth of `required_confirmations` and then updates the channel status to `Closed`.
 
-Once the `mutualClose` operation has reached `required_confirmations`, the customer and merchant consider the channel closed and no longer need to monitor the contract.
+#### Merchant Requirements
+The merchant waits until this operation has reached a confirmation depth of `required_confirmations` and then updates the channel status to `Closed`.
 
 ## Unilateral Customer Close
 Unilateral customer closes are as specified in `TezosEscrowAgent`.

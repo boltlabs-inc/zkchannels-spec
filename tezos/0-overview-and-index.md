@@ -105,7 +105,7 @@ There are three options for [channel closure](4-channel-closure.md):
 * **customer**:
    A _customer_ is a user who opens a zkChannel with a merchant. The customer has a complete view of the channel state and can initiate private payments to the given merchant over their zkChannel. The customer trusts the merchant to provide a requested good or service, but does not trust the merchant with their payment history. The customer's anonymity set for payments is the set of users with whom a given merchant has an open channel. Customers are the 'spokes' in the zkChannel 'hub and spoke' network topology.
 *  **timeout period**: 
-   A timeout period refers to the length of time the customer or merchant has to respond to a unilateral close from the other party. In the case of a merchant unilateral close (by calling the `expiry` entrypoint), the timeout period is the time the customer has to update the contract with their latest closing state. In the case of a unilateral customer close (by calling the `custClose` entrypoint), the timeout period is the time the merchant has to dispute the closing balance by calling the `merchDispute` entrypoint. The length of the timeout period is set by `self_delay` which is defined in the [global defaults](1-setup.md#Global-defaults).
+   A timeout period refers to the length of time the customer or merchant has to respond to a unilateral close from the other party. In the case of a merchant unilateral close (by calling the `expiry` entrypoint), the timeout period is the time the customer has to update the contract with their latest closing state. In the case of a unilateral customer close (by calling the `custClose` entrypoint), the timeout period is the time the merchant has to dispute the closing balance by calling the `merchDispute` entrypoint. The length of the timeout period is set by `self_delay` which is defined in the [global defaults section](1-setup.md#Global-defaults).
 *  **merchant**:
    A _merchant_ is an entity with the ability to accept payments and issue refunds over a zkChannel. A merchant has a limited view of channel state at any given time: they know the total amount of money allocated to a zkChannel by each participant, but cannot associate payment or refund activity to individual zkChannels. Depending on the merchant's approval process for opening channels, the merchant may or may not know the real-world identities of their customers. Merchants are the 'hubs' in the zkChannel 'hub and spoke' network topology. 
 *  **revocation lock scheme**: 
@@ -119,9 +119,9 @@ There are three options for [channel closure](4-channel-closure.md):
 * **`cid`**:
    A unique channel identifier generated as a SHA3-256 hash of random contributions from both parties, together with `zkAbacus` channel parameters and `TezosEscrowAgent` escrow account parameters. It is set during [channel establishment](2-channel-establishment.md) by the merchant after creating the [`open_m` message](2-channel-establishment.md#the-open_m-message), and by the customer after the receipt of the [`open_m` message](2-channel-establishment.md#the-open_m-message).
 * **`close`**: 
-   A fixed scalar used to differentiate closing state and state. It is defined as a [global default](1-setup.md#Global-defaults) in `zkAbacus`.
+   A fixed scalar used to differentiate closing state and state. It is defined as a [global default](1-setup.md#Global-defaults).
 * **`context-string`**:
-   A string set to `"zkChannels mutual close"`. This is contained in the tuple that gets signed when creating `mutual_close_signature`. The value is defined as part of the [global defaults](1-setup.md#Global-defaults).
+   A string set to `"zkChannels mutual close"`. This is contained in the tuple that gets signed when creating `mutual_close_signature`. This value is defined as part of the [global defaults](1-setup.md#Global-defaults).
 * **`cust_pk`, `merch_pk`**:
    These refer to the customer and merchant's tezos account public keys. For the customer, it is defined during [channel establishment](2-channel-establishment.md#the-open_c-message), and for the merchant during [merchant setup](1-setup.md#Merchant-Setup).
 * **`merch_PS_pk`**:
@@ -129,10 +129,10 @@ There are three options for [channel closure](4-channel-closure.md):
 * **`merch_pp_hash`**:
    This is the hash of the merchant's public parameters. It is used as a unique identifier for the merchant and is used by the customer to connect to them. `merch_pp_hash` is set to `SHA3-256(merch_PS_pk, merch_addr, merch_pk)` during the [merchant setup](1-setup.md#Merchant-Setup).
 * **`required_confirmations`**:
-   An integer that represents the minimum number of confirmations for an operation on the blockchain to be considered final. The value is defined as part of the [global defaults](1-setup.md#Global-defaults).
+   An integer that represents the minimum number of confirmations for an operation on the blockchain to be considered final. This value is defined as part of the [global defaults](1-setup.md#Global-defaults).
 * **`rev_lock`**: 
-   The revocation lock contained in a zkChannel state, generated as the SHA3-256 hash digest of the revocation secret.
-* **`rev_secret`**: The revocation secret that corresponds to a revocation lock. The revocation secret is a randomly generated value.  
+   A revocation lock contained in a zkChannel state, generated as the SHA3-256 hash digest of a revocation secret.
+* **`rev_secret`**: A revocation secret that corresponds to a revocation lock. A revocation secret is a randomly generated value.  
 * **`self_delay`**: 
    This value sets the length of the timeout period during a unilateral closure where the other party must respond. The same timeout period is used for [customer initiated](4-channel-closure.md##unilateral-customer-close) unilateral closes and [merchant initiated](4-channel-closure.md##unilateral-merchant-close). The value is defined as part of the [global defaults](1-setup.md#Global-defaults).
   

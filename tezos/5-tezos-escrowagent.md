@@ -259,7 +259,7 @@ The `TezosEscrowAgent` contract origination proceeds as follows.
 The customer will forge and sign the operation with the zkchannels contract and the initial storage arguments listed above. The operation fees are to be handled by the customer's tezos client.
 
 ## Customer injects origination operation
-When the customer broadcasts (or _injects_) their operation, they begin watching the blockchain to ensure that the operation is confirmed. If the operation is not confirmed within 60 blocks of the block header referenced in the operation, the operation will be dropped from the mempool and the customer must go back to the previous step to forge and sign a new operation.
+When the customer injects the origination operation, they watch the blockchain to ensure that the operation is confirmed. If the operation is not confirmed within 60 blocks of the block header referenced in the operation, the operation will be dropped from the mempool and the customer must go back to the previous step to forge and sign a new operation.
 
 ## Origination confirmed 
 Once the operation has reached the minimum number of required confirmations, the `contract-id` is locked in, the customer is ready to fund the contract with their initial balance.
@@ -270,10 +270,10 @@ The customer funds their side of the contract using the `addFunding` entrypoint 
 Once the funding has been confirmed, the customer sends the merchant a `funding_confirmed` message containing the `contract-id` and `cid`. This is to inform the merchant that the channel is ready, either for the merchant to fund their side, or if single-funded, to consider the channel open. 
 
 ## Merchant verifies the contract
-When the merchant receives the `funding_confirmed` message they will:
-* search for the `contract-id` on chain.
-* checks that the originated contract `contract-id` contains the expected zkchannels [contract](https://github.com/boltlabs-inc/tezos-contract/blob/main/zkchannels-contract/zkchannel_contract.tz).
-* check the contract storage matches the expected [initial storage](#Initial-storage-arguments)
+When the merchant receives the `funding_confirmed` message they:
+* Search for the `contract-id` on chain.
+* Check that the originated contract `contract-id` contains the expected zkchannels [contract](https://github.com/boltlabs-inc/tezos-contract/blob/main/zkchannels-contract/zkchannel_contract.tz).
+* Check the contract storage matches the expected [initial storage](#Initial-storage-arguments).
 
 If any of the above checks fail, the merchant aborts.
 
