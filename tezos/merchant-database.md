@@ -1,6 +1,7 @@
 # Merchant Database
 
 ## Overview
+
 A merchant in the zkChannels protocol is expected to have zkChannels open with multiple distinct customers. For each such channel, the merchant's view is limited to a channel identifier, the opening and closing balances, an on chain escrow account identifier, and the customer's Tezos public key used in the escrow account. (The escrow account is realized via [the `TezosEscrowAgent` protocol](5-tezos-escrowagent.md) as a smart contract account.) Only the associated customer has a full view of a given channel's current state.
 
 That is, the merchant _cannot associate any given received payment to a particular channel_. Instead, the merchant keeps the information sufficient to prevent double spends and punish the customer if they attempt to close the escrow account down on an old state. Two types of information are necessary to achieve this functionality: _nonces_ and _revocation pairs_, as discussed in the [payments overview](0-overview-and-index.md#channel-payments). The merchant stores this information in a single _revocation database_ as follows.
@@ -29,7 +30,7 @@ different sessions.
   a channel with the status "originated" is not merchant funded (because it has
   not yet been customer funded). This is the only column that can be updated.
   The possible statuses are: "originated", "customer funded", "merchant
-  funded", "active", and "closed".
+  funded", "active", "pending close", and "closed".
 
 ## Operations
 
@@ -113,7 +114,7 @@ ID, Merchant Balance, Customer Balance, and the "originated" status.
 This operation updates the channel status. The expected progression of a
 channel is:
 
-originated → customer funded → merchant funded → active → closed
+originated → customer funded → merchant funded → active → pending close → closed
 
 In addition, any channel that's not already closed may transition to closed
 when either the merchant or customer perform a unilateral close.
@@ -143,13 +144,13 @@ next, [refer to the overview of the protocol](0-overview-and-index.md).
 
 **channels**
 
-| field                    | properties                                                                                |
-| ------------------------ | ----------------------------------------------------------------------------------------- |
-| channel_id               | required                                                                                  |
-| contract_id              | required                                                                                  |
-| initial_merchant_balance | required                                                                                  |
-| initial_customer_balance | required                                                                                  |
-| status                   | required, one of ["originated", "customer funded", "merchant funded", "active", "closed"] |
+| field                    | properties                                                                                                 |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------- |
+| channel_id               | required                                                                                                   |
+| contract_id              | required                                                                                                   |
+| initial_merchant_balance | required                                                                                                   |
+| initial_customer_balance | required                                                                                                   |
+| status                   | required, one of ["originated", "customer funded", "merchant funded", "active", "pending close", "closed"] |
 
 #### Notes
 
