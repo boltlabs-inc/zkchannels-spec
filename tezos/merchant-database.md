@@ -1,7 +1,7 @@
 # Merchant Database
 
 ## Overview
-A merchant in the zkChannels protocol is expected to have zkChannels open with multiple distinct customers. For each such channel, the merchant's view is limited to a channel identifier, the opening and closing balances, an on-chain escrow account identifier, and the customer's Tezos public key used in the escrow account. (The escrow account is realized via [the `TezosEscrowAgent` protocol](5-tezos-escrowagent.md) as a smart contract account.) Only the associated customer has a full view of a given channel's current state.
+A merchant in the zkChannels protocol is expected to have zkChannels open with multiple distinct customers. For each such channel, the merchant's view is limited to a channel identifier, the opening and closing balances, an on chain escrow account identifier, and the customer's Tezos public key used in the escrow account. (The escrow account is realized via [the `TezosEscrowAgent` protocol](5-tezos-escrowagent.md) as a smart contract account.) Only the associated customer has a full view of a given channel's current state.
 
 That is, the merchant _cannot associate any given received payment to a particular channel_. Instead, the merchant keeps the information sufficient to prevent double spends and punish the customer if they attempt to close the escrow account down on an old state. Two types of information are necessary to achieve this functionality: _nonces_ and _revocation pairs_, as discussed in the [payments overview](0-overview-and-index.md#channel-payments). The merchant stores this information in a single _revocation database_ as follows.
 
@@ -18,7 +18,7 @@ different sessions.
 
 - **Channel ID**: Used to look up the channel in subsequent steps to update the
   status.
-- **Contract ID**: Used to perform operations on-chain.
+- **Contract ID**: Used to perform operations on chain.
 - **Initial Merchant Balance**: The amount initially deposited by the merchant
   upon establishing the channel. The merchant may use this for its own
   accounting purposes, outside the scope of the protocol.
@@ -77,7 +77,7 @@ This is used in a couple situations:
      close while closing unilaterally, both on the most recent state. In this
      case, the merchant aborts the mutual close session.
 3. When the merchant processes a mutual close request, they call this operation
-   just like in an on-chain close (2). The merchant then checks the output and
+   just like in an on chain close (2). The merchant then checks the output and
    proceeds as specified in the [mutual close
    section](4-channel-closure.md#mutual-close):
    - _If the returned list is empty_, then the merchant has never seen the
@@ -88,7 +88,7 @@ This is used in a couple situations:
      mutual close. If the merchant knows the identity of the customer, they
      may wish to take some sort of (possibly punitive) action.
    - _If the returned list contains only locks (without any corresponding
-     secrets)_, this means there is an on-chain customer close transaction on
+     secrets)_, this means there is an on chain customer close transaction on
      the most recent channel state at the time of the mutual close session.
      In this case, the merchant aborts the mutual close session as specified.
 
@@ -96,7 +96,7 @@ This is used in a couple situations:
 
 This operation may be separated into two, specialized queries if necessary. Since
 Pay (1) only cares whether the set is empty or not, it could return a boolean
-denoting success. Similarly, in processing an on-chain close (2) or a mutual close (3), we
+denoting success. Similarly, in processing an on chain close (2) or a mutual close (3), we
 could optionally return a single revocation secret if one exists.
 
 These optimizations would minimize the rows fetched from the database and may
