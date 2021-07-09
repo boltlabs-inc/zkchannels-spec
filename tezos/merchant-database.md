@@ -132,8 +132,8 @@ channel is:
 
 originated → customer funded → merchant funded → active → pending close → closed
 
-In addition, any channel that's not already closed may transition to closed
-when either the merchant or customer perform a unilateral close.
+In addition, any channel that's not already closed may skip to "pending close"
+if either the merchant or customer perform a unilateral close.
 
 Any update must be an atomic compare-and-swap that asserts the previous status
 to prevent race conditions. For example, if multiple sessions try to close the
