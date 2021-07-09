@@ -8,9 +8,25 @@ That is, the merchant _cannot associate any given received payment to a particul
 
 ### Revocation Database
 
-This database consists of two independent tables: one storing a set of
-(non-null) nonces, and one storing a set of revocation lock/optional-secret
-pairs (the secret may be NULL but the revocation lock must be present).
+This database consists of two independent tables:
+
+#### Nonces
+
+The nonces table stores a set of (non-null) nonces
+
+#### Revocations
+
+Each row in the revocations table must contain a revocation lock and,
+optionally, a revocation secret. The merchant populates this table any time it
+receives a revocation lock from the customer.
+
+This table has the same accounting properties as an append-only ledger. Rows
+can only be inserted— never updated or dropped— and there may be multiple rows
+for a single revocation lock. For example, a malicious customer may first
+submit a revocation lock to close a channel and then try to resubmit the lock
+with its corresponding secret in a subsequent pay step. In this scenario, the
+merchant stores two rows: first, the lock by itself and then the same lock with
+its corresponding secret.
 
 ### Channels
 
@@ -34,15 +50,15 @@ different sessions.
 
 ## Operations
 
-| Name                                                           | Input                                                                                      | Output                                                 | Summary                                             |
-| -------------------------------------------------------------- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------ | --------------------------------------------------- |
-| [**Insert Nonce**][insert_nonce]                               | Nonce (Required)                                                                           | True if it succeeded, False if not.                    | Insert the nonce if it doesn't already exist.       |
-| [**Insert Revocation Lock + Optional Secret**][insert_revlock] | Revocation Lock (Required) and a Revocation Secret (Optional)                              | A list of previously stored pairs with the input lock. | Insert the (Revocation Lock, Optional Secret) pair  |
-| [**Insert Channel**][insert_channel]                           | Channel ID, Contract ID, Initial Merchant Balance, Initial Customer Balance (All Required) | None                                                   | Insert the new channel with the status "originated" |
-| [**Update Channel Status**][update_channel_status]             | Channel ID (Required), New Status (Required)                                               | None                                                   | Update an existing channel's status                 |
+| Name                                                  | Input                                                                                      | Output                                                 | Summary                                             |
+| ----------------------------------------------------- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------ | --------------------------------------------------- |
+| [**Insert Nonce**][insert_nonce]                      | Nonce (Required)                                                                           | True if it succeeded, False if not.                    | Insert the nonce if it doesn't already exist.       |
+| [**Insert Revocation Lock + Secret**][insert_revlock] | Revocation Lock (Required) and a Revocation Secret (Optional)                              | A list of previously stored pairs with the input lock. | Insert the (Revocation Lock, Optional Secret) pair  |
+| [**Insert Channel**][insert_channel]                  | Channel ID, Contract ID, Initial Merchant Balance, Initial Customer Balance (All Required) | None                                                   | Insert the new channel with the status "originated" |
+| [**Update Channel Status**][update_channel_status]    | Channel ID (Required), New Status (Required)                                               | None                                                   | Update an existing channel's status                 |
 
 [insert_nonce]: #insert-nonce
-[insert_revlock]: #insert-revocation-lock--optional-secret
+[insert_revlock]: #insert-revocation-lock--secret
 [insert_channel]: #insert-channel
 [update_channel_status]: #update-channel-status
 
