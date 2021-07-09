@@ -1,4 +1,9 @@
-# Tezos zkEscrowAgent Realization
+# Tezos zkEscrowAgent 
+
+[`TezosEscrowAgent`](5-tezos-escrowagent.md) is a realization of [the `zkEscrowAgent` functionality](https://github.com/boltlabs-inc/blindsigs-protocol/releases/download/ecc-review/zkchannels-protocol-spec-v3.pdf) for Tezos. This component provides the functionality for a customer and a merchant to open and close a zkChannels escrow account as a [Tezos smart contract](2-contract-origination.md#tezos-smart-contract). 
+It includes support for mutual closes, unilateral closes by either the customer or the merchant, and dispute resolution via on-chain punishment.
+
+
 * [Tezos background](#tezos-background)
     * [Operation structure](#operation-structure)
     * [Forging an operation](#operation-structure)
@@ -24,10 +29,10 @@
 
 ## Tezos background
 
-Every tezos operation has only one source and one destination, and the operation must be signed by the private key that corresponds to the source account. There are two kinds of operations used in zkChannels, origination for originating the contract, and transaction for funding and calling the various entrypoints of the contract.
+Every Tezos operation has only one source and one destination, and the operation must be signed by the private key that corresponds to the source account. There are two kinds of operations used in zkChannels, origination for originating the contract, and transaction for funding and calling the various entrypoints of the contract.
 ### Operation structure
 
-Below is an example of an unsigned tezos operation. The signature on this operation is created by serializing the operation and signing it with the private key associated with the `source` address. For detailed description of how Tezos operations get serialized and signed see [this post](https://www.ocamlpro.com/2018/11/21/an-introduction-to-tezos-rpcs-signing-operations/).
+Below is an example of an unsigned Tezos operation. The signature on this operation is created by serializing the operation and signing it with the private key associated with the `source` address. For detailed description of how Tezos operations get serialized and signed see [this post](https://www.ocamlpro.com/2018/11/21/an-introduction-to-tezos-rpcs-signing-operations/).
 ```
 {
   "branch": "BMHBtAaUv59LipV1czwZ5iQkxEktPJDE7A9sYXPkPeRzbBasNY8",
@@ -56,12 +61,12 @@ Below is an example of an unsigned tezos operation. The signature on this operat
 - [`int64`:`storage_limit`]: Caller-defined storage limit. 
 - [`mutez`:`amount`]: The value being transferred (in mutez).
 - [`address`:`destination`]: The destination address.
-- [`micheline object`:`parameters`]: Contains additional parameters used when interacting with smart contracts. The `micheline object` type is native to tezos smart contract and is comparable to JSON. For more information [click here](https://tezos.gitlab.io/shell/micheline.html).
+- [`micheline object`:`parameters`]: Contains additional parameters used when interacting with smart contracts. The `micheline object` type is native to Tezos smart contract and is comparable to JSON. For more information [click here](https://tezos.gitlab.io/shell/micheline.html).
 - [`micheline object`:`entrypoint`]: The entrypoint of the smart contract being called.
 - [`micheline object`:`args`]: The arguments to be passed in to the entrypoint.
 
 ### Forging an operation
-Forging is the process of creating a serialized (but unsigned) operation in tezos. Typically this process involves interacting with a tezos node as it requires getting recent data from the blockchain and simulating the result of the operation.
+Forging is the process of creating a serialized (but unsigned) operation in Tezos. Typically this process involves interacting with a Tezos node as it requires getting recent data from the blockchain and simulating the result of the operation.
 
 The `fee`, `storage_limit`, `gas_limit`, and `counter` are to be determined by the user's (the customer or merchant's) Tezos node. The only requirement as far as the protocol is concerned is that the `fee` and gas and storage limits are sufficient for the operation to be baked. The `counter` is incremented each time an operation is performed from the account and is used to prevent replay attacks. Since the customer and merchant's accounts may be used to create operations outside of the zkChannels contract, the user's Tezos node should get the latest valid value from the blockchain. 
 
@@ -227,7 +232,7 @@ The `TezosEscrowAgent` contract origination proceeds as follows.
 ## Requirements
 * Both the customer and merchant:
     * need tz1 accounts with a sufficient balance to carry out on-chain operations (origination, funding, and closure).
-    * need online tezos clients that can create and inject operations from their (`cust_addr` and `merch_addr`).
+    * need online Tezos clients that can create and inject operations from their (`cust_addr` and `merch_addr`).
     * have already agreed upon the initial storage arguments.
 * In addition, the customer:
     * needs a closing signature from the merchant on the initial state.
@@ -256,7 +261,7 @@ The `TezosEscrowAgent` contract origination proceeds as follows.
     * [`int`:`status`]
     * [`bytes`:`rev_lock`]
 ## Customer creates and signs operation
-The customer will forge and sign the operation with the zkchannels contract and the initial storage arguments listed above. The operation fees are to be handled by the customer's tezos client.
+The customer will forge and sign the operation with the zkchannels contract and the initial storage arguments listed above. The operation fees are to be handled by the customer's Tezos client.
 
 ## Customer injects origination operation
 When the customer injects the origination operation, they watch the blockchain to ensure that the operation is confirmed. If the operation is not confirmed within 60 blocks of the block header referenced in the operation, the operation will be dropped from the mempool and the customer must go back to the previous step to forge and sign a new operation.

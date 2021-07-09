@@ -79,39 +79,46 @@ The customer waits until this operation has reached a confirmation depth of `req
 The merchant waits until this operation has reached a confirmation depth of `required_confirmations` and then updates the channel status to `Closed`.
 
 ## Unilateral Customer Close
-Unilateral customer closes are as specified in `TezosEscrowAgent`.
 
-For the customer to initiate a unilateral channel closure, they call the [Tezos smart contract](2-contract-origination.md#tezos-smart-contract) via `custClose` with the latest state and the merchant's `closing_signature` (`s1` and `s2`) on it. Note that an operation calling the `custClose` entrypoint will only be successful if the sender is `cust_addr`, as defined in in the smart contract. The following arguments are passed into `custClose`:
-* [`mutez`:`bal_cust`]
-* [`mutez`:`bal_merch`]
-* [`bls12_381_fr`:`rev_lock`]
-* [`json`:`closing_signature`]
-  * [`bls12_381_g1`:`s1`]
-  * [`bls12_381_g1`:`s2`]
+The customer initiates a unilateral channel closure by updating the channel status to `PendingClose` and
+calling [the `custClose` entrypoint](5-tezos-escrowagent#cust-close). They provide the merchant and customer balance and revocation lock from the latest state and the latest `closing_signature`. This operation only succeeds if the sender is `cust_addr`, as defined in in the smart contract. 
 
-When the `custClose` entrypoint has been called, the merchant's balance (`bal_merch`) will automatically be transferred to the `merch_addr` by the smart contract. Note that calling `custClose` creates an operation group of size 2: the call to `custClose`, and the transfer of the merchant's balance from the smart contract to `merch_addr`. Being in the same operation group, either both operations will be applied or both will fail. If the `custClose` operation was successful, the transfer to `merch_addr` will also be successful. The customer's balance (`bal_cust`) begins a timeout period to allow the merchant to [dispute](#merchant-dispute) the latest balance. The length of the timeout period is determined by `self_delay` set in the smart contract at origination.
+The customer passes the following arguments to `custClose`:
+* [`mutez`: `bal_cust`]
+* [`mutez`: `bal_merch`]
+* [`bls12_381_fr`: `rev_lock`]
+* [`(bls12_381_g1, bls12_381_g1)`: `closing_signature`]
 
-If the merchant does not call `merchDispute` within the timeout period, the customer should claim their balance by calling the `custClaim` entrypoint, at which point the smart contract will transfer the customer's balance to `cust_addr`. Note that calling `custClaim` creates an operation group of size 2: the call to `custClaim`, and the transfer of the customer's balance from the smart contract to `cust_addr`. Therefore, if the `custClaim` operation is successful, the transfer to `cust_addr` will also be successful. 
+Calling `custClose` creates an operation group of size two: the `custClose` operation and an operation that transfers the merchant's balance from the smart contract to `merch_addr`. Either both operations will apply or both will fail. 
+A successful application timelocks the customer's balance (`bal_cust`) for a timeout period `self_delay` (set in the smart contract at origination). 
 
-Once the `custClaim` operation has reached `required_confirmations`, the customer and merchant consider the channel closed and no longer need to monitor the contract.
+As soon as the merchant sees a `custClose` operation on chain for one of their channels, they update the channel status to `PendingClose`.
+The merchant reads the revocation lock `rev_lock` from the contract storage. They query their [revocation database](merchant-database#revocations) to see if they have a revocation secret 
+such that SHA3-256 hash of the secret equals `rev_lock`.
+- If so, they call [the `merchDispute` entrypoint](5-tezos-escrowagent#merchdispute) with the resulting revocation secret as the argument.
+Calling `merchDispute` creates an operation group of size two: the `merchDispute` operation and an operation that transfers the customer's timelocked balance to the merchant's account `merch_addr`. If successful, the merchant waits until the `merchDispute` operation reaches a confirmation depth of `required_confirmations`, and then updates the channel status to `Closed`. They stop monitoring the contract.
 
-### Merchant Dispute
-As soon as the merchant detects that the customer has called the `custClose` entrypoint, `rev_lock` is read from the contract storage and checked to see if it corresponds to a known `rev_secret` where H(`rev_secret`) == `rev_lock`, using the hash function SHA3-256. If `rev_secret` is known, this means the customer is attempting to close on an outdated state and the merchant should call the `merchDispute` entrypoint of the [Tezos smart contract](2-contract-origination.md#tezos-smart-contract)with:
-* [`bytes`:`rev_secret`]
+- Otherwise, they wait until the `custClose` operation is confirmed to the required confirmation depth and update the channel status to `Closed`. They stop monitoring the contract.
 
-If the `SHA3-256` hash over `rev_secret` is equal to `rev_lock`, the smart contract will send the customer's pending balance to the merchant. Note that this transfer initiated by the smart contract will be part of the same operation group as when `merchDispute` was called. Therefore, if the `merchDispute` operation is successful, the transfer to `merch_addr` will also be successful. 
+After the timelock elapses, the customer claims their balance by calling [the `custClaim` entrypoint](5-tezos-escrowagent#custclaim).
+Calling `custClaim` creates an operation group of size two: the `custClaim` operation and an operation that transfers the customer's balance from the smart contract to `cust_addr`. 
 
-Once the `merchDispute` operation has reached `required_confirmations`, the customer and merchant consider the channel closed and no longer need to monitor the contract.
+When the `custClaim` operation reaches a confirmation depth of `required_confirmations`, the customer updates the channel status to `Closed`. They stop monitoring the contract.
+If the operation does not succeed, the customer remains in the `PendingClose` status.
 
 ## Unilateral Merchant Close
-Unilateral merchant closes are as specified in `TezosEscrowAgent`.
 
-As the merchant does not know the latest state of a payment channel, the merchant initiates a unilateral closure by effectively forcing the customer to close the channel within a timeout period. The length of the timeout period is determined by `self_delay` (the same as the timeout period for `custClose`).
+The merchant initiates a unilateral channel closure by updating the channel status to `PendingClose`. 
 
-The merchant can initiate closure by calling the `expiry` entrypoint of the [Tezos smart contract](2-contract-origination.md#tezos-smart-contract). Note that an operation calling the `expiry` entrypoint will only be successful if the sender is `merch_addr`, as defined in the smart contract.
+They call [the `expiry` entrypoint](5-tezos-escrowagent#expiry). This operation will only be successful if the sender is `merch_addr` as defined in the contract. 
+The operation timelocks the channel balance for a timeout period of `self_delay` (set in the smart contract at origination).
 
-As soon as the customer observes the `expiry` entrypoint on the smart contract being called, they should prevent any payments on the channel from happening and call `custClose` with the latest channel state and closing signature (as described in [Unilateral Customer Close](#unilateral-customer-close)).
+As soon as the customer observes the `expiry` entrypoint on chain for one of their channels, they must
+- Complete any payment in progress.
+- Update the channel status to `PendingClose`.
+- Call the `custClose` entrypoint and continue as in [Unilateral Customer Close](#unilateral-customer-close).
 
-If the timeout period has passed without the customer calling `custClose`, the merchant should close the channel and receive the entire channel balance by calling the `merchClaim` entrypoint. When `merchClaim` is called, the smart contract will initiate a transfer to the `merch_addr`. Note that calling `merchClaim` creates an operation group of size 2: the call to `merchClaim`, and the transfer of the entire channel balance from the smart contract to `merch_addr`. Therefore, if the `merchClaim` operation is successful, the transfer to `merch_addr` will also be successful. 
+If the timeout period passes without the customer calling the `custClose` entrypoint, the merchant calls [the `merchClaim` entrypoint](5-tezos-escrowagent#merchclaim). This creates an operation group of size two: the `merchClaim` operation and an operation that transfers the entire channel balance to `merch_addr`.
 
-Once the `merchClaim` operation has reached `required_confirmations`, the customer and merchant consider the channel closed and no longer need to monitor the contract.
+Once the `merchClaim` operation has reached a confirmation depth of `required_confirmations`, the merchant updates the channel status to `Closed` and no longer needs to monitor the contract.
+Similarly, the customer updates the channel status to `Closed` and no longer needs to monitor the contract.
