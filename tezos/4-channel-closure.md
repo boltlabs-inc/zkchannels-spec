@@ -15,7 +15,7 @@ Mutual close is initiated by the customer and consists of a single round of comm
 That is:
 1. The customer initiates `zkAbacus.Close` by sending the message `mutual_close_c` to the merchant.
 2. The merchant runs `zkAbacus.Close`. If `zkAbacus.Close` fails, the merchant aborts. Otherwise, the merchant signs the appropriate closing message as specified below and sends this signature in the message `mutual_close_m` to the customer. 
-3. The customer checks the validity of the received `mutual_close_m` message and closes the smart contract by calling the `mutualClose` entrypoint in the [Tezos smart contract](2-contract-origination.md#tezos-smart-contract).
+3. The customer checks the validity of the received `mutual_close_m` message and closes the smart contract by calling [the `mutualClose` entrypoint](5-tezos-escrowagent#mutualclose) in the [Tezos smart contract](2-contract-origination.md#tezos-smart-contract).
 
 The details of each message are as follows.
 
@@ -116,7 +116,7 @@ The operation timelocks the channel balance for a timeout period of `self_delay`
 As soon as the customer observes the `expiry` entrypoint on chain for one of their channels, they must
 - Complete any payment in progress.
 - Update the channel status to `PendingClose`.
-- Call the `custClose` entrypoint and continue as in [Unilateral Customer Close](#unilateral-customer-close).
+- Call [the `custClose` entrypoint](5-tezos-escrowagent#custclose) and continue as in [Unilateral Customer Close](#unilateral-customer-close).
 
 If the timeout period passes without the customer calling the `custClose` entrypoint, the merchant calls [the `merchClaim` entrypoint](5-tezos-escrowagent#merchclaim). This creates an operation group of size two: the `merchClaim` operation and an operation that transfers the entire channel balance to `merch_addr`.
 
