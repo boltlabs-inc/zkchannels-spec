@@ -1,12 +1,15 @@
 # zkChannels on Tezos Introduction
   * [zkChannels Overview](#zkchannels-overview) 
-  * [System Setup and Merchant Initialization](1-setup.md)
-  * [Channel Establishment](2-channel-establishment.md)
-  * [Channel Payments](3-channel-payments.md)
-  * [Channel Closure](4-channel-closure.md) 
-  * [Tezos EscrowAgent Realization](5-tezos-escrowagent.md) 
+  * [System Setup and Merchant Initialization](#system-setup-and-merchant-initialization)
+  * [Channel Establishment](#channel-establishment)
+  * [Channel Payments](#channel-payments)
+  * [Channel Closure](#channel-closure) 
   * [References](#references) 
-  * [Glossary](#glossary) 
+  * [Glossaries and Notation](#glossaries-and-notation)
+      * [Tezos Glossary](#tezos-glossary)
+      * [zkChannels Glossary](#zkchannels-glossary)
+      * [zkChannels Notation Summary](#zkchannels-notation-summary)
+
 
 
 ## zkChannels Overview
@@ -15,25 +18,25 @@ zkChannels is a layer 2 protocol that enables anonymous and scalable payments be
 A zkChannels network for a given merchant follows a 'hub-and-spoke' topology. A hub-and-spoke topology consists of multiple outlying components (the customers), each of which is connected to a central component (the merchant).
 
 zkChannels on Tezos is built out two main components:
-* [`zkAbacus`](https://github.com/boltlabs-inc/blindsigs-protocol/releases/download/ecc-review/zkchannels-protocol-spec-v3.pdf). This component contains the functionality for a customer and a merchant to open, track payments, and collaboratively close a channel. This component does not interact with a payment network.
-* [`TezosEscrowAgent`](5-tezos-escrowagent.md): A Tezos realization of the `zkEscrowAgent` functionality. This component provides the functionality for a customer and a merchant to open and close a zkChannels escrow account as a [Tezos smart contract](2-contract-origination.md#tezos-smart-contract). 
+* `zkAbacus`: [The zkAbacus component](https://github.com/boltlabs-inc/blindsigs-protocol/releases/download/ecc-review/zkchannels-protocol-spec-v3.pdf) contains the functionality for a customer and a merchant to open, track payments, and collaboratively close a channel. This component does not interact with a blockchain.
+* `TezosEscrowAgent`: [The TezosEscrowAgent component](5-tezos-escrowagent.md) provides the functionality for a customer and a merchant to open and close a zkChannels escrow account as a Tezos smart contract. Formally, this is a realization of the [zkEscrowAgent functionality](https://github.com/boltlabs-inc/blindsigs-protocol/releases/download/ecc-review/zkchannels-protocol-spec-v3.pdf) for Tezos. 
 
 We briefly describe the protocol in four phases: System Setup and Merchant Initialization, Channel Establishment, Channel Payments, and Channel Closure.
 
 ## System Setup and Merchant Initialization
-Primitive specification and defaults are given [here](1-setup.md#system-setup)
+Primitive specification and defaults are given [here](1-setup.md#system-setup).
 Each merchant using zkChannels generates long-lived public keys and parameters for use
-with all zkChannels as detailed [here](1-setup.md#merchant-setup). 
+with all zkChannels as detailed [here](1-setup.md#merchant-setup). The merchant also initializes their [databases](merchant-database.md).
 
 
 ## Channel Establishment
 
-The customer and merchant agree on parameters, initialize a `zkAbacus` channel, open and fund a Tezos smart contract, and activate the `zkAbacus` channel as detailed [here](2-channel-establishment.md).
+The customer and merchant agree on parameters, initialize a `zkAbacus` channel, originate and fund a Tezos smart contract, and activate the `zkAbacus` channel as detailed [here](2-channel-establishment.md). Details specific to the smart contract functionality are given [here](5-tezos-escrowagent.md).
 
 ## Channel Payments
-Channel payments are specified in 4.4 of the [zkChannels Protocol](https://github.com/boltlabs-inc/blindsigs-protocol/releases/download/ecc-review/zkchannels-protocol-spec-v3.pdf). The customer initiates all payment requests, but both positive and negative payment values are supported. 
+Channel payments are specified using zkAbacus as a building block [here](3-channel-payments.md). For full details, please see the [zkChannels Protocol document](https://github.com/boltlabs-inc/blindsigs-protocol/releases/download/ecc-review/zkchannels-protocol-spec-v3.pdf). 
 
-In zkChannels, the customer offers a payment in return for a service from a merchant. If the merchant agrees to this payment and to provide the requested service, the parties run `zkAbacus.Pay` on the agreed-upon amount.
+In zkChannels, the customer offers a payment in return for a service from a merchant. If the merchant agrees to this payment and to provide the requested service, the parties run `zkAbacus.Pay` on the agreed-upon amount. The customer initiates all payment requests, but both positive and negative payment values are supported. 
 
 A zkChannel may be thought of a _sequence of _states__; the `zkAbacus` component allows state updates via `zkAbacus.Pay`:
 * The customer always has a _payment tag_ for the current state, which they "spend" in `zkAbacus.Pay`.
@@ -58,7 +61,7 @@ There are three options for [channel closure](4-channel-closure.md):
 [Introduction to Tezos Signing Operations](https://www.ocamlpro.com/2018/11/21/an-introduction-to-tezos-rpcs-signing-operations/)
 [Micheline data format](https://tezos.gitlab.io/shell/micheline.html).
 
-## Glossary
+## Glossaries and Notation
 ### Tezos Glossary 
 *  **account**: 
    An account is a unique identifier within the protocol. There are _implicit accounts_ that have addresses beginning with 'tz1', and there are _smart contract_ accounts that have addresses beginning with 'KT1'. Implicit accounts are linked to a public key and cannot include a script.
@@ -115,7 +118,7 @@ There are three options for [channel closure](4-channel-closure.md):
 *  **zkChannel**:
    A _zkChannel_ is a special type of payment channel that provides privacy for a customer when interacting with a merchant. More generally, a _payment channel_ allows two participants to send and receive payments to each other: when realized using cryptocurrencies, these channels typically consist of an on-chain escrow account and an off-chain state update protocol. A zkChannel is similarly comprised of two parts: an on-network escrow account and an off-network state update protocol, but the state update protocol does not allow the merchant to learn which specific channel is updated or how.
 
-### zkChannels Notation
+### zkChannels Notation Summary
 * **`cid`**:
    A unique channel identifier generated as a SHA3-256 hash of random contributions from both parties, together with `zkAbacus` channel parameters and `TezosEscrowAgent` escrow account parameters. It is set during [channel establishment](2-channel-establishment.md) by the merchant after creating the [`open_m` message](2-channel-establishment.md#the-open_m-message), and by the customer after the receipt of the [`open_m` message](2-channel-establishment.md#the-open_m-message).
 * **`close`**: 

@@ -7,5 +7,5 @@ This repository contains the specification for the zkChannels protocol instantia
 1. [Channel Establishment](tezos/2-channel-establishment.md)
 1. [Channel Payments](tezos/3-channel-payments.md)
 1. [Channel Closure](tezos/4-channel-closure.md)
-1. [Tezos zkEscrowAgent](tezos/5-tezos-escrowagent.md)
+1. [TezosEscrowAgent](tezos/5-tezos-escrowagent.md)
 1. [Merchant Database](tezos/merchant-database.md)
