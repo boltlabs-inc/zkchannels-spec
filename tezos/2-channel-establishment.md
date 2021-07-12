@@ -186,6 +186,7 @@ Upon receipt, the customer:
   - In the dual-funded case, waits for the contract storage status to be `OPEN` for `required_confirmations` blocks before proceeding. Update the channel status to `MerchantFunded`.
   - If the customer does not see a confirmed `addFunding` operation from the merchant within a specified timeout period, they call [the `reclaimFunding` entrypoint](5-tezos-escrowagent#reclaimfunding).
   - Checks that `payment_tag` is a valid signature with respect to the merchant's zkAbacus Pointcheval Sanders public key. If not, aborts by initiating a unilateral close.
+  - Updates the channel status to `Ready`.
 
 #### Merchant Requirements
 Before sending, the merchant:
