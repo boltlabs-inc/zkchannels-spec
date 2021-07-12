@@ -133,12 +133,12 @@ channel is:
 originated → customer funded → merchant funded → active → pending close → closed
 
 In addition, any channel that's not already closed may skip to "pending close"
-if either the merchant or customer perform a unilateral close.
+if either the merchant or customer performs a unilateral close.
 
 Any update must be an atomic compare-and-swap that asserts the previous status
 to prevent race conditions. For example, if multiple sessions try to close the
-same channel concurrently, only one of them will succeed. The other channel
-will read the updated status, see that it's already closed, and fail.
+same channel concurrently, exactly one session will succeed. The other sessions
+will read the updated status, see that the channel is already either closed or in the process of closing, and fail.
 
 For full details about when the merchant transitions from one status to the
 next, [refer to the overview of the protocol](0-overview-and-index.md).
@@ -170,5 +170,5 @@ next, [refer to the overview of the protocol](0-overview-and-index.md).
 
 #### Notes
 
-- **required** - This column cannot be empty.
-- **unique** - No two entries can contain the same value.
+- **required:** This column cannot be empty.
+- **unique:** No two entries can contain the same value.
