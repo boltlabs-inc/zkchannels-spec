@@ -6,6 +6,12 @@ A merchant in the zkChannels protocol is expected to have zkChannels open with m
 
 That is, the merchant _cannot associate any given received payment to a particular channel_. Instead, the merchant keeps the information sufficient to prevent double spends and punish the customer if they attempt to close the escrow account down on an old state. Two types of information are necessary to achieve this functionality: _nonces_ and _revocation pairs_, as discussed in the [payments overview](0-overview-and-index.md#channel-payments). The merchant stores this information in a single _revocations database_ as follows.
 
+Each merchant has its own database. The merchant server queries it to perform
+the steps of the protocol, but customers and other merchants cannot query it.
+Although we refer to it as the singular merchant database throughout the
+specification, in practice it may be sharded or distributed so long as it
+supports all the [operations](#operations).
+
 ### Revocations Database
 
 This database consists of two independent tables:
