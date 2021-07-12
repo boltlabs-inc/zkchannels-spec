@@ -37,8 +37,8 @@ The customer:
 #### Merchant Requirements
 Upon receipt, the merchant:
   - Aborts if no channel with identifier `cid` and status `Active` exists.
-  - Sets the status for the channel with identifier `cid` to `PendingClose`.
-  - Atomically checks the revocation database `revocation_DB` for `rev_lock` and inserts the value if it is not already there. If the value already exists in the database, the merchant aborts the mutual close session.
+  - [Update Channel Status][merchant_update_channel_status] for the channel with identifier `cid` to `PendingClose`.
+  - Atomically [Insert Revocation Lock][merchant_insert_revlock] if it doesn't already exist. If the value already exists in the database, the merchant aborts the mutual close session.
   - Checks that `closing_signature` is a valid Pointcheval Sanders signature on the proposed closing state `(cid, close, rev_lock, bal_cust, bal_merch)` with respect to the merchant's blind signing public key `merch_PS_pk`. If this check fails, the merchant aborts.
  
 ### The `mutual_close_m` Message
@@ -76,7 +76,7 @@ The customer calls this entrypoint with the following arguments:
 The customer waits until this operation has reached a confirmation depth of `required_confirmations` and then updates the channel status to `Closed`.
 
 #### Merchant Requirements
-The merchant waits until this operation has reached a confirmation depth of `required_confirmations` and then updates the channel status to `Closed`.
+The merchant waits until this operation has reached a confirmation depth of `required_confirmations` and then [Update Channel Status][merchant_update_channel_status] to `Closed`.
 
 ## Unilateral Customer Close
 
@@ -92,13 +92,12 @@ The customer passes the following arguments to `custClose`:
 Calling `custClose` creates an operation group of size two: the `custClose` operation and an operation that transfers the merchant's balance from the smart contract to `merch_addr`. Either both operations will apply or both will fail. 
 A successful application timelocks the customer's balance (`bal_cust`) for a timeout period `self_delay` (set in the smart contract at origination). 
 
-As soon as the merchant sees a `custClose` operation on chain for one of their channels, they update the channel status to `PendingClose`.
-The merchant reads the revocation lock `rev_lock` from the contract storage. They query their [revocation database](merchant-database#revocations) to see if they have a revocation secret 
-such that SHA3-256 hash of the secret equals `rev_lock`.
+As soon as the merchant sees a `custClose` operation on chain for one of their channels, they [Update Channel Status][merchant_update_channel_status] to `PendingClose`.
+The merchant reads the revocation lock `rev_lock` from the contract storage. They call [Insert Revocation Lock][merchant_insert_revlock] with the lock to add it to their database and determine if they've previously seen a revocation secret with a SHA3-256 hash that equals `rev_lock`.
 - If so, they call [the `merchDispute` entrypoint](5-tezos-escrowagent#merchdispute) with the resulting revocation secret as the argument.
-Calling `merchDispute` creates an operation group of size two: the `merchDispute` operation and an operation that transfers the customer's timelocked balance to the merchant's account `merch_addr`. If successful, the merchant waits until the `merchDispute` operation reaches a confirmation depth of `required_confirmations`, and then updates the channel status to `Closed`. They stop monitoring the contract.
+Calling `merchDispute` creates an operation group of size two: the `merchDispute` operation and an operation that transfers the customer's timelocked balance to the merchant's account `merch_addr`. If successful, the merchant waits until the `merchDispute` operation reaches a confirmation depth of `required_confirmations`, and then [Update Channel Status][merchant_update_channel_status] to `Closed`. They stop monitoring the contract.
 
-- Otherwise, they wait until the `custClose` operation is confirmed to the required confirmation depth and update the channel status to `Closed`. They stop monitoring the contract.
+- Otherwise, they wait until the `custClose` operation is confirmed to the required confirmation depth and [Update Channel Status][merchant_update_channel_status] to `Closed`. They stop monitoring the contract.
 
 After the timelock elapses, the customer claims their balance by calling [the `custClaim` entrypoint](5-tezos-escrowagent#custclaim).
 Calling `custClaim` creates an operation group of size two: the `custClaim` operation and an operation that transfers the customer's balance from the smart contract to `cust_addr`. 
@@ -108,7 +107,7 @@ If the operation does not succeed, the customer remains in the `PendingClose` st
 
 ## Unilateral Merchant Close
 
-The merchant initiates a unilateral channel closure by updating the channel status to `PendingClose`. 
+The merchant initiates a unilateral channel closure by calling [Update Channel Status][merchant_update_channel_status] with `PendingClose`. 
 
 They call [the `expiry` entrypoint](5-tezos-escrowagent#expiry). This operation will only be successful if the sender is `merch_addr` as defined in the contract. 
 The operation timelocks the channel balance for a timeout period of `self_delay` (set in the smart contract at origination).
@@ -120,5 +119,8 @@ As soon as the customer observes the `expiry` entrypoint on chain for one of the
 
 If the timeout period passes without the customer calling the `custClose` entrypoint, the merchant calls [the `merchClaim` entrypoint](5-tezos-escrowagent#merchclaim). This creates an operation group of size two: the `merchClaim` operation and an operation that transfers the entire channel balance to `merch_addr`.
 
-Once the `merchClaim` operation has reached a confirmation depth of `required_confirmations`, the merchant updates the channel status to `Closed` and no longer needs to monitor the contract.
+Once the `merchClaim` operation has reached a confirmation depth of `required_confirmations`, the merchant calls [Update Channel Status][merchant_update_channel_status] with `Closed` and no longer needs to monitor the contract.
 Similarly, the customer updates the channel status to `Closed` and no longer needs to monitor the contract.
+
+[merchant_update_channel_status]: merchant_database.md#update-channel-status
+[merchant_insert_revlock]: merchant_database.md#insert-revocation-lock--secret
