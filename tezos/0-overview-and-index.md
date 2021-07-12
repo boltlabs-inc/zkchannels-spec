@@ -38,7 +38,7 @@ Channel payments are specified using zkAbacus as a building block [here](3-chann
 
 In zkChannels, the customer offers a payment in return for a service from a merchant. If the merchant agrees to this payment and to provide the requested service, the parties run `zkAbacus.Pay` on the agreed-upon amount. The customer initiates all payment requests, but both positive and negative payment values are supported. 
 
-A zkChannel may be thought of a _sequence of _states__; the `zkAbacus` component allows state updates via `zkAbacus.Pay`:
+A zkChannel may be thought of as a sequence of _states_; each state contains a channel identifier, the current allocation of the channel balance to customer and merchant, and information needed to track freshness of and revoke states. The `zkAbacus` component allows state updates via `zkAbacus.Pay`:
 * The customer always has a _payment tag_ for the current state, which they "spend" in `zkAbacus.Pay`.
 * In return, the merchant sends the customer a _closing authorization signature_ for the new state.
 * With the ability to close on the new state, the customer then invalidates the spent state's closing authorization signature by providing the merchant a _revocation secret_.

@@ -18,9 +18,9 @@ different sessions.
 - **Initial Merchant Balance**: The amount initially deposited by the merchant
   upon establishing the channel. The customer may use this for their own
   accounting purposes, outside the scope of the protocol.
-- **Status**: All the information pertaining to the present status of the
-  channel. One of the following: [Inactive][], [Ready][], [Started][],
-  [Locked][], [PendingClose][], [Closed][].
+- **Channel State and Status**: All the information pertaining to the present state and status of the
+  channel, including a unique channel identifier, allocation of the balance to customer and merchant, a nonce, and a revocation pair. The status must be one of the following: [Inactive][], [Ready][], [Started][],
+  [Locked][], [PendingClose][], [Closed][]. Internal details of the channel state are discussed in the zkAbacus specification in [the zkChannels protocol document](https://github.com/boltlabs-inc/blindsigs-protocol/releases/download/ecc-review/zkchannels-protocol-spec-v3.pdf).
 
 ## Operations
 
@@ -79,7 +79,7 @@ Here, we describe briefly what each status means for the channel:
 | `MerchantFunded` | Contract is funded by the merchant (possibly vacuously).
 | `Ready`          | Customer has a valid pay token | Customer can make payments on the channel.
 | `Started`        | Customer has made a payment request and provided proof that it is valid. | Customer cannot initiate another payment on the channel.
-| `Locked`         | Customer has a valid close token for the new channel balances. | Customer cannot initiate another payment on the channel.
+| `Locked`         | Customer has a valid closing signature for the new channel balances. | Customer cannot initiate another payment on the channel.
 | `PendingClose`   | One of the parties has initiated a close procedure.
 | `Closed`         | The balances on the smart contract are paid out. 
 
