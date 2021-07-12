@@ -147,26 +147,35 @@ next, [refer to the overview of the protocol](0-overview-and-index.md).
 
 **nonces**
 
-| field | properties       |
-| ----- | ---------------- |
-| data  | unique, required |
+| field | properties       | type      |
+| ----- | ---------------- | --------- |
+| data  | unique, required | [Nonce][] |
 
 **revocations**
 
-| field  | properties       |
-| ------ | ---------------- |
-| lock   | unique, required |
-| secret |                  |
+| field  | properties       | type                 |
+| ------ | ---------------- | -------------------- |
+| lock   | unique, required | [RevocationLock][]   |
+| secret |                  | [RevocationSecret][] |
 
 **channels**
 
-| field                    | properties                                                                                                 |
-| ------------------------ | ---------------------------------------------------------------------------------------------------------- |
-| channel_id               | required                                                                                                   |
-| contract_id              | required                                                                                                   |
-| initial_merchant_balance | required                                                                                                   |
-| initial_customer_balance | required                                                                                                   |
-| status                   | required, one of ["originated", "customer funded", "merchant funded", "active", "pending close", "closed"] |
+| field                    | properties                                                                                                 | type                |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------- | ------------------- |
+| channel_id               | required                                                                                                   | [ChannelId][]       |
+| contract_id              | required                                                                                                   | [ContractId][]      |
+| initial_merchant_balance | required                                                                                                   | [MerchantBalance][] |
+| initial_customer_balance | required                                                                                                   | [CustomerBalance][] |
+| status                   | required, one of ["originated", "customer funded", "merchant funded", "active", "pending close", "closed"] | [ChannelStatus][]   |
+
+[nonce]: https://github.com/boltlabs-inc/libzkchannels-crypto/blob/f953b6187370f0b42edf0571c4abbae1a473e2fe/zkabacus-crypto/src/nonce.rs#L7-L10
+[revocationlock]: https://github.com/boltlabs-inc/libzkchannels-crypto/blob/f953b6187370f0b42edf0571c4abbae1a473e2fe/zkabacus-crypto/src/revlock.rs#L19-L22
+[revocationsecret]: https://github.com/boltlabs-inc/libzkchannels-crypto/blob/f953b6187370f0b42edf0571c4abbae1a473e2fe/zkabacus-crypto/src/revlock.rs#L24-L27
+[channelid]: https://github.com/boltlabs-inc/libzkchannels-crypto/blob/f953b6187370f0b42edf0571c4abbae1a473e2fe/zkabacus-crypto/src/states.rs#L61-L63
+[contractid]: https://github.com/boltlabs-inc/zeekoe/blob/f953b6187370f0b42edf0571c4abbae1a473e2fe/src/protocol.rs#L102-L104
+[merchantbalance]: https://github.com/boltlabs-inc/libzkchannels-crypto/blob/f953b6187370f0b42edf0571c4abbae1a473e2fe/zkabacus-crypto/src/states.rs#L158-L160
+[customerbalance]: https://github.com/boltlabs-inc/libzkchannels-crypto/blob/f953b6187370f0b42edf0571c4abbae1a473e2fe/zkabacus-crypto/src/states.rs#L194-L196
+[channelstatus]: https://github.com/boltlabs-inc/zeekoe/blob/f953b6187370f0b42edf0571c4abbae1a473e2fe/src/protocol.rs#L113-L122
 
 #### Notes
 
