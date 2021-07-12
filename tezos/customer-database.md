@@ -26,7 +26,7 @@ different sessions.
 
 | Name                                             | Input                                      | Output  | Summary                                                                                           |
 | ------------------------------------------------ | ------------------------------------------ | ------- | ------------------------------------------------------------------------------------------------- |
-| [**Insert Channel**][insert_channel]             | Label, Address, Inactive (All Required)    | None    | Insert the new channel if it doesn't already exist. If the insertion failed, return the Inactive. |
+| [**Insert Channel**][insert_channel]             | Label, Address, Inactive (All Required)    | None    | Insert the new channel if it doesn't already exist. If the insertion fails, return the Inactive. |
 | [**Get Address**][get_address]                   | Label (Required)                           | Address | Get the address of a channel with a given label.                                                  |
 | [**Update Channel State**][update_channel_state] | Label, Old State, New State (All Required) | None    | Update an existing channel's state atomically.                                                    |
 
@@ -39,8 +39,8 @@ different sessions.
 
 `zkAbacus.Establish` calls this operation. This operation is atomic to prevent
 race conditions. For example, if multiple Establish sessions try to insert a
-channel with the same lable, only the first will succeed. Subsequent inserts
-will fail because a channel already exists with the label.
+channel with the same label, only the first session succeeds. Subsequent inserts
+fail because a channel already exists with the given label.
 
 ### Get Address
 
@@ -60,8 +60,7 @@ next. Specifically:
 | `zkAbacus.Pay`       | `Locked → Ready`        | Validated the merchant's approval message.                     |
 | `zkAbacus.Close`     | `PendingClose → Closed` | Mutual close has reached required confirmation depth on chain. |
 
-This update should be performed within an atomic transaction, such that it only
-succeeds if the condition is met.
+This update must be atomic and succeed if and only if the given condition is met.
 
 ## Schema
 
@@ -88,5 +87,5 @@ succeeds if the condition is met.
 
 #### Notes
 
-- **required** - This column cannot be empty.
-- **unique** - No two entries can contain the same value.
+- **required:** This column cannot be empty.
+- **unique:**  No two entries can contain the same value.
