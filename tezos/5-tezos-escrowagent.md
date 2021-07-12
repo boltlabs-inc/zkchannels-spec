@@ -1,4 +1,4 @@
-# Tezos zkEscrowAgent 
+# TezosEscrowAgent 
 
 [`TezosEscrowAgent`](5-tezos-escrowagent.md) is a realization of [the `zkEscrowAgent` functionality](https://github.com/boltlabs-inc/blindsigs-protocol/releases/download/ecc-review/zkchannels-protocol-spec-v3.pdf) for Tezos. This component provides the functionality for a customer and a merchant to open and close a zkChannels escrow account as a [Tezos smart contract](2-contract-origination.md#tezos-smart-contract). 
 It includes support for mutual closes, unilateral closes by either the customer or the merchant, and dispute resolution via on-chain punishment.
