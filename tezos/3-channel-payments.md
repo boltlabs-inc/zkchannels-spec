@@ -4,8 +4,12 @@ A customer wishes to purchase a good or service from the merchant using their zk
 
 1. The customer sends a _payment request message_ containing the tuple `(x, amt)` to the merchant.
 2. The merchant checks the payment request message and decides whether to accept or reject. If the former, they send `accept`; if the latter, they send `reject` and abort.
-3. Upon receipt of `reject`, the customer aborts the session. Upon receipt of `accept`, the customer and merchant run `zkAbacus.Pay()` for amount `amt`. (The customer must use their current channel state data to process this payment, and the merchant must have read and write access to their [revocation database](1-setup.md#Revocation-database-initialization) `revocation_DB` and their [blind signing key](1-setup.md#Blind-signing-key-generation).
+3. Upon receipt of `reject`, the customer aborts the session. Upon receipt of `accept`, the customer and merchant run `zkAbacus.Pay()` for amount `amt`. 
+The customer must have status `Ready` and must use the current channel state data to process the payment. 
+The merchant must have read and write access to their [revocation database](1-setup.md#Revocation-database-initialization) `revocation_DB` and their [blind signing key](1-setup.md#Blind-signing-key-generation).
 
+    During execution of `zkAbacus.Pay()`, the customer will transition their status from `Ready` to `Started` to `Locked` and finally to `Ready`. For more details on this functionality, see Section 3.3.2 of the 
+[zkChannels Private Payments Protocol](https://github.com/boltlabs-inc/blindsigs-protocol/releases/download/ecc-review/zkchannels-protocol-spec-v3.pdf).
 
 4. The merchant receives a success indicator from `zkAbacus.Pay()`, which can be used to decide whether or not the requested service should be provided:
 
@@ -17,6 +21,6 @@ A customer wishes to purchase a good or service from the merchant using their zk
 
 
 5. The customer also receives a success indicator from `zkAbacus.Pay()` and does the following:
-    * If the customer receives `revocation-incomplete`, the customer sets their channel status to `frozen` and initiates a [unilateral customer close](4-channel-closure.md#unilateral-customer-close) on their current state.
-    * If the customer receives `revocation-complete`, the customer sets their channel status to `frozen` and initiates a [unilateral customer close](4-channel-closure.md#unilateral-customer-close) on the updated state, the balances of which reflect a payment of amount `amt`.
-    * If the customer receives `state-updated`, then the customer should expect to receive the requested good or service, and may continue to make additional payments on the channel.
+    * If the customer receives `revocation-incomplete`, they will have a channel status of `Started`. They initiate a [unilateral customer close](4-channel-closure.md#unilateral-customer-close) on their current state, not including the attempted payment.
+    * If the customer receives `revocation-complete`, they  will have a channel status of `Locked`. They initiate a [unilateral customer close](4-channel-closure.md#unilateral-customer-close) on the updated state, the balances of which reflect a payment of amount `amt`.
+    * If the customer receives `state-updated`, the channel status is `Ready`. They should expect to receive the requested good or service and may continue to make additional payments on the channel.
