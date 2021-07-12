@@ -1,2 +1,4 @@
 # zkchannels-spec
-specifications of the blockchain interaction for zkchannels
+
+This repository contains specifications for the blockchain interactions in
+zkChannels.
