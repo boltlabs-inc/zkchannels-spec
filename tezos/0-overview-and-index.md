@@ -1,4 +1,4 @@
-# zkChannels on Tezos: Overview and Index
+# zkChannels on Tezos Introduction
   * [zkChannels Overview](#zkchannels-overview) 
   * [System Setup and Merchant Initialization](1-setup.md)
   * [Channel Establishment](2-channel-establishment.md)
