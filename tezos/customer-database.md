@@ -97,17 +97,17 @@ Here, we describe briefly what each status means for the channel:
 | state                    | required         | [ChannelState][channel_state], which is one of: Inactive, Originated, CustomerFunded, MerchantFunded, Ready, Started, Locked, PendingClose, Closed |
 
 
-[channel_state]: https://github.com/boltlabs-inc/zeekoe/blob/main/src/database/customer/state.rs#L19
-[channel_name]: https://github.com/boltlabs-inc/zeekoe/blob/ace087b97f51752f8a86241772bb3eaf24c7ad3d/src/customer.rs#L39-L41
-[zk_channel_address]: https://github.com/boltlabs-inc/zeekoe/blob/063d7275d65ed0c7cbe1c9d8b2f669fc86483978/src/transport/client.rs#L225-L231
-[customer_balance]: https://github.com/boltlabs-inc/libzkchannels-crypto/blob/0983f42dc9e8ecd08d6aa068ae9d24bee9913110/zkabacus-crypto/src/states.rs#L194-L196
-[merchant_balance]: https://github.com/boltlabs-inc/libzkchannels-crypto/blob/0983f42dc9e8ecd08d6aa068ae9d24bee9913110/zkabacus-crypto/src/states.rs#L158-L160
-[inactive]: https://github.com/boltlabs-inc/libzkchannels-crypto/blob/99a77f534d0aace02b80fdd1ff141b5378c2c112/zkabacus-crypto/src/customer.rs#L209-L217
-[ready]: https://github.com/boltlabs-inc/libzkchannels-crypto/blob/99a77f534d0aace02b80fdd1ff141b5378c2c112/zkabacus-crypto/src/customer.rs#L104-L113
-[started]: https://github.com/boltlabs-inc/libzkchannels-crypto/blob/99a77f534d0aace02b80fdd1ff141b5378c2c112/zkabacus-crypto/src/customer.rs#L339-L348
-[locked]: https://github.com/boltlabs-inc/libzkchannels-crypto/blob/99a77f534d0aace02b80fdd1ff141b5378c2c112/zkabacus-crypto/src/customer.rs#L479-L489
-[pendingclose]: https://github.com/boltlabs-inc/libzkchannels-crypto/blob/99a77f534d0aace02b80fdd1ff141b5378c2c112/zkabacus-crypto/src/customer.rs#L363-L370
-[closed]: https://github.com/boltlabs-inc/zeekoe/blob/b2272d2e47bda800082b399c01b6561cd7b165b5/src/database/customer/state.rs#L37-L43
+[channel_state]: https://github.com/boltlabs-inc/zeekoe/blob/9240bbc0982c563be48d93df5c643dac3512614f/src/database/customer/state.rs#L15-L33
+[channel_name]: https://github.com/boltlabs-inc/zeekoe/blob/9240bbc0982c563be48d93df5c643dac3512614f/src/customer.rs#L39-L41
+[zk_channel_address]: https://github.com/boltlabs-inc/zeekoe/blob/9240bbc0982c563be48d93df5c643dac3512614f/src/transport/client.rs#L225-L231
+[customer_balance]: https://github.com/boltlabs-inc/libzkchannels-crypto/blob/f953b6187370f0b42edf0571c4abbae1a473e2fe/zkabacus-crypto/src/states.rs#L194-L196
+[merchant_balance]: https://github.com/boltlabs-inc/libzkchannels-crypto/blob/f953b6187370f0b42edf0571c4abbae1a473e2fe/zkabacus-crypto/src/states.rs#L158-L160
+[inactive]: https://github.com/boltlabs-inc/libzkchannels-crypto/blob/f953b6187370f0b42edf0571c4abbae1a473e2fe/zkabacus-crypto/src/customer.rs#L209-L217
+[ready]: https://github.com/boltlabs-inc/libzkchannels-crypto/blob/f953b6187370f0b42edf0571c4abbae1a473e2fe/zkabacus-crypto/src/customer.rs#L104-L113
+[started]: https://github.com/boltlabs-inc/libzkchannels-crypto/blob/f953b6187370f0b42edf0571c4abbae1a473e2fe/zkabacus-crypto/src/customer.rs#L339-L348
+[locked]: https://github.com/boltlabs-inc/libzkchannels-crypto/blob/f953b6187370f0b42edf0571c4abbae1a473e2fe/zkabacus-crypto/src/customer.rs#L479-L489
+[pendingclose]: https://github.com/boltlabs-inc/libzkchannels-crypto/blob/f953b6187370f0b42edf0571c4abbae1a473e2fe/zkabacus-crypto/src/customer.rs#L363-L370
+[closed]: https://github.com/boltlabs-inc/zeekoe/blob/9240bbc0982c563be48d93df5c643dac3512614f/src/database/customer/state.rs#L37-L43
 
 #### Notes
 
