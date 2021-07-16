@@ -4,28 +4,34 @@
 It includes support for mutual closes, unilateral closes by either the customer or the merchant, and dispute resolution via on-chain punishment.
 
 
-* [Tezos background](#tezos-background)
-    * [Operation structure](#operation-structure)
-    * [Forging an operation](#operation-structure)
-    * [Signing an operation](#signing-an-operation)
-* [Contract requirements](#contract-requirements)
-* [Entry point requirements](#entry-point-requirements)
-    * [`addFunding`](#addfunding)
-    * [`reclaimFunding`](#reclaimfunding)
-    * [`expiry`](#expiry)
-    * [`custClose`](#custclose)
-    * [`merchDispute`](#merchdispute)
-    * [`custClaim`](#custclaim)
-    * [`merchClaim`](#merchclaim)
-    * [`mutualClose`](#mutualclose)
-* [Contract Origination and Funding](#contract-origination-and-funding)
-    * [Requirements](#requirements)
-    * [Customer creates and signs operation](#customer-creates-and-signs-operation)
-    * [Customer injects origination operation](#customer-injects-origination-operation)
-    * [Origination confirmed ](#origination-confirmed )
-    * [Customer funds their side of the contract](#customer-funds-their-side-of-the-contract)
-    * [Merchant verifies the contract](#merchant-verifies-the-contract)
-    * [Reclaim funding](#reclaim-funding)
+- [TezosEscrowAgent](#tezosescrowagent)
+  - [Tezos background](#tezos-background)
+    - [Operation structure](#operation-structure)
+    - [Forging an operation](#forging-an-operation)
+    - [Signing an operation](#signing-an-operation)
+    - [Operation fees](#operation-fees)
+  - [Contract Requirements](#contract-requirements)
+    - [Initial contract arguments](#initial-contract-arguments)
+    - [Global default arguments](#global-default-arguments)
+    - [Fixed arguments](#fixed-arguments)
+    - [Entry point requirements](#entry-point-requirements)
+      - [`addFunding`](#addfunding)
+      - [`reclaimFunding`](#reclaimfunding)
+      - [`expiry`](#expiry)
+      - [`custClose`](#custclose)
+      - [`merchDispute`](#merchdispute)
+      - [`custClaim`](#custclaim)
+      - [`merchClaim`](#merchclaim)
+      - [`mutualClose`](#mutualclose)
+- [Contract Origination and Funding](#contract-origination-and-funding)
+  - [Requirements](#requirements)
+    - [Initial storage arguments](#initial-storage-arguments)
+  - [Customer creates and signs operation](#customer-creates-and-signs-operation)
+  - [Customer injects origination operation](#customer-injects-origination-operation)
+  - [Origination confirmed](#origination-confirmed)
+  - [Customer funds their side of the contract](#customer-funds-their-side-of-the-contract)
+  - [Merchant verifies the contract](#merchant-verifies-the-contract)
+  - [Reclaim funding](#reclaim-funding)
 
 ## Tezos background
 
@@ -86,6 +92,25 @@ The operation is then hashed using blake2b to create a 32-byte digest. The diges
 637e08251cae646a42e6eb8bea86ece5256cf777c52bc474b73ec476ee1d70e84c6ba21276d41bc212e4d878615f4a31323d39959e07539bc066b84174a8ff0d
 ```
 In the final step, the binary format of the operation is appended to the signature to create the signed operation which is ready to be broadcast by the Tezos node.
+
+### Operation fees
+Operation fees consist of two parts, the _baker fee_ and the _burn fee_. The baker fee is paid to the baker that creates the block containing the operation. This fee provides a monetary incentive for the bakers to include the operation in the block. The burn fee does not go to the baker is instead removed from the total supply of tez. The amount of the burn fee for an operation is determined by a protocol constant multiplied by the number of additional bytes an operation's effect adds to the state of the blockchain. 
+
+The operation fees can only be paid for by the source account of the operation. If the source account does not hold a sufficient balance for the baker fee, it will not be an valid operation and not be included in the blockchain. If the source account holds enough for the baker fee but not enough for the burn fee as well, the baker will still receive the baker fee but the operation will fail. If an operation fails, any of its effects will be reversed (as well as any other operation within the same operation group).
+
+As there are constraints on how many operations a block can include, bakers are incentivized to prioritize the most profitable operations for block inclusion. There are two protocol constants that limit the number of operations that can go in a block. The first is a limit on the total gas used by all operations, and the second is a limit on the total additional storage used by all operations. The total of all the operations in the block must not exceed either of these limits.
+
+In the Tezos node reference implementation, bakers prioritize operations based on their _weight_, where the weight is defined as:
+```
+Weight = fee / (max ( (storage/storage_block_limit), (gas/gas_block_limit)))
+```
+* `fee` - baker fee
+* `storage` - operation storage
+* `storage_block_limit` - storage limit for a block
+* `gas` - operation gas
+* `gas_block_limit` - gas limit for a block
+
+Assuming most Tezos nodes are prioritizing operations based on this definition of weight, a fee estimator should choose a target weight for an operation and use that to calculate the baker fee, based on the operations estimated gas and storage usage. The the target weight could then be based on the recent activity of the blockchain (such as recently confirmed transactions, or pending transactions in the memory pool).
 
 
 ## Contract Requirements

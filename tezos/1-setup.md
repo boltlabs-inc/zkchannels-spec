@@ -3,6 +3,7 @@
     * [Commitment scheme parameters](#commitment-scheme-parameters)
     * [Signature schemes](#signature-schemes)
     * [Global defaults](#global-defaults)
+    * [Tezos account balances](#tezos-account-balances)
   * [Merchant Setup](#merchant-setup)
     * [Blind signing key generation](#blind-signing-key-generation)
     * [Range proof parameters generation](#range-proof-parameters-generation)
@@ -27,6 +28,10 @@ We use SHA3-256 hashes to instantiate our hash-based commitments.
 * `context-string`: a string set to `"zkChannels mutual close"`. This is contained in the tuple that gets signed when creating `mutual_close_signature`.
 #### `zkAbacus` global defaults
 * `close`: a fixed scalar used to differentiate closing state and state. The default value is 0x000000000000000000000000000000000000000000000000000000434c4f5345, which is derived from the binary encoding of the string 'CLOSE'.
+
+### Tezos account balances
+Before establishing a zkChannel, the customer and merchant should ensure that they will have a sufficient balance to pay for the [operations fees](5-tezos-escrowagent.md#operation-fees) needed for interacting with the smart contract. Since the blockchain fee market is dynamic, it is impossible to predict with certainty what the necessary fees will be. However, based on our [contract benchmarks](https://github.com/boltlabs-inc/tezos-contract/wiki/Benchmark-Results) on testnet, we recommend a minimum amount reserved specifically for operation fees for the customer and merchant to be 2 tez and 0.009 tez, respectively. 
+
 
 ## Merchant Setup
 
