@@ -112,6 +112,20 @@ Weight = fee / (max ( (storage/storage_block_limit), (gas/gas_block_limit)))
 
 Assuming most Tezos nodes are prioritizing operations based on this definition of weight, a fee estimator should choose a target weight for an operation and use that to calculate the baker fee, based on the operations estimated gas and storage usage. The the target weight could then be based on the recent activity of the blockchain (such as recently confirmed transactions, or pending transactions in the memory pool).
 
+Tezos bakers by default require a minimal fee to propagate and include operations into block. This minimal fee is not set at the protocol level but rather in the configuration of the node and the baker. Bakers may set their own minimal fee requirements that differ from the default. The default minimal fee is determined by:
+```
+fees >= minimal_fees + minimal_nanotez_per_byte * size + minimal_nanotez_per_gas_unit * gas
+```
+* `size` - the number of bytes of the complete serialized operation, including the signature.
+* `gas` - operation gas
+
+The default minimal fee values are below. For more details see the tezos [developer documentation](https://tezos.gitlab.io/protocols/004_Pt24m4xi.html).
+* `minimal_fees` = 100 mutez
+* `minimal_nanotez_per_gas_unit` = 100 nanotez per gas unit
+* `minimal_nanotez_per_byte` = 1000 nanotez per bytes=
+
+
+
 
 ## Contract Requirements
 * The contract keeps track of its current `status` that can be used to determine which entrypoint can be called. The initial status is set to `AWAITING_FUNDING`. The possible statuses are: `AWAITING_FUNDING`, `OPEN`, `EXPIRY`, `CUST_CLOSE`, `CLOSED`.

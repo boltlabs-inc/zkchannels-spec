@@ -97,7 +97,9 @@ There are three options for [channel closure](4-channel-closure.md):
 *  **KT1 address**: 
    The address of a smart contract account, which always starts with 'KT1'. The KT1 address is derived from the operation hash of the contract's originating operation.
 *  **mutez**:
-   The smallest denomination of tez. 1 tez is equal to 1 million mutez.
+   The smallest denomination of Tez. 1 Tez is equal to 1 million mutez.
+*  **nanotez**:
+   _Nanotez_ are used for fine-grained gas calculations for fees. 1 nanotez is equal to 1,000 mutez. Fees calculated using nanotez are rounded to mutez when being defined in operations.
 *  **operation**:
    An _operation_ is a set of instructions that transform the state of the blockchain. Supported operation types are as follows:
    - **origination**: An operation that creates a new smart contract. 
