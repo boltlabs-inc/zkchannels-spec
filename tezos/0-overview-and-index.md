@@ -77,8 +77,8 @@ There are three options for [channel closure](4-channel-closure.md):
    To _burn_ tez means to permanently remove it from circulation, reducing the total supply. 
 * **contract identifier**:
    A smart contract's KT1 address. This acts as a unique identifier for a given contract that may be used to look up the latest state as well as any previous operations that interact with that contract.
-* **confirmations**:
-   _Confirmations_ represent the number of blocks in the blockchain that have been accepted by the network since the block that includes the operation of interest (including first the block it appeared in). An operation is said to have received its first confirmation when it has been included in the blockchain. Each subsequent block represents an additional confirmation.
+* **confirmations/confirmation depth**:
+   _Confirmations_ or _confirmation depth_ represent the number of blocks in the blockchain that have been accepted by the network since the block that includes the operation of interest (including first the block it appeared in). An operation is said to have received its first confirmation when it has been included in the blockchain. Each subsequent block represents an additional confirmation. More precisely, the blockchain is a sequence of blocks, so for an operation A of interest, suppose that _A_ is included in block _b<sub>i</sub>_. Then we say that a *confirmation for A* is any block _b<sub>j</sub>_ for _j $\geq$ i_.
 * **destination**:
    Every operation has one destination. The destination is of an operation is the receiver's tezos address. 
 * **failed**:
