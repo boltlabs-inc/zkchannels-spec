@@ -60,19 +60,29 @@ There are three options for [channel closure](4-channel-closure.md):
 [Tezos zkChannel Contract Repository](https://github.com/boltlabs-inc/tezos-contract/blob/main/zkchannels-contract) <br>
 [Introduction to Tezos Signing Operations](https://www.ocamlpro.com/2018/11/21/an-introduction-to-tezos-rpcs-signing-operations/)
 [Micheline data format](https://tezos.gitlab.io/shell/micheline.html).
+[zkChannels contract costs](https://github.com/boltlabs-inc/tezos-contract/wiki/Benchmark-Results) <br>
+[Types of operation failiures](https://tezos.gitlab.io/active/michelson.html#failures)
 
 ## Glossaries and Notation
 ### Tezos Glossary 
 *  **account**: 
-   An account is a unique identifier within the protocol. There are _implicit accounts_ that have addresses beginning with 'tz1', and there are _smart contract_ accounts that have addresses beginning with 'KT1'. Implicit accounts are linked to a public key and cannot include a script.
-*  **bake**:
-   _Baking_ is the process of producing a new block in the Tezos blockchain. It is the equivalent of _mining_ on a proof of work blockchain.
+   An account is a unique identifier within the protocol that is associated with a balance of tez. There are _implicit accounts_ that have addresses beginning with 'tz1', and there are _smart contract_ accounts that have addresses beginning with 'KT1'. Implicit accounts are linked to a public key and cannot include a script.
+* **applied**:
+   _Applied_ is the status assigned to successful operation included in the blockchain. For more details see _operation status_.
+* **backtracked**:
+   _Backtracked_ is the status assigned to an operation in the blockchain whose effects were reverted due to the failiure of another operation in the same operation group. A backtracked operation is one that would have otherwise been successful were it not for the failiure of a subsequent operation in the same operation group. For more details see _operation status_.
+*  **baking/baker**:
+   _Baking_ is the process of producing a new block in the Tezos blockchain. It is the equivalent of _mining_ on a proof of work blockchain. Baking is performed by _bakers_ who stake tezos in order to participate in the process. 
+* **burn**:
+   To _burn_ tez means to permanently remove it from circulation, reducing the total supply. 
 * **contract identifier**:
    A smart contract's KT1 address. This acts as a unique identifier for a given contract that may be used to look up the latest state as well as any previous operations that interact with that contract.
 * **confirmations**:
-   _Confirmations_ represent the number of blocks in the blockchain that have been accepted by the network since the block that includes the operation (including first the block it appeared in). An operation is said to have received its first confirmation when it has been included in the blockchain. Each subsequent block represents an additional confirmation.
+   _Confirmations_ represent the number of blocks in the blockchain that have been accepted by the network since the block that includes the operation of interest (including first the block it appeared in). An operation is said to have received its first confirmation when it has been included in the blockchain. Each subsequent block represents an additional confirmation.
 * **destination**:
    Every operation has one destination. The destination is of an operation is the receiver's tezos address. 
+* **failed**:
+   _Failed_ is the status assigned to an operation in the blockchain whose effects were reverted due to an error that occured during the execution of the operation. An operation can fail for a few reasons, for example, because it encountered a programmed `FAILWITH` instruction in the smart contract, or because the source account did not have enough tez to cover the cost of the operation. For a list of reasons why an operation may fail, please refer to the tezos [developer documentation](https://tezos.gitlab.io/active/michelson.html#failures). 
 *  **forging**:
    The process of creating a serialized Tezos operation.
 *  **implicit account**:
@@ -84,19 +94,27 @@ There are three options for [channel closure](4-channel-closure.md):
 *  **mutez**:
    The smallest denomination of Tez. 1 Tez is equal to 1 million mutez.
 *  **operation**:
-   An _operation_ in Tezos is the equivalent of a _transaction_ in Ethereum. Operations are used for originating contracts, calling entrypoints to contracts, and transferring tez. The list of all types of operations are: origination, transaction, reveal, and delegation. 
+   Operations are used for originating contracts, calling entrypoints to contracts, and transferring tez. The list of all types of operations are: origination, transaction, reveal, and delegation. _Origination_ refers to the creation of a new smart contract. _Transaction_ refers to transferring tez from one account to another. Note that contract calls are performed with _transaction_ operations where the _destination_ is the entrypoint of the contract. A _transaction_ operation can transfer a value of 0 and contain additional arguments to be passed into the entrypoint of the smart contract. Please refer to the tezos developer documentation for more information about [delegation](https://tezos.gitlab.io/introduction/howtorun.html) and [reveal](https://tezos.gitlab.io/introduction/howtouse.html#transfers-and-receipts) operations. 
 *  **operation group**:
-   An _operation group_ in Tezos refers to operations that have been authorized by the same signature. Operations that are created by the smart contract in response to a contract call are considered as being part of the same group. Operations in the same group are applied to the blockchain atomically - either they all get applied or they all fail together. 
-* **smart contract**:
+   An _operation group_ in Tezos refers to a batch of operations that have been authorized by the same signature. Operations may be in the same operation group either because they have been created as a batch by the source account, or because an operation called on a contract that created an operation. Batching operations (rather than creating separate operations) has the advantage of being more efficient in terms of gas as only one signature needs to be verified. Contract-initiated operations cannot exist independently and are always contained in the same operation group as the operation that contained the original contract call. The operations within an operation group have a defined order of execution and are applied to the blockchain atomically - either they all succeed or fail together. The tezos node stores an _operation status_ for each operation that records whether the operations in the group were applied to the blockchain or not. If the operation group failed, the operation status will indicate which operation caused the group to fail. 
+*  **operations status**:
+   When an operation is included in the blockchain it can either succeed or fail in terms of executing the code called on by the operation. The success of an operation is all or none; if an error occurs at any point during the execution of the operation, all the effects of the operation are reverted (apart from the baker fee being paid to the baker). Furthermore, if the operation is part of an operation group, all the operations in the group will succeed or fail together. The tezos node stores the operation status for all operation included in the blockchain. The possible operation statuses are: _applied_, _failed_, _backtracked_, and _skipped_. For a list of reasons why an operation may fail, please refer to the tezos [developer documentation](https://tezos.gitlab.io/active/michelson.html#failures).
+*  **operation hash**:
+   The operation hash is used as a unique identifier for operations. It is created by taking the blake2b hash over the serialized operation including the signature. 
+*  **reorg**:
+   A _reorg_ refers to an event where one or more blocks of the blockchain (as being observed by a particular node) is replaced with a new chain of blocks that have a higher _fitness_ score. Tezos is a proof of stake blockchain and the support for a particular block is determined by its fitness score. The fitness score of a block is a function of the amount of tezos staked by the bakers that approved the block. 
+*  **skipped**:
+   _Skipped_ is the status assigned to an operation in the blockchain that was skipped to the failiure of previous operation in the same operation group. An operation being skipped does not indicate whether it would or would not have been successful if it were to have been executed. For more details see _operation status_.
+*  **smart contract**:
    An account which is associated with a Michelson script. They are created with an explicit origination operation and are therefore sometimes called originated accounts. The address of a smart contract always starts with the letters 'KT1'.
-* **source**:
+*  **source**:
    Every operation has one source. The source is the sender's tezos address and the operation must be signed by the source account's private key. 
 *  **storage**:
    The memory held by the smart contract.
 *  **tez**:
    The unit of currency in Tezo.
 *  **tezos account public key** 
-   Every implict account is linked to a public key. The public key is used to verify that an operation was signed by the owner of the source's address. Since an account's address is derived from the hash of a public key, it is impossible to derive the public key from the address. Therefore, a new account must first perform a _reveal_ operation to broadcast its public key on chain, before broadcasting any subsequent operations.
+   Every implict account is linked to a public key. The public key is used to verify that an operation was signed by the owner of the source's address. Since an account's address is derived from the hash of a public key, it is impossible to derive the public key from the address. 
 *  **tz1 address**: 
    The address of an implicit account using an EdDSA signature scheme. The address is derived from the hash of the public key and always begin with the prefix 'tz1'.
 

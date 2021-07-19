@@ -89,7 +89,7 @@ The customer passes the following arguments to `custClose`:
 * [`bls12_381_fr`: `rev_lock`]
 * [`(bls12_381_g1, bls12_381_g1)`: `closing_signature`]
 
-Calling `custClose` creates an operation group of size two: the `custClose` operation and an operation that transfers the merchant's balance from the smart contract to `merch_addr`. Either both operations will apply or both will fail. 
+Calling `custClose` creates an operation group of size two: the `custClose` operation and an operation that transfers the merchant's balance from the smart contract to `merch_addr`. Either both operations will succeed or both will fail. 
 A successful application timelocks the customer's balance (`bal_cust`) for a timeout period `self_delay` (set in the smart contract at origination). 
 
 As soon as the merchant sees a `custClose` operation on chain for one of their channels, they [Update Channel Status][merchant_update_channel_status] to `PendingClose`.
