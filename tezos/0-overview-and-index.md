@@ -111,7 +111,7 @@ There are three options for [channel closure](4-channel-closure.md):
 *  **operation hash**:
    A unique identifier for a given operation, created by taking the blake2b hash over the serialized operation, including the signature. 
 *  **reorg**:
-   An event where one or more blocks of the blockchain (as being observed by a particular node) are replaced with a new chain of blocks that have a higher _fitness_ score. Tezos is a proof of stake blockchain and the support for a particular block is determined by its fitness score. The fitness score of a block is a function of the amount of tezos staked by the bakers that approved the block. 
+   An event where one or more blocks of the blockchain (as being observed by a particular node) are replaced with a new chain of blocks that have a higher [fitness score](https://tezos.gitlab.io/alpha/glossary.html?highlight=fitness#score). A block's fitness score is a function of the amount of tezos staked by the bakers that approved the block in question. 
 *  **skipped**:
    A status assigned to an operation included the blockchain, the execution of which has been skipped due to the failure of a previous operation in the same operation group. For more details see _operation status_.
 *  **smart contract**:
