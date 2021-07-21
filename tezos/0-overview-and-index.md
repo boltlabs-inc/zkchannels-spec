@@ -62,11 +62,11 @@ There are three options for [channel closure](4-channel-closure.md):
 [TezosEscrowAgent smart contract](https://github.com/boltlabs-inc/tezos-contract/blob/main/zkchannels-contract): Implementation of the smart contract used in realizing the on-chain escrow functionality for zkChannels.<br>
 [zkChannels contract costs](https://github.com/boltlabs-inc/tezos-contract/wiki/Benchmark-Results): Benchmarking of the Tezos smart contract.
 ### Tezos Resources
-[Developer documentation](https://tezos.gitlab.io/index.html). At time of writing this specification, the active protocol versin for Tezos is Florence. Subsections of particular interest include: 
-- [An Introduction to Tezos RPCS: Signing Operations](https://www.ocamlpro.com/2018/11/21/an-introduction-to-tezos-rpcs-signing-operations/): Blog post summarizing how to forge and sign Tezos operations.<br>
-- [Micheline](https://tezos.gitlab.io/shell/micheline.html): Data format used when passing parameters to the smart contract.<br>
-- [Michelson](https://tezos.gitlab.io/active/michelson.html): Overview of the language used for Tezos smart contracts. <br>
+[Developer documentation](https://tezos.gitlab.io/index.html). At time of writing this specification, the active protocol version for Tezos is Florence. Subsections of particular interest include: 
+- [Micheline](https://tezos.gitlab.io/shell/micheline.html): Data format used when passing parameters to the smart contract.
+- [Michelson](https://tezos.gitlab.io/active/michelson.html): Overview of the language used for Tezos smart contracts.<br>
 
+[An Introduction to Tezos RPCS: Signing Operations](https://www.ocamlpro.com/2018/11/21/an-introduction-to-tezos-rpcs-signing-operations/): Blog post summarizing how to forge and sign Tezos operations.<br>
 
 ## Glossaries and Notation
 ### Tezos Glossary 
