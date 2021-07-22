@@ -43,10 +43,9 @@ different sessions.
   upon establishing the channel. The merchant may use this for its own
   accounting purposes, outside the scope of the protocol.
 - **Status**: Used to determine valid operations on the channel. For example,
-  a channel with the status "originated" is not merchant funded (because it has
+  a channel with the status "Originated" is not merchant funded (because it has
   not yet been customer funded). This is the only column that can be updated.
-  The possible statuses are: "originated", "customer funded", "merchant
-  funded", "active", "pending close", and "closed".
+  The possible statuses are: "Originated", "CustomerFunded", "MerchantFunded", "Active", "PendingClose", "Dispute", and "Closed".
 
 ## Operations
 
@@ -130,10 +129,11 @@ ID, Merchant Balance, Customer Balance, and the "originated" status.
 This operation updates the channel status. The expected progression of a
 channel is:
 
-originated → customer funded → merchant funded → active → pending close → closed
+Originated → Customer funded → Merchant funded → Active → Pending close → Closed
 
-In addition, any channel that's not already closed may skip to "pending close"
-if either the merchant or customer performs a unilateral close.
+Two variations from this pattern are:
+- Any channel that's not already closed may skip to "Pending close" if either the merchant or customer performs a unilateral close. 
+- A "Pending close" channel may enter the "Dispute" status before closing if dishonest behavior is detected.
 
 Any update must be an atomic compare-and-swap that asserts the previous status
 to prevent race conditions. For example, if multiple sessions try to close the
@@ -166,7 +166,7 @@ next, [refer to the overview of the protocol](0-overview-and-index.md).
 | contract_id              | required                                                                                                   | [ContractId][]      |
 | initial_merchant_balance | required                                                                                                   | [MerchantBalance][] |
 | initial_customer_balance | required                                                                                                   | [CustomerBalance][] |
-| status                   | required, one of ["originated", "customer funded", "merchant funded", "active", "pending close", "closed"] | [ChannelStatus][]   |
+| status                   | required, one of ["Originated", "CustomerFunded", "MerchantFunded", "Active", "PendingClose", "Dispute", "Closed"] | [ChannelStatus][]   |
 
 [nonce]: https://github.com/boltlabs-inc/libzkchannels-crypto/blob/f953b6187370f0b42edf0571c4abbae1a473e2fe/zkabacus-crypto/src/nonce.rs#L7-L10
 [revocationlock]: https://github.com/boltlabs-inc/libzkchannels-crypto/blob/f953b6187370f0b42edf0571c4abbae1a473e2fe/zkabacus-crypto/src/revlock.rs#L19-L22

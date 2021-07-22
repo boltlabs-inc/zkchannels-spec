@@ -94,16 +94,20 @@ A successful application timelocks the customer's balance (`bal_cust`) for a tim
 
 As soon as the merchant sees a `custClose` operation on chain for one of their channels, they [Update Channel Status][merchant_update_channel_status] to `PendingClose`.
 The merchant reads the revocation lock `rev_lock` from the contract storage. They call [Insert Revocation Lock][merchant_insert_revlock] with the lock to add it to their database and determine if they've previously seen a revocation secret with a SHA3-256 hash that equals `rev_lock`.
-- If so, they call [the `merchDispute` entrypoint](5-tezos-escrowagent#merchdispute) with the resulting revocation secret as the argument.
-Calling `merchDispute` creates an operation group of size two: the `merchDispute` operation and an operation that transfers the customer's timelocked balance to the merchant's account `merch_addr`. If successful, the merchant waits until the `merchDispute` operation reaches a confirmation depth of `required_confirmations`, and then [Update Channel Status][merchant_update_channel_status] to `Closed`. They stop monitoring the contract.
+- If so, they [Update Channel Status][merchant_update_channel_status] to `Dispute` and call [the `merchDispute` entrypoint](5-tezos-escrowagent#merchdispute) with the known revocation secret as the argument.
 
-- Otherwise, they wait until the `custClose` operation is confirmed to the required confirmation depth and [Update Channel Status][merchant_update_channel_status] to `Closed`. They stop monitoring the contract.
+    Calling `merchDispute` creates an operation group of size two: the `merchDispute` operation and an operation that transfers the customer's timelocked balance to the merchant's account `merch_addr`. If successful, the merchant waits until the `merchDispute` operation reaches a confirmation depth of `required_confirmations`, and then [Updates Channel Status][merchant_update_channel_status] to `Closed`. They stop monitoring the contract.
 
-After the timelock elapses, the customer claims their balance by calling [the `custClaim` entrypoint](5-tezos-escrowagent#custclaim).
+    As soon as the customer sees a `merchDispute` operation on chain for one of their channels, they [Update Channel Status][customer_update_channel_status] to `Dispute`. Once the operation reaches a confirmation depth of `required_confirmations`, they update their channel status to `Closed`.
+
+- Otherwise, the merchant waits until the `custClose` operation is confirmed to the required confirmation depth and [Updates Channel Status][merchant_update_channel_status] to `Closed`. They stop monitoring the contract.
+
+When the customer is notified that the timelock has elapsed, the customer checks that their status is still `PendingClose`. If so, they claim their balance by calling [the `custClaim` entrypoint](5-tezos-escrowagent#custclaim).
 Calling `custClaim` creates an operation group of size two: the `custClaim` operation and an operation that transfers the customer's balance from the smart contract to `cust_addr`. 
 
 When the `custClaim` operation reaches a confirmation depth of `required_confirmations`, the customer updates the channel status to `Closed`. They stop monitoring the contract.
 If the operation does not succeed, the customer remains in the `PendingClose` status.
+
 
 ## Unilateral Merchant Close
 
@@ -124,3 +128,4 @@ Similarly, the customer updates the channel status to `Closed` and no longer nee
 
 [merchant_update_channel_status]: merchant_database.md#update-channel-status
 [merchant_insert_revlock]: merchant_database.md#insert-revocation-lock--secret
+[customer_update_channel_status]: customer_database.md#update-channel-status

@@ -67,6 +67,8 @@ Ready -> Started -> Locked
 The closing procedure can begin from many statuses, but in a normal run, we expect it to start from the `Ready` status:
 ``` 
 Ready -> Pending close -> Close
+            |              ^
+            ---> Dispute --|
 ```
 
 Here, we describe briefly what each status means for the channel:
@@ -81,6 +83,7 @@ Here, we describe briefly what each status means for the channel:
 | `Started`        | Customer has made a payment request and provided proof that it is valid. | Customer cannot initiate another payment on the channel.
 | `Locked`         | Customer has a valid closing signature for the new channel balances. | Customer cannot initiate another payment on the channel.
 | `PendingClose`   | One of the parties has initiated a close procedure.
+| `Dispute`        | Merchant has evidence that customer posted invalid close information.
 | `Closed`         | The balances on the smart contract are paid out. 
 
 
@@ -94,7 +97,7 @@ Here, we describe briefly what each status means for the channel:
 | address                  | required         | [ZkChannelAddress][zk_channel_address]                                                 |
 | initial_customer_balance | required         | [CustomerBalance][customer_balance]                                                    |
 | initial_merchant_balance | required         | [MerchantBalance][merchant_balance]                                                    |
-| state                    | required         | [ChannelState][channel_state], which is one of: Inactive, Originated, CustomerFunded, MerchantFunded, Ready, Started, Locked, PendingClose, Closed |
+| state                    | required         | [ChannelState][channel_state], which is one of: Inactive, Originated, CustomerFunded, MerchantFunded, Ready, Started, Locked, PendingClose, Dispute, Closed |
 
 
 [channel_state]: https://github.com/boltlabs-inc/zeekoe/blob/9240bbc0982c563be48d93df5c643dac3512614f/src/database/customer/state.rs#L15-L33
