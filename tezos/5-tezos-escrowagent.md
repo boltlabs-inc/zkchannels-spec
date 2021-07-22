@@ -10,6 +10,10 @@ It includes support for mutual closes, unilateral closes by either the customer 
     - [Forging an operation](#forging-an-operation)
     - [Signing an operation](#signing-an-operation)
     - [Operation fees](#operation-fees)
+      - [Operation weight](#operation-weight)
+      - [Fee estimation](#fee-estimation)
+      - [Setting fees](#setting-fees)
+      - [Minimal operation fees](#minimal-operation-fees)
   - [Contract Requirements](#contract-requirements)
     - [Initial contract arguments](#initial-contract-arguments)
     - [Global default arguments](#global-default-arguments)
@@ -94,15 +98,16 @@ The operation is then hashed using blake2b to create a 32-byte digest. The diges
 In the final step, the binary format of the operation is appended to the signature to create the signed operation which is ready to be broadcast by the Tezos node.
 
 ### Operation fees
-Operation fees consist of two parts, the _baker fee_ and the _burn fee_. The baker fee is paid to the baker that creates the block containing the operation. This fee provides a monetary incentive for the bakers to include the operation in the block. The burn fee does not go to the baker is instead removed from the total supply of tez. The amount of the burn fee for an operation is determined by a protocol constant multiplied by the number of additional bytes an operation's effect adds to the state of the blockchain. 
+Operation fees consist of two parts, the _baker fee_ and the _burn fee_. The baker fee is paid to the baker that creates the block containing the operation. This fee provides a monetary incentive for bakers to include the operation in their next block. The burn fee does not go to the baker is instead removed from the total supply of tez. The amount of the burn fee for an operation is determined by a protocol constant multiplied by the number of additional bytes an operation's effect adds to the state of the blockchain. 
 
 The operation fees can only be paid for by the source account of the operation. If the source account does not hold a sufficient balance for the baker fee, it will not be an valid operation and not be included in the blockchain. If the source account holds enough for the baker fee but not enough for the burn fee as well, the baker will still receive the baker fee but the operation will fail. If an operation fails, any of its effects will be reversed (as well as any other operation within the same operation group).
 
+#### Operation weight
 As there are constraints on how many operations a block can include, bakers are incentivized to prioritize the most profitable operations for block inclusion. There are two protocol constants that limit the number of operations that can go in a block. The first is a limit on the total gas used by all operations, and the second is a limit on the total additional storage used by all operations. The total of all the operations in the block must not exceed either of these limits.
 
 In the Tezos node reference implementation, bakers prioritize operations based on their _weight_, where the weight is defined as:
 ```
-Weight = fee / (max ( (storage/storage_block_limit), (gas/gas_block_limit)))
+weight = fee / (max ( (storage/storage_block_limit), (gas/gas_block_limit)))
 ```
 * `fee` - baker fee
 * `storage` - operation storage
@@ -110,9 +115,14 @@ Weight = fee / (max ( (storage/storage_block_limit), (gas/gas_block_limit)))
 * `gas` - operation gas
 * `gas_block_limit` - gas limit for a block
 
-Assuming most Tezos nodes are prioritizing operations based on this definition of weight, a fee estimator should choose a target weight for an operation and use that to calculate the baker fee, based on the operations estimated gas and storage usage. The the target weight could then be based on the recent activity of the blockchain (such as recently confirmed transactions, or pending transactions in the memory pool).
 
-Tezos bakers by default require a minimal fee to propagate and include operations into block. This minimal fee is not set at the protocol level but rather in the configuration of the node and the baker. Bakers may set their own minimal fee requirements that differ from the default. The default minimal fee is determined by:
+#### Fee estimation
+Since it is impossible to accurately predict what other operations the bakers will receive, it is also impossible to know what operation weight will be sufficient for an operation to be included in the next block. Therefore, setting the operation weight for an operation is a trade-off between cost and the probability of it being included in the next block. For a layer-2 protocol such as zkChannels, it is critical that certain operations get confirmed in a timely manner as the security of the protocol depends on the customer and merchant being able to broadcast operations within specified delay periods. We do not specify how the operation weight should be set but require that the Tezos clients used by the customer and merchant are capable of setting a target operation weight to ensure operations are confirmed quickly. 
+
+#### Setting fees
+Given a target operation weight, setting the baker fee involves two steps: estimating the gas and storage used by an operation, then setting a baker fee based on a target weight. The Tezos node allows clients to estimate the gas and storage used by an operation by simulating the operation locally. This lets the client know how much gas and storage was used, as well as whether the operation was successful or not (to avoid paying fees for an erroneous transaction). Given an estimate of the gas and storage usage, a target weight can be achieved by using the formula to derive the appropriate baker fee. 
+#### Minimal operation fees
+Tezos bakers by default require a minimal operation fee to propagate and include operations into a block. This minimal fee is not set at the protocol level but rather in the configuration of the node and the baker. Bakers may set their own minimal fee requirements that differ from the default. The default minimal fee is determined by:
 ```
 fees >= minimal_fees + minimal_nanotez_per_byte * size + minimal_nanotez_per_gas_unit * gas
 ```
@@ -271,7 +281,7 @@ The `TezosEscrowAgent` contract origination proceeds as follows.
 ## Requirements
 * Both the customer and merchant:
     * need tz1 accounts with a sufficient balance to carry out on-chain operations (origination, funding, and closure).
-    * need online Tezos clients that can create and inject operations from their (`cust_addr` and `merch_addr`).
+    * need online Tezos clients that can estimate fees, create, and inject operations from their (`cust_addr` and `merch_addr`).
     * have already agreed upon the initial storage arguments.
 * In addition, the customer:
     * needs a closing signature from the merchant on the initial state.

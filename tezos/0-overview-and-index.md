@@ -96,6 +96,10 @@ There are three options for [channel closure](4-channel-closure.md):
    To broadcast a signed operation to Tezos nodes in the network; injection is performed by a Tezos node.
 *  **KT1 address**: 
    The address of a smart contract account, which always starts with 'KT1'. The KT1 address is derived from the operation hash of the contract's originating operation.
+*  **memory pool**:
+   A node's mechanism for storing unconfirmed operations.
+*  **minimal operation fee**:
+   Tezos bakers by default require a _minimal operatin fee_ to propagate and include operations into a block. This minimal fee is not set at the protocol level but rather in the configuration of the node and the baker. Bakers may set their own minimal fee requirements that differ from the default. For more information see the [developer documentation](https://tezos.gitlab.io/protocols/004_Pt24m4xi.html).
 *  **mutez**:
    The smallest denomination of Tez. 1 Tez is equal to 1 million mutez.
 *  **nanotez**:
@@ -127,7 +131,8 @@ There are three options for [channel closure](4-channel-closure.md):
    Every implict account is linked to a public key. The public key is used to verify that an operation was signed by the owner of the source's address. Since an account's address is derived from the hash of a public key, it is impossible to derive the public key from the address. 
 *  **tz1 address**: 
    The address of an implicit account using the Ed25519 signature scheme. The address is derived from the hash of the public key and always begin with the prefix 'tz1'.
-
+*  **weight**:
+   The default measure used in the Tezos node reference implementation for prioritizing operations for block inclusion. An operation's _weight_ is defined by `weight = fee / (max ( (storage/storage_block_limit), (gas/gas_block_limit)))` where `fee` is the baker fee, `storage` is the operation storage, `storage_block_limit` is the storage limit for a block, `gas` is the operation gas, and `gas_block_limit` is the gas limit for a block ([link to source code](https://gitlab.com/tezos/tezos/-/blob/master/src/proto_009_PsFLoren/lib_delegate/client_baking_forge.ml#L283)).
 ### zkChannels Glossary 
 * **channel identifer**: 
    A unique identifier for a zkChannel.
