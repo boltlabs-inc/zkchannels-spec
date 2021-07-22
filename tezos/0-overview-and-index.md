@@ -84,7 +84,7 @@ There are three options for [channel closure](4-channel-closure.md):
    A _smart contract's KT1 address_. This acts as a unique identifier for a given contract that may be used to look up the latest state as well as any previous operations that interact with that contract.
 * **confirmation**: A _confirmation_ of a given operation is any block included in the blockchain that implies the operation in question is also included in the blockchain. That is, the first block to include the given operation or any subsequent block thereof is a confirmation.
 * **confirmation depth**:
-   The total number of confirmations of a given operation.
+   The total number of confirmations of a given operation. The index starts at 1, e.g. an operation that is included in the latest block of the blockchain will have a confirmation depth of 1.
 * **destination**: The intended receiver's tezos address for an operation; every operation has exactly one destination.  
 * **failed**:
    A status assigned to an operation that is included in the blockchain, but the execution of which has failed. An operation can fail for a few reasons, e.g., due to a programmed `FAILWITH` instruction in the smart contract, or because the source account does not have sufficient tez to cover the cost of the operation. For a list of reasons why an operation may fail, see the [tezos developer documentation](https://tezos.gitlab.io/active/michelson.html#failures). 
@@ -97,7 +97,7 @@ There are three options for [channel closure](4-channel-closure.md):
 *  **KT1 address**: 
    The address of a smart contract account, which always starts with 'KT1'. The KT1 address is derived from the operation hash of the contract's originating operation.
 *  **mutez**:
-   The smallest denomination of Tez. 1 tez is equal to 1 million mutez.
+   The smallest denomination of tez. 1 tez is equal to 1 million mutez.
 *  **operation**:
    An _operation_ is a set of instructions that transform the state of the blockchain. Supported operation types are as follows:
    - **origination**: An operation that creates a new smart contract. 
