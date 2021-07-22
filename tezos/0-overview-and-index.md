@@ -76,10 +76,14 @@ There are three options for [channel closure](4-channel-closure.md):
    A status assigned to an operation that is included in the blockchain and is successful. For more details see _operation_ and _operation status_.
 * **backtracked**:
    A status assigned to an operation that is included in the blockchain and previously successful, but the effects of which have been reverted. This occurs when a subsequent operation in the same operation group fails. For more details see _operation_, _operation group_, and _operation status_.
-*  **baker**: An entity who _bakes_ blocks. Also known as a _validator_. A baker must stake tezos in order to bake blocks.
 *  **bake**: To produce a new block in the Tezos blockchain. It is the equivalent of _mining_ on a proof-of-work blockchain.
+*  **baker**: An entity who _bakes_ blocks. Also known as a _validator_. A baker must stake tezos in order to bake blocks.
+*  **baker fee**:
+   All operations contain a _baker fee_ that is paid to the baker that creates the block containing the operation. This fee provides a monetary incentive for bakers to include the operation in their next block.
 * **burn**:
    To permanently remove _tez_ from circulation, thereby reducing the total supply. 
+*  **burn fee**:
+   A fee paid by an operation's source account for adding storage to the state of the blockchain. The amount of the burn fee for an operation is determined by a protocol constant multiplied by the number of additional bytes an operation's effect adds to the state of the blockchain. 
 * **contract identifier**:
    A _smart contract's KT1 address_. This acts as a unique identifier for a given contract that may be used to look up the latest state as well as any previous operations that interact with that contract.
 * **confirmation**: A _confirmation_ of a given operation is any block included in the blockchain that implies the operation in question is also included in the blockchain. That is, the first block to include the given operation or any subsequent block thereof is a confirmation.
@@ -90,6 +94,8 @@ There are three options for [channel closure](4-channel-closure.md):
    A status assigned to an operation that is included in the blockchain, but the execution of which has failed. An operation can fail for a few reasons, e.g., due to a programmed `FAILWITH` instruction in the smart contract, or because the source account does not have sufficient tez to cover the cost of the operation. For a list of reasons why an operation may fail, see the [tezos developer documentation](https://tezos.gitlab.io/active/michelson.html#failures). 
 *  **forge**:
    To create a serialized Tezos operation.
+*  **gas**:
+   A measure of the number of elementary operations performed during the execution of a smart contract. Gas is used to measure how much computing power is used to execute a smart contract.
 *  **implicit account**:
    An account that is linked to a public key. An implicit account cannot include a script and cannot reject incoming transactions. The address prefix indicates the instantiation of EdDSA signature scheme for the associated public key, i.e. 'tz1' indicates Ed25519, 'tz2' indicates ECDSA over Secp256k1, and 'tz3' indicates ECDSA over P256. 
 *  **inject**:
@@ -101,7 +107,7 @@ There are three options for [channel closure](4-channel-closure.md):
 *  **minimal operation fee**:
    Tezos bakers by default require a _minimal operatin fee_ to propagate and include operations into a block. This minimal fee is not set at the protocol level but rather in the configuration of the node and the baker. Bakers may set their own minimal fee requirements that differ from the default. For more information see the [developer documentation](https://tezos.gitlab.io/protocols/004_Pt24m4xi.html).
 *  **mutez**:
-   The smallest denomination of Tez. 1 Tez is equal to 1 million mutez.
+   The smallest denomination of tez. 1 tez is equal to 1 million mutez.
 *  **nanotez**:
    _Nanotez_ are used for fine-grained gas calculations for fees. 1 nanotez is equal to 1,000 mutez. Fees calculated using nanotez are rounded to mutez when being defined in operations.
 *  **operation**:
