@@ -102,7 +102,7 @@ There are three options for [channel closure](4-channel-closure.md):
    To broadcast a signed operation to Tezos nodes in the network; injection is performed by a Tezos node.
 *  **KT1 address**: 
    The address of a smart contract account, which always starts with 'KT1'. The KT1 address is derived from the operation hash of the contract's originating operation.
-*  **memory pool**:
+*  **mempool**:
    A node's mechanism for storing unconfirmed operations.
 *  **minimal operation fee**:
    Tezos bakers by default require a _minimal operatin fee_ to propagate and include operations into a block. This minimal fee is not set at the protocol level but rather in the configuration of the node and the baker. Bakers may set their own minimal fee requirements that differ from the default. For more information see the [developer documentation](https://tezos.gitlab.io/protocols/004_Pt24m4xi.html).

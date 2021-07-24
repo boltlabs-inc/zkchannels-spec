@@ -29,6 +29,22 @@ We use SHA3-256 hashes to instantiate our hash-based commitments.
 #### `zkAbacus` global defaults
 * `close`: a fixed scalar used to differentiate closing state and state. The default value is 0x000000000000000000000000000000000000000000000000000000434c4f5345, which is derived from the binary encoding of the string 'CLOSE'.
 
+### Tezos client requirements
+The Tezos client is used to interact with the tezos node for performing actions as creating operations, broadcasting operations and querying the state of the blockchain. We require that the Tezos client must be capable of:
+* Creating and broadcasting operations:
+  * Creating and broadcasting operations to call specific entrypoints of a zkChannels contract.
+    * Originating the zkChannels contract.
+    * Calling entrypoints, including those requiring arguments.
+  * Regular transfer operations outside of the zkChannels protocol. 
+  * Fee handling:
+    * Given an operation, estimate the gas and storage usage and calculate a baker fee.
+    * Bumping up operation fees by a specified amount
+* Querying the blockchain:
+  * Given a contract-id, return the contract storage.
+  * Given an address, return the balance.
+  * Given an operation hash, return the block height it was included in.
+  * Provide a stream of new block headers as they appear.
+
 ### Tezos account balances
 Before establishing a zkChannel, the customer and merchant should ensure that they will have a sufficient balance to pay for the [operations fees](5-tezos-escrowagent.md#operation-fees) needed for interacting with the smart contract. Since the blockchain fee market is dynamic, it is impossible to predict with certainty what the necessary fees will be. However, based on our [contract benchmarks](https://github.com/boltlabs-inc/tezos-contract/wiki/Benchmark-Results) on testnet, we recommend a minimum amount reserved specifically for operation fees for the customer and merchant to be 2 tez and 0.009 tez, respectively. 
 
