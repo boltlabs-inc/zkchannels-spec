@@ -17,6 +17,8 @@ The customer has [obtained the merchant’s setup information](1-setup.md#publis
 * The revocation lock commitment parameters `revlock_com_params` must be well-formed Pedersen parameters of the expected length, and consist of elements in the BLS12-381 pairing subgroup G1.
 * The merchant EdDSA public key `merch_pk` must be a valid EdDSA key for the curve specified by `tezos-client` and the merchant address `merch_addr` must be a Tezos tz1 address correctly derived from `merch_pk`. 
 
+The customer should ensure they have a Tezos implicit account with balance sufficient to both contribute the desired amount to the zkChannel and pay the [operations fees](5-tezos-escrowagent.md#operation-fees) needed to originate, fund, and call the appropriate entry points of the corresponding smart contract. We recommend 2 tez based on our [contract benchmarks](https://github.com/boltlabs-inc/tezos-contract/wiki/Benchmark-Results) on testnet.
+
 ## Overview
 Channel establishment is a three round protocol.
 
@@ -79,12 +81,14 @@ Upon receipt, the merchant checks that the following are true. If any are false,
   - Checks `merch_pp_hash` is the SHA3-256 hash of` (merch_PS_pk, merch_addr, merch_pk)`.
   - Checks `cust_addr` is an implicit Tezos account (tz1 address), and not a smart contract address (KT1 address). 
 
+The merchant may choose to either accept or reject the channel establishment request. If the merchant accepts, they should ensure their implicit Tezos account with address `merch_addr` has a balance sufficient to both contribute the desired amount to the zkChannel and pay the [operations fees](5-tezos-escrowagent.md#operation-fees) needed to fund and call the appropriate entry points of the corresponding smart contract. We recommend 0.009 tez based on our [contract benchmarks](https://github.com/boltlabs-inc/tezos-contract/wiki/Benchmark-Results) on testnet.
+
 ### The `open_m` Message
 The merchant sends the `open_m` message to the customer; this message is formed as follows:
 1. type: `open_m`
 2. data: [`string`:`cid_m`]. This is the merchant randomness contribution to the channel identifier.
 
-#### Customer requirements
+#### Customer Requirements
 Upon receipt, the customer checks the that `cid_m` is a valid merchant randomness contribution to the channel identifier. If so, the customer sets the channel identifier `cid` to: `SHA3-256(cid_c, cid_m, cust_pk, merch_pk, merch_PS_pk)`, where:
 - `cid_c` is the customer randomness contribution to the channel identifier sent to the merchant in the `open_c` message.
 - `cid_m` is the merchant randomness contribution to the channel identifier received in the `open_m` message.
@@ -94,7 +98,7 @@ Upon receipt, the customer checks the that `cid_m` is a valid merchant randomnes
 
 If not, the customer aborts.
 
-#### Merchant requirements
+#### Merchant Requirements
 Before sending, the merchant:
   - Generates `cid_m` randomly using a secure RNG.
   - Sets the channel identifier `cid` to: `SHA3-256(cid_c, cid_m, cust_pk, merch_pk, merch_PS_pk)`, where:
@@ -131,10 +135,10 @@ The merchant sends an `init_m` message to the customer.
 1. type: `init_m`
 2. data: [`(bls12_381_g1, bls12_381_g1):closing_signature`]. A closing authorization signature on the initial closing state.
  
-#### Customer requirements
+#### Customer Requirements
 Upon receipt, the customer verifies `closing_signature` is a valid signature with respect to the merchant zkAbacus Pointcheval Sanders public key. If the signature is valid, the customer continues as specified in `zkAbacus.Initialize()`. If the signaure is invalid, the customer aborts.
 
-#### Merchant requirements
+#### Merchant Requirements
 The merchant runs `zkAbacus.Initialize` on inputs `cid`, `bal_cust`, and `bal_merch`. If successful, the merchant sends the resulting message `init_m`. Otherwise, the merchant aborts.
 
 ### The `funding_confirmed` Message
@@ -156,7 +160,7 @@ The customer:
   - Updates the channel status to `CustomerFunded`.
   - Sends the `funding_confirmed` message to the merchant.
 
-#### Merchant requirements
+#### Merchant Requirements
 Upon receipt of the `funding_confirmed` message, the merchant: 
   - Checks that the originated contract `contract-id` contains the expected [zkchannels contract](https://github.com/boltlabs-inc/tezos-contract/blob/main/zkchannels-contract/zkchannel_contract.tz) with respect to the channel identifier `cid`, the customer Tezos public key `cust_pk`, the customer's tezos tz1 address `cust_addr`, the merchant public parameters, and the initial balances `bal_cust` and `bal_merch`.
   - Checks that the on-chain storage of `contract-id` at `originated-block-height` is exactly as expected for channel `cid`:
@@ -181,7 +185,7 @@ Upon receipt of the `funding_confirmed` message, the merchant:
 1. type: `activate`
 2. data: [(bls12_381_g1, bls12_381_g1):`payment_tag`]
 
-#### Customer requirements
+#### Customer Requirements
 Upon receipt, the customer:
   - In the dual-funded case, waits for the contract storage status to be `OPEN` for `required_confirmations` blocks before proceeding. Update the channel status to `MerchantFunded`.
   - If the customer does not see a confirmed `addFunding` operation from the merchant within a specified timeout period, they call [the `reclaimFunding` entrypoint](5-tezos-escrowagent#reclaimfunding).

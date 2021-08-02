@@ -44,10 +44,6 @@ The Tezos client is used to interact with the tezos node for performing actions 
   * Given an address, return the balance.
   * Given an operation hash, return the operation and the block height it was included in.
 
-### Tezos account balances
-Before establishing a zkChannel, the customer and merchant should ensure that they will have a sufficient balance to pay for the [operations fees](5-tezos-escrowagent.md#operation-fees) needed for interacting with the smart contract. Since the blockchain fee market is dynamic, it is impossible to predict with certainty what the necessary fees will be. However, based on our [contract benchmarks](https://github.com/boltlabs-inc/tezos-contract/wiki/Benchmark-Results) on testnet, we recommend a minimum amount reserved specifically for operation fees for the customer and merchant to be 2 tez and 0.009 tez, respectively. 
-
-
 ## Merchant Setup
 
 A party who wishes to act as a zkChannel merchant must generate and publish the following parameters for use across all of their zkChannels: 
