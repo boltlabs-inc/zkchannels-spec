@@ -77,7 +77,7 @@ There are three options for [channel closure](4-channel-closure.md):
 * **backtracked**:
    A status assigned to an operation that is included in the blockchain and previously successful, but the effects of which have been reverted. This occurs when a subsequent operation in the same operation group fails. For more details see _operation_, _operation group_, and _operation status_.
 *  **bake**: To produce a new block in the Tezos blockchain. It is the equivalent of _mining_ on a proof-of-work blockchain.
-*  **baker**: A Tezos node that _bakes_ blocks. Also known as a _validator_. A baker must stake tezos in order to bake blocks.
+*  **baker**: A Tezos node that _bakes_ blocks. Also known as a _validator_. 
 *  **baker fee**:
    All operations contain a _baker fee_ that is paid to the baker that creates the block containing the operation. This fee provides a monetary incentive for bakers to include the operation in their next block.
 * **burn**:
@@ -105,13 +105,13 @@ There are three options for [channel closure](4-channel-closure.md):
 *  **mempool**:
    A node's mechanism for storing unconfirmed operations.
 *  **minimal operation fee**:
-   The minimal fee required by a Tezos baker in order to propagate and include an operation into a block. This fee is set in the Tezos node's configuration. For more information see the [developer documentation](https://tezos.gitlab.io/protocols/004_Pt24m4xi.html).
+   The minimal fee required by either a Tezos node in order to propagate operations over the gossip network or required by a baker in order to include an operation into a block. This fee is set in the Tezos node's configuration. For more information see the [developer documentation](https://tezos.gitlab.io/protocols/004_Pt24m4xi.html).
 *  **mutez**:
-   The smallest denomination of tez. 1 tez is equal to 1 million mutez.
+   The smallest denomination of tez. One tez is equal to one million mutez.
 *  **nanotez**:
-   _Nanotez_ are used for fine-grained gas calculations for fees. 1 nanotez is equal to 1,000 mutez. Fees calculated using nanotez are rounded to mutez when being defined in operations.
+   _Nanotez_ are used for fine-grained gas calculations for fees. One nanotez is equal to one thousand mutez. Fees calculated using nanotez are rounded to mutez when being defined in operations.
 *  **tezos node**:
-   A peer in the peer-to-peer network. A tezos node maintains a local state and propagates blocks and operations. Bakers are a subset of nodes that also participate in baking.
+   A peer in the peer-to-peer network. A tezos node maintains local state and propagates blocks and operations in the gossip network. A tezos node may also participate in baking.
 *  **operation**:
    An _operation_ is a set of instructions that transform the state of the blockchain. Supported operation types are as follows:
    - **origination**: An operation that creates a new smart contract. 
@@ -140,7 +140,7 @@ There are three options for [channel closure](4-channel-closure.md):
 *  **tz1 address**: 
    The address of an implicit account using the Ed25519 signature scheme. The address is derived from the hash of the public key and always begin with the prefix 'tz1'.
 *  **weight**:
-   The default measure used in the Tezos node reference implementation for prioritizing operations for block inclusion. An operation's _weight_ is defined by `weight = fee / (max ( (storage/storage_block_limit), (gas/gas_block_limit)))` where `fee` is the baker fee, `storage` is the operation storage, `storage_block_limit` is the storage limit for a block, `gas` is the operation gas, and `gas_block_limit` is the gas limit for a block ([see source code](https://gitlab.com/tezos/tezos/-/blob/master/src/proto_009_PsFLoren/lib_delegate/client_baking_forge.ml#L283)).
+   The default measure used in the Tezos node reference implementation for prioritizing operations for inclusion in a block. An operation's _weight_ is defined by `weight = fee / (max ( (storage/storage_block_limit), (gas/gas_block_limit)))` where `fee` is the baker fee, `storage` is the operation storage, `storage_block_limit` is the storage limit for a block, `gas` is the operation gas, and `gas_block_limit` is the gas limit for a block ([see source code](https://gitlab.com/tezos/tezos/-/blob/master/src/proto_009_PsFLoren/lib_delegate/client_baking_forge.ml#L283)).
 ### zkChannels Glossary 
 * **channel identifer**: 
    A unique identifier for a zkChannel.
