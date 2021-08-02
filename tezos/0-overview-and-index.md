@@ -77,7 +77,7 @@ There are three options for [channel closure](4-channel-closure.md):
 * **backtracked**:
    A status assigned to an operation that is included in the blockchain and previously successful, but the effects of which have been reverted. This occurs when a subsequent operation in the same operation group fails. For more details see _operation_, _operation group_, and _operation status_.
 *  **bake**: To produce a new block in the Tezos blockchain. It is the equivalent of _mining_ on a proof-of-work blockchain.
-*  **baker**: An entity who _bakes_ blocks. Also known as a _validator_. A baker must stake tezos in order to bake blocks.
+*  **baker**: A Tezos node that _bakes_ blocks. Also known as a _validator_. A baker must stake tezos in order to bake blocks.
 *  **baker fee**:
    All operations contain a _baker fee_ that is paid to the baker that creates the block containing the operation. This fee provides a monetary incentive for bakers to include the operation in their next block.
 * **burn**:
@@ -105,7 +105,7 @@ There are three options for [channel closure](4-channel-closure.md):
 *  **mempool**:
    A node's mechanism for storing unconfirmed operations.
 *  **minimal operation fee**:
-   Tezos bakers by default require a _minimal operatin fee_ to propagate and include operations into a block. This minimal fee is not set at the protocol level but rather in the configuration of the node and the baker. Bakers may set their own minimal fee requirements that differ from the default. For more information see the [developer documentation](https://tezos.gitlab.io/protocols/004_Pt24m4xi.html).
+   The minimal fee required by a Tezos baker in order to propagate and include an operation into a block. This fee is set in the Tezos node's configuration. For more information see the [developer documentation](https://tezos.gitlab.io/protocols/004_Pt24m4xi.html).
 *  **mutez**:
    The smallest denomination of tez. 1 tez is equal to 1 million mutez.
 *  **nanotez**:
