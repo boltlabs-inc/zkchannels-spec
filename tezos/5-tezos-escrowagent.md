@@ -38,8 +38,15 @@ It includes support for mutual closes, unilateral closes by either the customer 
   - [Reclaim funding](#reclaim-funding)
 
 ## Tezos background
+A _Tezos operation_ is a set of instructions that transforms the state (or _context_) of the blockchain. An operation has exactly one _source account_ (the account that pays for the execution of the instructions and inclusion in the blockchain) and exactly one _destination account_ (the account that receives a transfer of funds). 
 
-Every Tezos operation has only one source and one destination, and the operation must be signed by the private key that corresponds to the source account. There are two kinds of operations used in zkChannels, origination for originating the contract, and transaction for funding and calling the various entrypoints of the contract.
+After creating (or _forging_) an operation, the operation must be signed by the private key that corresponds to the specified source account. A signed operation is then _injected_ by a Tezos node (i.e., propagated to the gossip network) for subsequent inclusion in a block. Inclusion in a block does not guarantee success of the given operation. 
+
+An operation may be either independent or part of a larger _operation group_ (i.e., a set of operations that have been authorized by a single signature). Operations may be in the same operation group either because they have been created as a batch by the source account, or because an operation called on a contract that creates one or more operations. The operations within a given operation group have a defined order of execution and are applied to the blockchain atomically; that is, all such operations succeed or fail together. The tezos node stores an _operation status_ for each operation that indicates whether the operation is applied to the blockchain or not. 
+
+There are two kinds of operations used in zkChannels, _origination_ operations for originating the channel's smart contract, and _transaction_ operations for funding and calling the various entrypoints of the contract.
+
+
 ### Operation structure
 
 Below is an example of an unsigned Tezos operation. The signature on this operation is created by serializing the operation and signing it with the private key associated with the `source` address. For detailed description of how Tezos operations get serialized and signed see [this post](https://www.ocamlpro.com/2018/11/21/an-introduction-to-tezos-rpcs-signing-operations/).
@@ -98,9 +105,11 @@ The operation is then hashed using blake2b to create a 32-byte digest. The diges
 In the final step, the binary format of the operation is appended to the signature to create the signed operation which is ready to be broadcast by the Tezos node.
 
 ### Operation fees
-Operation fees consist of two parts, the _baker fee_ and the _burn fee_. The baker fee is paid to the baker that creates the block containing the operation. This fee provides a monetary incentive for bakers to include the operation in their next block. The burn fee does not go to the baker is instead removed from the total supply of tez. The amount of the burn fee for an operation is determined by a protocol constant multiplied by the number of additional bytes an operation's effect adds to the state of the blockchain. 
+Operation fees consist of two parts, the _baker fee_ and the _burn fee_. The baker fee is paid to the baker that bakes the block containing the given operation. This fee provides a monetary incentive for bakers to include the operation in their next block. The burn fee is removed from the total supply of tez; the burn fee amount for a given operation is determined by a protocol constant multiplied by the number of additional bytes an operation's effect adds to the state of the blockchain. 
 
-The operation fees can only be paid for by the source account of the operation. If the source account does not hold a sufficient balance for the baker fee, the operation will not be a valid and therefore not be included in the blockchain. If the source account holds enough for the baker fee but not enough for the burn fee as well, the baker will still receive the baker fee but the operation will fail. If an operation fails, any of its effects will be reversed (as well as any other operation within the same operation group).
+Operation fees must be paid by the source account specified by the given operation. We have the following cases:
+- If the source account has insufficient balance for the baker fee, the operation will be deemed invalid and will not be included in a block. 
+- If the source account holds sufficient funds for the baker fee, but insufficient additional funds for the burn fee, the operation may be included in a block. In such a case, if the block containing the given operation is included in the blockchain, the baker receives the baker fee, but the operation itself fails.
 
 #### Operation weight
 There are two protocol constants that limit how many operations can go in a block. The first limit is on the total gas used by all operations, and the second limit is on the total additional storage added by all operations. For a block to be valid, the total of all the operations in the block must not exceed either of these limits. Given these limits, bakers are incentivized to prioritize operations that pay the highest baker fee relative to their gas and storage usage. 
@@ -115,13 +124,13 @@ weight = fee / (max ( (storage/storage_block_limit), (gas/gas_block_limit)))
 * `gas` - operation gas
 * `gas_block_limit` - gas limit for a block
 
-Therefore, when creating an operation which is intended to have a fast confirmation (e.g. by the next block), the baker fee should be high enough such that the operation weight is within the baker's threshold for being included in the next block.
+Therefore, when creating an operation which is intended to have a fast confirmation (e.g. by the next block), the baker fee should be high enough such that the operation weight is within the baker's threshold for inclusion in the next block.
 
 #### Estimating operation gas and storage
-The Tezos node allows clients to estimate the gas and storage used by an operation by simulating the operation locally. This lets the client know how much gas and storage was used, as well as whether the operation was successful or not (to avoid paying fees for an erroneous transaction). 
+The Tezos node allows clients to estimate the gas and storage used by an operation by simulating the operation locally. This lets the client know how much gas and storage is required, as well as whether the operation is successful or not (to avoid paying fees for an erroneous transaction). 
 
 #### Minimal operation fees
-Tezos bakers by default require a minimal operation fee to propagate and include operations into a block. This minimal fee is not set at the protocol level but rather in the configuration of the node and the baker. Bakers may set their own minimal fee requirements that differ from the default. The default minimal fee is determined by:
+Tezos nodes and bakers require a minimal operation fee to propagate operations over the gossip network and to include operations in a block. This minimal fee is not set at the protocol level but rather in the configuration of the node and the baker. Bakers may set their own minimal fee requirements that differ from the default. The default minimal fee is determined by:
 ```
 fees >= minimal_fees + minimal_nanotez_per_byte * size + minimal_nanotez_per_gas_unit * gas
 ```
@@ -134,7 +143,7 @@ The default minimal fee values are below. For more details see the tezos [develo
 * `minimal_nanotez_per_byte` = 1000 nanotez per bytes=
 
 #### Setting fees
-By default, operations are created using the minimal operation fees specified above. If the operation is not confirmed within 60 blocks of being broadcast, the operation will be dropped from the mempool. If this happens, the operation must be created and broadcast again but with a higher baker fee. 
+By default, operations are created using the minimal operation fees specified above. If the operation is not confirmed within sixty blocks of being broadcast, the operation is dropped from the mempool. If this happens, the operation should be forged and injected again, but with a higher baker fee. 
 
 ## Contract Requirements
 * The contract keeps track of its current `status` that can be used to determine which entrypoint can be called. The initial status is set to `AWAITING_FUNDING`. The possible statuses are: `AWAITING_FUNDING`, `OPEN`, `EXPIRY`, `CUST_CLOSE`, `CLOSED`.
@@ -312,7 +321,7 @@ The `TezosEscrowAgent` contract origination proceeds as follows.
 The customer will forge and sign the operation with the zkchannels contract and the initial storage arguments listed above. The operation fees are to be handled by the customer's Tezos client.
 
 ## Customer injects origination operation
-When the customer injects the origination operation, they watch the blockchain to ensure that the operation is confirmed. If the operation is not confirmed within 60 blocks of the block header referenced in the operation, the operation will be dropped from the mempool and the customer must go back to the previous step to forge and sign a new operation with a higher fee (see [fee bumping](#bumping-up-baker-fees)).
+When the customer injects the origination operation, they watch the blockchain to ensure that the operation is confirmed. If the operation is not confirmed within sixty blocks of the block header referenced in the operation, the operation will be dropped from the mempool and the customer must go back to the previous step to forge and sign a new operation with a higher fee (see [fee bumping](#bumping-up-baker-fees)).
 
 ## Origination confirmed 
 Once the operation has reached the minimum number of required confirmations, the `contract-id` is locked in, the customer is ready to fund the contract with their initial balance.
