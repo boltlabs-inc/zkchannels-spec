@@ -13,7 +13,8 @@ It includes support for mutual closes, unilateral closes by either the customer 
       - [Operation weight](#operation-weight)
       - [Estimating operation gas and storage](#estimating-operation-gas-and-storage)
       - [Minimal operation fees](#minimal-operation-fees)
-      - [Setting fees](#setting-fees)
+    - [Fee handling](#fee-handling)
+  - [Tezos client requirements](#tezos-client-requirements)
   - [Contract Requirements](#contract-requirements)
     - [Initial contract arguments](#initial-contract-arguments)
     - [Global default arguments](#global-default-arguments)
@@ -112,15 +113,15 @@ Operation fees must be paid by the source account specified by the given operati
 - If the source account holds sufficient funds for the baker fee, but insufficient additional funds for the burn fee, the operation may be included in a block. In such a case, if the block containing the given operation is included in the blockchain, the baker receives the baker fee, but the operation itself fails.
 
 #### Operation weight
-There are two protocol constants that limit how many operations can go in a block. The first limit is on the total gas used by all operations, and the second limit is on the total additional storage added by all operations. For a block to be valid, the total of all the operations in the block must not exceed either of these limits. Given these limits, bakers are incentivized to prioritize operations that pay the highest baker fee relative to their gas and storage usage. 
+There are two protocol constants that limit how many operations can go in a block. The first limit is on the total gas used by all operations [10,400,000](https://tzstats.com/protocols/PsFLorenaUUuikDWvMDr6fGBRG8kt3e3D3fHoXK1j1BFRxeSH4i), and the second limit is on the total size in bytes of all the operations ([512kB](https://gitlab.com/tezos/tezos/-/blob/master/src/proto_009_PsFLoren/lib_protocol/main.ml#L84) as of the Florence protocol). For a block to be valid, the total of all the operations in the block must not exceed either of these limits. Given these limits, bakers are incentivized to prioritize operations that pay the highest baker fee relative to their gas and size. 
 
 In the Tezos node reference implementation, bakers prioritize operations based on their _weight_ ([source code](https://gitlab.com/tezos/tezos/-/blob/master/src/proto_009_PsFLoren/lib_delegate/client_baking_forge.ml#L283)), where the weight is defined as:
 ```
-weight = fee / (max ( (storage/storage_block_limit), (gas/gas_block_limit)))
+weight = fee / (max ( (size/max_size), (gas/gas_block_limit)))
 ```
 * `fee` - baker fee
-* `storage` - operation storage
-* `storage_block_limit` - storage limit for a block
+* `size` - operation size in bytes
+* `max_size` - operation list size limit for a block
 * `gas` - operation gas
 * `gas_block_limit` - gas limit for a block
 
@@ -142,8 +143,23 @@ The default minimal fee values are below. For more details see the tezos [develo
 * `minimal_nanotez_per_gas_unit` = 100 nanotez per gas unit
 * `minimal_nanotez_per_byte` = 1000 nanotez per bytes=
 
-#### Setting fees
-By default, operations are created using the minimal operation fees specified above. If the operation is not confirmed within sixty blocks of being broadcast, the operation is dropped from the mempool. If this happens, the operation should be forged and injected again, but with a higher baker fee. 
+### Fee handling
+By default, operations are forged using the minimal operation fee. The assumption is that the minimal operation fee will be sufficient for operations to be confirmed. during normal network activity with regards to the number of operations being injected. If the network becomes congested, with many operations competing for inclusion into a block, it is possible for the operation to get stuck in the mempool. If the operation fails to be confirmed within sixty blocks of the block hash the operation of interest references, the operation will be dropped from the mempool. In this case, the operation should be forged and injected again, but with a higher baker fee. The process of estimating a sufficient baker fee is not handled by this specification. Users should specify a custom fallback fee for instances where the minimal operation fee is insufficient for inclusion into a block.
+
+## Tezos client requirements
+The Tezos client is used to interact with the tezos node for performing actions as creating operations, injecting operations and querying the state of the blockchain. We assume that the Tezos client is capable of:
+* Creating and injecting operations:
+  * Regular transfer operations outside of the zkChannels protocol. 
+  * Operations used in the zkChannels protocol.
+    * Originating the zkChannels contract.
+    * Calling entrypoints, including those requiring arguments.
+  * Handling operation fees:
+    * Given a unsigned operation, estimate the gas and storage usage and calculate the minimal baker fee.
+    * Bump up the operation fee by an arbitrary amount. 
+* Querying the blockchain:
+  * Given a contract-id, return the contract code and storage.
+  * Given an address, return the balance.
+  * Given an operation hash, return the operation and the block height it was included in.
 
 ## Contract Requirements
 * The contract keeps track of its current `status` that can be used to determine which entrypoint can be called. The initial status is set to `AWAITING_FUNDING`. The possible statuses are: `AWAITING_FUNDING`, `OPEN`, `EXPIRY`, `CUST_CLOSE`, `CLOSED`.
@@ -321,7 +337,7 @@ The `TezosEscrowAgent` contract origination proceeds as follows.
 The customer will forge and sign the operation with the zkchannels contract and the initial storage arguments listed above. The operation fees are to be handled by the customer's Tezos client.
 
 ## Customer injects origination operation
-When the customer injects the origination operation, they watch the blockchain to ensure that the operation is confirmed. If the operation is not confirmed within sixty blocks of the block header referenced in the operation, the operation will be dropped from the mempool and the customer must go back to the previous step to forge and sign a new operation with a higher fee (see [fee bumping](#bumping-up-baker-fees)).
+When the customer injects the origination operation, they watch the blockchain to ensure that the operation is confirmed. If the operation is not confirmed within sixty blocks of the block header referenced in the operation, the operation will be dropped from the mempool and the customer must go back to the previous step to forge and sign a new operation with a higher fee (see [Fee handling](#Fee-handling)).
 
 ## Origination confirmed 
 Once the operation has reached the minimum number of required confirmations, the `contract-id` is locked in, the customer is ready to fund the contract with their initial balance.

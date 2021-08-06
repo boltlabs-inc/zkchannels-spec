@@ -29,20 +29,6 @@ We use SHA3-256 hashes to instantiate our hash-based commitments.
 #### `zkAbacus` global defaults
 * `close`: a fixed scalar used to differentiate closing state and state. The default value is 0x000000000000000000000000000000000000000000000000000000434c4f5345, which is derived from the binary encoding of the string 'CLOSE'.
 
-### Tezos client requirements
-The Tezos client is used to interact with the tezos node for performing actions as creating operations, broadcasting operations and querying the state of the blockchain. We assume that the Tezos client is capable of:
-* Creating and broadcasting operations:
-  * Regular transfer operations outside of the zkChannels protocol. 
-  * Operations used in the zkChannels protocol.
-    * Originating the zkChannels contract.
-    * Calling entrypoints, including those requiring arguments.
-  * Handling operation fees:
-    * Given a unbroadcasted operation, estimate the gas and storage usage and calculate the minimal baker fee.
-    * Bump up the operation fee by an arbitrary amount. 
-* Querying the blockchain:
-  * Given a contract-id, return the contract code and storage.
-  * Given an address, return the balance.
-  * Given an operation hash, return the operation and the block height it was included in.
 
 ## Merchant Setup
 
