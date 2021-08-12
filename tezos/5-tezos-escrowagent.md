@@ -121,7 +121,7 @@ weight = fee / (max ( (size/max_size), (gas/gas_block_limit)))
 ```
 * `fee` - baker fee
 * `size` - operation size in bytes
-* `max_size` - operation list size limit for a block
+* `max_size` - size limit for all the operations in a block
 * `gas` - operation gas
 * `gas_block_limit` - gas limit for a block
 
@@ -144,7 +144,7 @@ The default minimal fee values are below. For more details see the tezos [develo
 * `minimal_nanotez_per_byte` = 1000 nanotez per bytes=
 
 ### Fee handling
-By default, operations are forged using the minimal operation fee. The assumption is that the minimal operation fee will be sufficient for operations to be confirmed during normal network activity with regards to the number of operations being injected. If the network becomes congested, with many operations competing for inclusion into a block, it is possible for the operation to get stuck in the mempool. If the operation does not get confirmed within sixty blocks of the block hash the operation of interest references, the operation will be dropped from the mempool. In this case, the operation should be forged and injected again, but with a higher baker fee. The process of estimating a sufficient baker fee is not handled by this specification. Users should specify a custom fallback fee for instances where the minimal operation fee is insufficient for inclusion into a block.
+We assume that the minimal operation fee will be sufficient for operations to be confirmed. As such, operations are forged using the minimal operation fee. This specification does not handle the case where the minimal operation fee is insufficient for bakers to include the operation into a block. 
 
 ## Tezos client requirements
 The Tezos client is used to interact with the tezos node for performing actions as creating operations, injecting operations and querying the state of the blockchain. We assume that the Tezos client is capable of:
@@ -154,8 +154,7 @@ The Tezos client is used to interact with the tezos node for performing actions 
     * Originating the zkChannels contract.
     * Calling entrypoints, including those requiring arguments.
   * Handling operation fees:
-    * Given a unsigned operation, estimate the gas and storage usage and calculate the minimal baker fee.
-    * Bump up the operation fee by an arbitrary amount. 
+    * Given a unsigned operation, estimate the gas and storage usage and calculate the minimal operaion fee.
 * Querying the blockchain:
   * Given a contract-id, return the contract code and storage.
   * Given an address, return the balance.
