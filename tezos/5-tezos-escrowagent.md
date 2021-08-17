@@ -113,7 +113,7 @@ Operation fees must be paid by the source account specified by the given operati
 - If the source account holds sufficient funds for the baker fee, but insufficient additional funds for the burn fee, the operation may be included in a block. In such a case, if the block containing the given operation is included in the blockchain, the baker receives the baker fee, but the operation itself fails.
 
 #### Operation weight
-There are two protocol constants that limit how many operations can go in a block: the first limit is on the total gas used by all operations [10,400,000](https://tzstats.com/protocols/PsFLorenaUUuikDWvMDr6fGBRG8kt3e3D3fHoXK1j1BFRxeSH4i), and the second limit is on the total size in bytes of all the operations ([512kB](https://gitlab.com/tezos/tezos/-/blob/master/src/proto_009_PsFLoren/lib_protocol/main.ml#L84) as of the Florence protocol). For a block to be valid, the total of all the operations in the block must not exceed either of these limits. Given these limits, bakers are incentivized to prioritize operations that pay the highest baker fee relative to their gas and size. 
+There are two protocol constants that limit how many operations can go in a block: the first limit is on the total gas used by all operations [10,400,000](https://tzstats.com/protocols/PsFLorenaUUuikDWvMDr6fGBRG8kt3e3D3fHoXK1j1BFRxeSH4i), and the second limit is on the total size in bytes of all the operations ([512kB](https://gitlab.com/tezos/tezos/-/blob/master/src/proto_009_PsFLoren/lib_protocol/main.ml#L84) as of the Florence protocol). Given these limits, bakers are incentivized to prioritize operations that pay the highest baker fee relative to their gas and size. 
 
 In the Tezos node reference implementation, bakers prioritize operations based on their _weight_ ([source code](https://gitlab.com/tezos/tezos/-/blob/master/src/proto_009_PsFLoren/lib_delegate/client_baking_forge.ml#L283)), where the weight is defined as:
 ```
@@ -125,7 +125,9 @@ weight = fee / (max ( (size/max_size), (gas/gas_block_limit)))
 * `gas` - operation gas
 * `gas_block_limit` - gas limit for a block
 
-Therefore, when creating an operation which is intended to have a fast confirmation (e.g. by the next block), the baker fee should be high enough such that the operation weight is within the baker's threshold for inclusion in the next block.
+Therefore, when creating an operation which is intended to have a fast confirmation (e.g. by the next block), the baker fee should be high enough such that the operation weight is within the baker's threshold for inclusion in the next block. It is standard practise for Tezos clients to just use the [minimal operation fee](#Minimal-operation-fees) and in most instances this will be sufficient for a fast confirmation.
+
+Most Tezos clients use the minimal operation fee (see below) by default.
 
 #### Estimating operation gas and storage
 The Tezos node allows clients to estimate the gas and storage used by an operation by simulating the operation locally. This lets the client know how much gas and storage is required, as well as whether the operation is successful or not (to avoid paying fees for an erroneous transaction). 
@@ -336,7 +338,7 @@ The `TezosEscrowAgent` contract origination proceeds as follows.
 The customer will forge and sign the operation with the zkchannels contract and the initial storage arguments listed above. The operation fees are to be handled by the customer's Tezos client.
 
 ## Customer injects origination operation
-When the customer injects the origination operation, they watch the blockchain to ensure that the operation is confirmed. If the operation is not confirmed within sixty blocks of the block header referenced in the operation, the operation will be dropped from the mempool and the customer must go back to the previous step to forge and sign a new operation with a higher fee (see [Fee handling](#Fee-handling)).
+When the customer injects the origination operation, they watch the blockchain to ensure that the operation is confirmed to the required depth. 
 
 ## Origination confirmed 
 Once the operation has reached the minimum number of required confirmations, the `contract-id` is locked in, the customer is ready to fund the contract with their initial balance.
