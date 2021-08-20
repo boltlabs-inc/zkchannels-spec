@@ -125,9 +125,7 @@ weight = fee / (max ( (size/max_size), (gas/gas_block_limit)))
 * `gas` - operation gas
 * `gas_block_limit` - gas limit for a block
 
-Therefore, when creating an operation which is intended to have a fast confirmation (e.g. by the next block), the baker fee should be high enough such that the operation weight is within the baker's threshold for inclusion in the next block. It is standard practise for Tezos clients to just use the [minimal operation fee](#Minimal-operation-fees) and in most instances this will be sufficient for a fast confirmation.
-
-Most Tezos clients use the minimal operation fee (see below) by default.
+Therefore, when creating an operation which is intended to have a fast confirmation (e.g. by the next block), the baker fee should be high enough such that the operation weight is within the baker's threshold for inclusion in the next block. It is standard practise for Tezos clients to use the [minimal operation fee](#Minimal-operation-fees).
 
 #### Estimating operation gas and storage
 The Tezos node allows clients to estimate the gas and storage used by an operation by simulating the operation locally. This lets the client know how much gas and storage is required, as well as whether the operation is successful or not (to avoid paying fees for an erroneous transaction). 
