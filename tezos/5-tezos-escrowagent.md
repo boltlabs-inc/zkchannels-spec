@@ -174,7 +174,7 @@ The zkChannel contract is originated with the following channel-specific argumen
 * `merchant_address`: The merchant's Tezos tz1 address.
 * `merchFunding`: The merchant's initial balance.
 * `merchant_public_key`: The merchan'ts Tezos public key.
-* `merchant_blind_public_key`: The merchant's zkAbacus Pointcheval Sanders public key.
+* `merchant_zkabacus_public_key`: The merchant's zkAbacus Pointcheval Sanders public key.
 
 ### Global default arguments
 These [global default](1-setup.md#global-defaults) arguments are constant for every implementation of a zkChannels contract, regardless of the customer or merchant. 
@@ -249,7 +249,7 @@ Inputs:
 Requirements:
 * The source must be `customer_address`.
 * The contract status must be set to either `OPEN` or `EXPIRY`.
-* The closing authorization signature must be a valid signature that verifies under `merchant_blind_public_key`. The closing state contains the `cid`, `close`, `revocation_lock`, `customer_balance`, and `merchant_balance`. 
+* The closing authorization signature must be a valid signature that verifies under `merchant_zkabacus_public_key`. The closing state contains the `cid`, `close`, `revocation_lock`, `customer_balance`, and `merchant_balance`. 
 
 On execution:
 * The customer's balance from the close state, `customer_balance`, is stored in the contract.
@@ -334,7 +334,7 @@ The `TezosEscrowAgent` contract origination proceeds as follows.
     * [`bls12_381_g2`:`Y3`]
     * [`bls12_381_g2`:`Y4`] 
   --->
-    * [`blind_key`: `merchant_blind_public_key`]
+    * [`blind_key`: `merchant_zkabacus_public_key`]
     * [`domain_separator`:`close`]
     * [`int`:`self_delay`] 
     

@@ -39,7 +39,7 @@ Upon receipt, the merchant:
   - Aborts if no channel with identifier `cid` and status `Active` exists.
   - [Update Channel Status][merchant_update_channel_status] for the channel with identifier `cid` to `PendingClose`.
   - Atomically [Insert Revocation Lock][merchant_insert_revlock] if it doesn't already exist. If the value already exists in the database, the merchant aborts the mutual close session.
-  - Checks that `closing_signature` is a valid Pointcheval Sanders signature on the proposed closing state `(cid, close, revocation_lock, customer_balance, merchant_balance)` with respect to the merchant's blind signing public key `merchant_blind_public_key`. If this check fails, the merchant aborts.
+  - Checks that `closing_signature` is a valid Pointcheval Sanders signature on the proposed closing state `(cid, close, revocation_lock, customer_balance, merchant_balance)` with respect to the merchant's blind signing public key `merchant_zkabacus_public_key`. If this check fails, the merchant aborts.
  
 ### The `mutual_close_m` Message
 
