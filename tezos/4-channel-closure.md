@@ -23,7 +23,7 @@ The details of each message are as follows.
 
 1. type: (`mutual_close_c`)
 2. data: 
-    * [`bls12_381_fr`:`cid`]
+    * [`bls12_381_fr`:`channel_id`]
     * [`mutez`:`customer_balance`]
     * [`mutez`:`merchant_balance`]
     * [`bls12_381_fr`:`revocation_lock`]
@@ -31,15 +31,15 @@ The details of each message are as follows.
       
 #### Customer Requirements
 The customer:
-  - Forms the message `mutual_close_c` using the most recent closing state and closing authorization signature for the `zkAbacus` channel with identifier `cid`.
-  - Updates the channel status to `PendingClose` and does not initiate any more payments for the channel with identifier `cid`.
+  - Forms the message `mutual_close_c` using the most recent closing state and closing authorization signature for the `zkAbacus` channel with identifier `channel_id`.
+  - Updates the channel status to `PendingClose` and does not initiate any more payments for the channel with identifier `channel_id`.
 
 #### Merchant Requirements
 Upon receipt, the merchant:
-  - Aborts if no channel with identifier `cid` and status `Active` exists.
-  - [Update Channel Status][merchant_update_channel_status] for the channel with identifier `cid` to `PendingClose`.
+  - Aborts if no channel with identifier `channel_id` and status `Active` exists.
+  - [Update Channel Status][merchant_update_channel_status] for the channel with identifier `channel_id` to `PendingClose`.
   - Atomically [Insert Revocation Lock][merchant_insert_revlock] if it doesn't already exist. If the value already exists in the database, the merchant aborts the mutual close session.
-  - Checks that `closing_signature` is a valid Pointcheval Sanders signature on the proposed closing state `(cid, close, revocation_lock, customer_balance, merchant_balance)` with respect to the merchant's blind signing public key `merchant_zkabacus_public_key`. If this check fails, the merchant aborts.
+  - Checks that `closing_signature` is a valid Pointcheval Sanders signature on the proposed closing state `(channel_id, close, revocation_lock, customer_balance, merchant_balance)` with respect to the merchant's blind signing public key `merchant_zkabacus_public_key`. If this check fails, the merchant aborts.
  
 ### The `mutual_close_m` Message
 
@@ -53,7 +53,7 @@ Upon receipt, the customer:
   - If the signature is not valid, aborts and initiates a [unilateral customer close](##unilateral-customer-close).
 
 #### Merchant Requirements
-The merchant generates `mutual_close_signature` as an EdDSA signature under the merchant's Tezos public key pair (`merch_pk`, `merch_sk`) on the tuple `(contract-id, "zkChannels mutual close", cid, customer_balance, merchant_balance)`, where `contract-id` is the address of the smart contract and `context-string` is a [global default](1-setup.md#global-defaults) set to `"zkChannels mutual close"`.
+The merchant generates `mutual_close_signature` as an EdDSA signature under the merchant's Tezos public key pair (`merch_pk`, `merch_sk`) on the tuple `(contract-id, "zkChannels mutual close", channel_id, customer_balance, merchant_balance)`, where `contract-id` is the address of the smart contract and `context-string` is a [global default](1-setup.md#global-defaults) set to `"zkChannels mutual close"`.
 
 ### The `mutualClose` entrypoint
 This entry point sends `customer_balance` funds to the customer's Tezos account (associated to `cust_pk`) and `merchant_balance` funds to the merchant's Tezos account (associated to `merch_pk `).
@@ -61,9 +61,9 @@ This entry point sends `customer_balance` funds to the customer's Tezos account 
 A call to the `mutualClose` entrypoint will only succeed if and only if all of the following are true:
 * The sender is `customer_address`, as defined in the smart contract.
 * The contract has been funded (either by the customer for a single-funded channel, or both the customer and merchant for a dual-funded channel) and `custClose` or `expiry` have not been called.
-* The signature `mutual_close_signature` is a valid EdDSA signature under the merchant's Tezos public key pair on the tuple `(contract-id, "zkChannels mutual close", cid, customer_balance, merchant_balance)`, where:
+* The signature `mutual_close_signature` is a valid EdDSA signature under the merchant's Tezos public key pair on the tuple `(contract-id, "zkChannels mutual close", channel_id, customer_balance, merchant_balance)`, where:
   * `contract-id` is the address of the smart contract;
-  * `cid` is the channel identifier contained in the contract storage;
+  * `channel_id` is the channel identifier contained in the contract storage;
   * `context-string` is a [global default](1-setup.md#global-defaults) set to `"zkChannels mutual close"`;
   * the sum `customer_balance + merchant_balance` does not exceed the balance associated to the smart contract.
 

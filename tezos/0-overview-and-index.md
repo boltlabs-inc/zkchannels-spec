@@ -145,7 +145,7 @@ There are three options for [channel closure](4-channel-closure.md):
 * **channel identifer**: 
    A unique identifier for a zkChannel.
 * **closing state**:
-   A closing state contains a channel identifier (`cid`), close flag (`close`), revocation lock (`revocation_lock`), customer balance (`customer_balance`), and merchant balance (`merchant_balance`). The merchant's blind signature over the closing state is what allows the customer to post the final balances to the smart contract during a unilateral customer close. The revocation lock provides a mechanism for the merchant to dispute revoked closing states posted by the customer.
+   A closing state contains a channel identifier (`channel_id`), close flag (`close`), revocation lock (`revocation_lock`), customer balance (`customer_balance`), and merchant balance (`merchant_balance`). The merchant's blind signature over the closing state is what allows the customer to post the final balances to the smart contract during a unilateral customer close. The revocation lock provides a mechanism for the merchant to dispute revoked closing states posted by the customer.
 * **customer**:
    A _customer_ is a user who opens a zkChannel with a merchant. The customer has a complete view of the channel state and can initiate private payments to the given merchant over their zkChannel. The customer trusts the merchant to provide a requested good or service, but does not trust the merchant with their payment history. The customer's anonymity set for payments is the set of users with whom a given merchant has an open channel. Customers are the 'spokes' in the zkChannel 'hub and spoke' network topology.
 *  **timeout period**: 
@@ -160,7 +160,7 @@ There are three options for [channel closure](4-channel-closure.md):
    A _zkChannel_ is a special type of payment channel that provides privacy for a customer when interacting with a merchant. More generally, a _payment channel_ allows two participants to send and receive payments to each other: when realized using cryptocurrencies, these channels typically consist of an on-chain escrow account and an off-chain state update protocol. A zkChannel is similarly comprised of two parts: an on-network escrow account and an off-network state update protocol, but the state update protocol does not allow the merchant to learn which specific channel is updated or how.
 
 ### zkChannels Notation Summary
-* **`cid`**:
+* **`channel_id`**:
    A unique channel identifier generated as a SHA3-256 hash of random contributions from both parties, together with `zkAbacus` channel parameters and `TezosEscrowAgent` escrow account parameters. It is set during [channel establishment](2-channel-establishment.md) by the merchant after creating the [`open_m` message](2-channel-establishment.md#the-open_m-message), and by the customer after the receipt of the [`open_m` message](2-channel-establishment.md#the-open_m-message).
 * **`close`**: 
    A fixed scalar used to differentiate closing state and state. It is defined as a [global default](1-setup.md#Global-defaults).

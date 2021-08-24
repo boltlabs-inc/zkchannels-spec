@@ -26,7 +26,7 @@ The customer should ensure they have a Tezos implicit account with balance suffi
 ## Overview
 Channel establishment is a three round protocol.
 
-In the first round, the customer sends the `open_c` message, which contains information about the initial state of the proposed channel. If the merchant agrees to open the proposed channel, they reply with the message `open_m`, which contains the merchan'ts contribution to the channel identifier. At the end of this round, the customer and merchant have exchanged enough information to compute the channel identifer `cid`, which acts as the unique channel identifier for the on-chain Tezos escrow account and off-chain `zkAbacus` channel. 
+In the first round, the customer sends the `open_c` message, which contains information about the initial state of the proposed channel. If the merchant agrees to open the proposed channel, they reply with the message `open_m`, which contains the merchan'ts contribution to the channel identifier. At the end of this round, the customer and merchant have exchanged enough information to compute the channel identifer `channel_id`, which acts as the unique channel identifier for the on-chain Tezos escrow account and off-chain `zkAbacus` channel. 
 
 In the next round, the customer and merchant initialize the `zkAbacus` channel by running `zkAbacus.Initialize()` on the previously established public parameters. In this subroutine, the customer sends `init_c`, which consists of a (hiding) commitment to the intial state and a zero-knowledge proof of correctness. In return, the merchant sends `init_m`, which contains an initial closing authorization signature for the customer. 
 
@@ -62,7 +62,7 @@ The `open_c` message is sent from the customer to the merchant and is formed as 
 
 1. type: `open_c`
 2. data: 
-    * [`string`:`cid_c`]: Customer randomness contribution to the channel identifer.
+    * [`string`:`channel_id_c`]: Customer randomness contribution to the channel identifer.
     * [`int`:`customer_balance`]: The proposed initial customer balance.
     * [`int`:`merchant_balance`]: The proposed initial merchant balance.
     * [`address`:`customer_address`]: The customer's Tezos tz1 account address.
@@ -73,13 +73,13 @@ The `open_c` message is sent from the customer to the merchant and is formed as 
 
 The customer, before sending:
 - Retrieves the merchant public parameters and checks these parameters are well-formed and valid as specified [above](#prerequisites).
-- Generates `cid_c` randomly using a secure RNG. 
+- Generates `channel_id_c` randomly using a secure RNG. 
 
 
 #### Merchant Requirements
 
 Upon receipt, the merchant checks that the following are true. If any are false, the merchant aborts:
-  - Checks `cid_c` is valid customer randomness for the contract identifier.
+  - Checks `channel_id_c` is valid customer randomness for the contract identifier.
   - Checks `customer_balance` ≥ 0 and `merchant_balance` ≥ 0 are positive integers.
   - Checks `cust_pk` is a valid Tezos EdDSA public key for the curve specified by `tezos-client` and that `customer_address` is a valid Tezos tz1 address that is correctly derived from `cust_pk`.
   - Checks `merch_pp_hash` is the SHA3-256 hash of` (merchant_zkabacus_public_key, merchant_address, merch_pk)`.
@@ -90,12 +90,12 @@ The merchant may choose to either accept or reject the channel establishment req
 ### The `open_m` Message
 The merchant sends the `open_m` message to the customer; this message is formed as follows:
 1. type: `open_m`
-2. data: [`string`:`cid_m`]. This is the merchant randomness contribution to the channel identifier.
+2. data: [`string`:`channel_id_m`]. This is the merchant randomness contribution to the channel identifier.
 
 #### Customer Requirements
-Upon receipt, the customer checks the that `cid_m` is a valid merchant randomness contribution to the channel identifier. If so, the customer sets the channel identifier `cid` to: `SHA3-256(cid_c, cid_m, cust_pk, merch_pk, merchant_zkabacus_public_key)`, where:
-- `cid_c` is the customer randomness contribution to the channel identifier sent to the merchant in the `open_c` message.
-- `cid_m` is the merchant randomness contribution to the channel identifier received in the `open_m` message.
+Upon receipt, the customer checks the that `channel_id_m` is a valid merchant randomness contribution to the channel identifier. If so, the customer sets the channel identifier `channel_id` to: `SHA3-256(channel_id_c, channel_id_m, cust_pk, merch_pk, merchant_zkabacus_public_key)`, where:
+- `channel_id_c` is the customer randomness contribution to the channel identifier sent to the merchant in the `open_c` message.
+- `channel_id_m` is the merchant randomness contribution to the channel identifier received in the `open_m` message.
 - `cust_pk` is the customer Tezos account public key.
 - `merch_pk` is the merchant Tezos account public key.
 - `merchant_zkabacus_public_key` is the merchant's zkAbacus Pointcheval Sanders public key.
@@ -104,10 +104,10 @@ If not, the customer aborts.
 
 #### Merchant Requirements
 Before sending, the merchant:
-  - Generates `cid_m` randomly using a secure RNG.
-  - Sets the channel identifier `cid` to: `SHA3-256(cid_c, cid_m, cust_pk, merch_pk, merchant_zkabacus_public_key)`, where:
-    * `cid_c` is the customer randomness contribution to the channel identifier sent to the merchant in the `open_c` message.
-    * `cid_m` is the merchant randomness contribution to the channel identifier received in the `open_m` message.
+  - Generates `channel_id_m` randomly using a secure RNG.
+  - Sets the channel identifier `channel_id` to: `SHA3-256(channel_id_c, channel_id_m, cust_pk, merch_pk, merchant_zkabacus_public_key)`, where:
+    * `channel_id_c` is the customer randomness contribution to the channel identifier sent to the merchant in the `open_c` message.
+    * `channel_id_m` is the merchant randomness contribution to the channel identifier received in the `open_m` message.
     * `cust_pk` is the customer Tezos account public key.
     * `merch_pk` is the merchant Tezos account public key.
     * `merchant_zkabacus_public_key` is the merchant's zkAbacus Pointcheval Sanders public key.
@@ -118,20 +118,20 @@ The customer sends an `init_c` message to the merchant.
 
 1. type: `init_c`
 2. data:
-    * [`string`:`cid`]
+    * [`string`:`channel_id`]
     * [`bls12_381_g1`:`close_state_commitment`]: A commitment to the initial closing state.
     * [`bls12_381_g1`:`state_commitment`]: A commitment to the initial state.
     * [`(bls12_381_g1, bls12_381_g1, Vec<bls12_381_fr>): establish_proof`]: A zero-knowledge proof of correctness of the commitments to the initial state and initial closing state.
 
 #### Customer Requirements
-The customer runs the `zkAbacus.Initialize()` on inputs `cid`, `customer_balance`, and `merchant_balance` to generate the `init_c` message.
+The customer runs the `zkAbacus.Initialize()` on inputs `channel_id`, `customer_balance`, and `merchant_balance` to generate the `init_c` message.
 
 #### Merchant Requirements
 Upon receipt, the merchant:
-- Checks that `cid` matches the channel identifier previously computed.
+- Checks that `channel_id` matches the channel identifier previously computed.
 - Continues as specified in `zkAbacus.Initialize()`. 
 
-If `cid` is incorrect, the merchant aborts.
+If `channel_id` is incorrect, the merchant aborts.
 
 ### The `init_m` Message
 The merchant sends an `init_m` message to the customer.
@@ -143,7 +143,7 @@ The merchant sends an `init_m` message to the customer.
 Upon receipt, the customer verifies `closing_signature` is a valid signature with respect to the merchant zkAbacus Pointcheval Sanders public key. If the signature is valid, the customer continues as specified in `zkAbacus.Initialize()`. If the signaure is invalid, the customer aborts.
 
 #### Merchant Requirements
-The merchant runs `zkAbacus.Initialize` on inputs `cid`, `customer_balance`, and `merchant_balance`. If successful, the merchant sends the resulting message `init_m`. Otherwise, the merchant aborts.
+The merchant runs `zkAbacus.Initialize` on inputs `channel_id`, `customer_balance`, and `merchant_balance`. If successful, the merchant sends the resulting message `init_m`. Otherwise, the merchant aborts.
 
 ### The `funding_confirmed` Message
 The customer sends the `funding_confirmed` message to the merchant.
@@ -166,8 +166,8 @@ The customer:
 
 #### Merchant Requirements
 Upon receipt of the `funding_confirmed` message, the merchant: 
-  - Checks that the originated contract `contract-id` contains the expected [zkchannels contract](https://github.com/boltlabs-inc/tezos-contract/blob/main/zkchannels-contract/zkchannel_contract.tz) with respect to the channel identifier `cid`, the customer Tezos public key `cust_pk`, the customer's tezos tz1 address `customer_address`, the merchant public parameters, and the initial balances `customer_balance` and `merchant_balance`.
-  - Checks that the on-chain storage of `contract-id` at `originated-block-height` is exactly as expected for channel `cid`:
+  - Checks that the originated contract `contract-id` contains the expected [zkchannels contract](https://github.com/boltlabs-inc/tezos-contract/blob/main/zkchannels-contract/zkchannel_contract.tz) with respect to the channel identifier `channel_id`, the customer Tezos public key `cust_pk`, the customer's tezos tz1 address `customer_address`, the merchant public parameters, and the initial balances `customer_balance` and `merchant_balance`.
+  - Checks that the on-chain storage of `contract-id` at `originated-block-height` is exactly as expected for channel `channel_id`:
     - The contract storage contains the merchant's Pointcheval Sanders public key.
     - The customer's tezos tz1 address and public key match the fields `customer_address` and  `cust_pk`, respectively.
     - The merchant's tezos tz1 address and public key match the fields `merchant_address` and  `merch_pk`, respectively.
@@ -199,5 +199,5 @@ Upon receipt, the customer:
 #### Merchant Requirements
 Before sending, the merchant:
   - Waits until the contract storage status has been set to `OPEN` (denoted as `1`) for `required_confirmations` blocks.
-  - Generate the `activate` message by running `zkAbacus.Activate()` on the initial state commitment `state_commitment` provided in the customer's `init_c` message, the channel identifier `cid`, and their Pointcheval Sanders public key.
+  - Generate the `activate` message by running `zkAbacus.Activate()` on the initial state commitment `state_commitment` provided in the customer's `init_c` message, the channel identifier `channel_id`, and their Pointcheval Sanders public key.
   - Updates the channel status to `Active`.

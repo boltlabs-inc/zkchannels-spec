@@ -167,7 +167,7 @@ The Tezos client is used to interact with the tezos node for performing actions 
 * The contract stores the customer's closing balance after `custClose` is called.
 ### Initial contract arguments
 The zkChannel contract is originated with the following channel-specific arguments as specified [channel establishment](2-channel-establishment.md):
-* `cid`: The channel identifier.
+* `channel_id`: The channel identifier.
 * `customer_address`: The customer's Tezos tz1 address.
 * `custFunding`: The customer's initial balance.
 * `customer_public_key`: The customer's Tezos public key.
@@ -253,7 +253,7 @@ Inputs:
 Requirements:
 * The source must be `customer_address`.
 * The contract status must be set to either `OPEN` or `EXPIRY`.
-* The closing authorization signature must be a valid signature that verifies under `merchant_zkabacus_public_key`. The closing state contains the `cid`, `close`, `revocation_lock`, `customer_balance`, and `merchant_balance`. 
+* The closing authorization signature must be a valid signature that verifies under `merchant_zkabacus_public_key`. The closing state contains the `channel_id`, `close`, `revocation_lock`, `customer_balance`, and `merchant_balance`. 
 
 On execution:
 * The customer's balance from the close state, `customer_balance`, is stored in the contract.
@@ -309,7 +309,7 @@ Inputs:
 Requirements:
 * The source must be `customer_address`.
 * The contract status must be set to `OPEN`.
-* `merch_sig` must be a valid EdDSA signature over the tuple `(contract-id, context-string, cid, customer_balance, merchant_balance)` with respect to `merchant_public_key`. Note that while `customer_balance`, `merchant_balance`, and `merch_sig` are provided to the entrypoint call as inputs, `contract-id`, `context-string`, and `cid` are retrieved internally from the contract's storage. `context-string` is a string set to `"zkChannels mutual close"` and is defined as [global default](1-setup.md#Merchant-Setup).
+* `merch_sig` must be a valid EdDSA signature over the tuple `(contract-id, context-string, channel_id, customer_balance, merchant_balance)` with respect to `merchant_public_key`. Note that while `customer_balance`, `merchant_balance`, and `merch_sig` are provided to the entrypoint call as inputs, `contract-id`, `context-string`, and `channel_id` are retrieved internally from the contract's storage. `context-string` is a string set to `"zkChannels mutual close"` and is defined as [global default](1-setup.md#Merchant-Setup).
 
 On execution:
 * `customer_balance` and `merchant_balance` are sent to `customer_address` and `merchant_address`, respectively.
@@ -338,12 +338,12 @@ The `TezosEscrowAgent` contract origination proceeds as follows.
     * [`bls12_381_g2`:`Y3`]
     * [`bls12_381_g2`:`Y4`] 
   --->
-    * [`blind_key`: `merchant_zkabacus_public_key`]
+    * [`zkabacus_key`: `merchant_zkabacus_public_key`]
     * [`domain_separator`:`close`]
     * [`int`:`self_delay`] 
     
 * Channel specific arguments
-    * [`ChannelID`:`cid`]
+    * [`ChannelID`:`channel_id`]
     * [`address`:`customer_address`]
     * [`key`:`customer_public_key`]
     * [`mutez`:`custFunding`]
@@ -365,7 +365,7 @@ Once the operation has reached the minimum number of required confirmations, the
 ## Customer funds their side of the contract
 The customer funds their side of the contract using the `addFunding` entrypoint of the contract. The source of this transfer operation must be equal to the `customer_address` specified in the contract's initial storage, with the transfer amount being exactly equal to `custFunding`. 
 
-Once the funding has been confirmed, the customer sends the merchant a `funding_confirmed` message containing the `contract-id` and `cid`. This is to inform the merchant that the channel is ready, either for the merchant to fund their side, or if single-funded, to consider the channel open. 
+Once the funding has been confirmed, the customer sends the merchant a `funding_confirmed` message containing the `contract-id` and `channel_id`. This is to inform the merchant that the channel is ready, either for the merchant to fund their side, or if single-funded, to consider the channel open. 
 
 ## Merchant verifies the contract
 When the merchant receives the `funding_confirmed` message they:
