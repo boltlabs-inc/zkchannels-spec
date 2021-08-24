@@ -253,11 +253,7 @@ Inputs:
 Requirements:
 * The source must be `customer_address`.
 * The contract status must be set to either `OPEN` or `EXPIRY`.
-<<<<<<< HEAD
 * The closing authorization signature must be a valid signature that verifies under `merchant_zkabacus_public_key`. The closing state contains the `cid`, `close`, `revocation_lock`, `customer_balance`, and `merchant_balance`. 
-=======
-* The closing authorization signature must be a valid signature that verifies under `merchant_blind_public_key`. The closing state contains the `cid`, `close`, `revocation_lock`, `customer_balance`, and `merchant_balance`. 
->>>>>>> a8faf50d916f8ab6c5460f8d681ce366008aa0e4
 
 On execution:
 * The customer's balance from the close state, `customer_balance`, is stored in the contract.
