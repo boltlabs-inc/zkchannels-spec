@@ -11,7 +11,7 @@ Suppose a customer wishes to purchase a good or service from the merchant using 
 
 ## Payment Session
 1. The customer sends a _payment request message_ containing the tuple `(x, amt)` to the merchant. 
-2. The merchant checks the payment request message and dechannel_ides whether to accept or reject. If the former, they send `accept`; if the latter, they send `reject` and abort.
+2. The merchant checks the payment request message and decides whether to accept or reject. If the former, they send `accept`; if the latter, they send `reject` and abort.
 3. Upon receipt of `reject`, the customer aborts the session. Upon receipt of `accept`, the customer and merchant run `zkAbacus.Pay()` for amount `amt` on the channel with identifier `channel_id`. 
 The customer must have status `Ready` and must use the current channel state data to process the payment. 
 The merchant must have read and write access to their [revocation database](1-setup.md#Revocation-database-initialization) `revocation_DB` and their [blind signing key](1-setup.md#Blind-signing-key-generation).
@@ -19,7 +19,7 @@ The merchant must have read and write access to their [revocation database](1-se
     During execution of `zkAbacus.Pay()`, the customer transitions their status from `Ready` to `Started` to `Locked` and finally to `Ready`. For more details on this functionality, see Section 3.3.2 of the 
 [zkChannels Private Payments Protocol](https://github.com/boltlabs-inc/blindsigs-protocol/releases/download/ecc-review/zkchannels-protocol-spec-v3.pdf).
 
-4. The merchant receives a success indicator from `zkAbacus.Pay()`, which can be used to dechannel_ide whether or not the requested service should be provided:
+4. The merchant receives a success indicator from `zkAbacus.Pay()`, which can be used to decide whether or not the requested service should be provided:
 
     * If the merchant receives a failure indicator, no good or service should be provided.
 

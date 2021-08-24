@@ -12,11 +12,7 @@
 The merchant has completed the [setup](1-setup.md#merchant-setup) phase, and the customer and merchant have established a communication session.
 
 The customer has [obtained the merchant’s setup information](1-setup.md#publishing-public-parameters) out of band. The customer must verify the merchant's public parameters are well-formed and valid:
-<<<<<<< HEAD
 * The merchant blind signing public key `merchant_zkabacus_public_key` must consist of a valid Pointcheval Sanders public key of the expected length with components in the BLS12-381 pairing subgroups G1 and G2.
-=======
-* The merchant blind signing public key `merchant_blind_public_key` must consist of a valid Pointcheval Sanders public key of the expected length with components in the BLS12-381 pairing subgroups G1 and G2.
->>>>>>> a8faf50d916f8ab6c5460f8d681ce366008aa0e4
 * The range proof parameters `range_proof_params` must consist of a valid Pointcheval Sanders key of the expected length with components in the BLS12-381 pairing subgroup G1, and valid signatures on the appropriate integer range.
 * The revocation lock commitment parameters `revlock_com_params` must be well-formed Pedersen parameters of the expected length, and consist of elements in the BLS12-381 pairing subgroup G1.
 * The merchant EdDSA public key `merch_pk` must be a valid EdDSA key for the curve specified by `tezos-client` and the merchant address `merchant_address` must be a Tezos tz1 address correctly derived from `merch_pk`. 
@@ -62,7 +58,7 @@ The `open_c` message is sent from the customer to the merchant and is formed as 
 
 1. type: `open_c`
 2. data: 
-    * [`string`:`channel_id_c`]: Customer randomness contribution to the channel identifer.
+    * [`string`:`customer_randomness`]: Customer randomness contribution to the channel identifer.
     * [`int`:`customer_balance`]: The proposed initial customer balance.
     * [`int`:`merchant_balance`]: The proposed initial merchant balance.
     * [`address`:`customer_address`]: The customer's Tezos tz1 account address.
@@ -73,13 +69,13 @@ The `open_c` message is sent from the customer to the merchant and is formed as 
 
 The customer, before sending:
 - Retrieves the merchant public parameters and checks these parameters are well-formed and valid as specified [above](#prerequisites).
-- Generates `channel_id_c` randomly using a secure RNG. 
+- Generates `customer_randomness` uniformly at random using a secure RNG. 
 
 
 #### Merchant Requirements
 
 Upon receipt, the merchant checks that the following are true. If any are false, the merchant aborts:
-  - Checks `channel_id_c` is valid customer randomness for the contract identifier.
+  - Checks `customer_randomness` is the correct length.
   - Checks `customer_balance` ≥ 0 and `merchant_balance` ≥ 0 are positive integers.
   - Checks `cust_pk` is a valid Tezos EdDSA public key for the curve specified by `tezos-client` and that `customer_address` is a valid Tezos tz1 address that is correctly derived from `cust_pk`.
   - Checks `merch_pp_hash` is the SHA3-256 hash of` (merchant_zkabacus_public_key, merchant_address, merch_pk)`.
@@ -90,12 +86,12 @@ The merchant may choose to either accept or reject the channel establishment req
 ### The `open_m` Message
 The merchant sends the `open_m` message to the customer; this message is formed as follows:
 1. type: `open_m`
-2. data: [`string`:`channel_id_m`]. This is the merchant randomness contribution to the channel identifier.
+2. data: [`string`:`merchant_randomness`]. This is the merchant randomness contribution to the channel identifier.
 
 #### Customer Requirements
-Upon receipt, the customer checks the that `channel_id_m` is a valid merchant randomness contribution to the channel identifier. If so, the customer sets the channel identifier `channel_id` to: `SHA3-256(channel_id_c, channel_id_m, cust_pk, merch_pk, merchant_zkabacus_public_key)`, where:
-- `channel_id_c` is the customer randomness contribution to the channel identifier sent to the merchant in the `open_c` message.
-- `channel_id_m` is the merchant randomness contribution to the channel identifier received in the `open_m` message.
+Upon receipt, the customer checks the that `merchant_randomness` is the correct length. If so, the customer sets the channel identifier `channel_id` to: `SHA3-256(customer_randomness, merchant_randomness, cust_pk, merch_pk, merchant_zkabacus_public_key)`, where:
+- `customer_randomness` is the customer's contribution to the channel identifier sent to the merchant in the `open_c` message.
+- `merchant_randomness` is the merchant's contribution to the channel identifier received in the `open_m` message.
 - `cust_pk` is the customer Tezos account public key.
 - `merch_pk` is the merchant Tezos account public key.
 - `merchant_zkabacus_public_key` is the merchant's zkAbacus Pointcheval Sanders public key.
@@ -104,10 +100,10 @@ If not, the customer aborts.
 
 #### Merchant Requirements
 Before sending, the merchant:
-  - Generates `channel_id_m` randomly using a secure RNG.
-  - Sets the channel identifier `channel_id` to: `SHA3-256(channel_id_c, channel_id_m, cust_pk, merch_pk, merchant_zkabacus_public_key)`, where:
-    * `channel_id_c` is the customer randomness contribution to the channel identifier sent to the merchant in the `open_c` message.
-    * `channel_id_m` is the merchant randomness contribution to the channel identifier received in the `open_m` message.
+  - Generates `merchant_randomness` uniformly at random using a secure RNG.
+  - Sets the channel identifier `channel_id` to: `SHA3-256(customer_randomness, merchant_randomness, cust_pk, merch_pk, merchant_zkabacus_public_key)`, where:
+    * `customer_randomness` is the customer's contribution to the channel identifier sent to the merchant in the `open_c` message.
+    * `merchant_randomness` is the merchant's contribution to the channel identifier received in the `open_m` message.
     * `cust_pk` is the customer Tezos account public key.
     * `merch_pk` is the merchant Tezos account public key.
     * `merchant_zkabacus_public_key` is the merchant's zkAbacus Pointcheval Sanders public key.
