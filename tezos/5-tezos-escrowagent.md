@@ -174,7 +174,11 @@ The zkChannel contract is originated with the following channel-specific argumen
 * `merchant_address`: The merchant's Tezos tz1 address.
 * `merchFunding`: The merchant's initial balance.
 * `merchant_public_key`: The merchan'ts Tezos public key.
+<<<<<<< HEAD
 * `merchant_zkabacus_public_key`: The merchant's zkAbacus Pointcheval Sanders public key.
+=======
+* `merchant_blind_public_key`: The merchant's zkAbacus Pointcheval Sanders public key.
+>>>>>>> a8faf50d916f8ab6c5460f8d681ce366008aa0e4
 
 ### Global default arguments
 These [global default](1-setup.md#global-defaults) arguments are constant for every implementation of a zkChannels contract, regardless of the customer or merchant. 
@@ -249,7 +253,11 @@ Inputs:
 Requirements:
 * The source must be `customer_address`.
 * The contract status must be set to either `OPEN` or `EXPIRY`.
+<<<<<<< HEAD
 * The closing authorization signature must be a valid signature that verifies under `merchant_zkabacus_public_key`. The closing state contains the `cid`, `close`, `revocation_lock`, `customer_balance`, and `merchant_balance`. 
+=======
+* The closing authorization signature must be a valid signature that verifies under `merchant_blind_public_key`. The closing state contains the `cid`, `close`, `revocation_lock`, `customer_balance`, and `merchant_balance`. 
+>>>>>>> a8faf50d916f8ab6c5460f8d681ce366008aa0e4
 
 On execution:
 * The customer's balance from the close state, `customer_balance`, is stored in the contract.
