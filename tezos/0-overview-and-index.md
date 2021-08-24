@@ -145,7 +145,7 @@ There are three options for [channel closure](4-channel-closure.md):
 * **channel identifer**: 
    A unique identifier for a zkChannel.
 * **closing state**:
-   A closing state contains a channel identifier (`cid`), close flag (`close`), revocation lock (`rev_lock`), customer balance (`bal_cust`), and merchant balance (`bal_merch`). The merchant's blind signature over the closing state is what allows the customer to post the final balances to the smart contract during a unilateral customer close. The revocation lock provides a mechanism for the merchant to dispute revoked closing states posted by the customer.
+   A closing state contains a channel identifier (`cid`), close flag (`close`), revocation lock (`revocation_lock`), customer balance (`customer_balance`), and merchant balance (`merchant_balance`). The merchant's blind signature over the closing state is what allows the customer to post the final balances to the smart contract during a unilateral customer close. The revocation lock provides a mechanism for the merchant to dispute revoked closing states posted by the customer.
 * **customer**:
    A _customer_ is a user who opens a zkChannel with a merchant. The customer has a complete view of the channel state and can initiate private payments to the given merchant over their zkChannel. The customer trusts the merchant to provide a requested good or service, but does not trust the merchant with their payment history. The customer's anonymity set for payments is the set of users with whom a given merchant has an open channel. Customers are the 'spokes' in the zkChannel 'hub and spoke' network topology.
 *  **timeout period**: 
@@ -171,12 +171,12 @@ There are three options for [channel closure](4-channel-closure.md):
 * **`merch_PS_pk`**:
    The merchant's blind signing public key defined during [merchant setup](1-setup.md#Merchant-Setup)
 * **`merch_pp_hash`**:
-   This is the hash of the merchant's public parameters. It is used as a unique identifier for the merchant and is used by the customer to connect to them. `merch_pp_hash` is set to `SHA3-256(merch_PS_pk, merch_addr, merch_pk)` during the [merchant setup](1-setup.md#Merchant-Setup).
+   This is the hash of the merchant's public parameters. It is used as a unique identifier for the merchant and is used by the customer to connect to them. `merch_pp_hash` is set to `SHA3-256(merch_PS_pk, merchant_address, merch_pk)` during the [merchant setup](1-setup.md#Merchant-Setup).
 * **`required_confirmations`**:
    An integer that represents the minimum number of confirmations for an operation on the blockchain to be considered final. This value is defined as part of the [global defaults](1-setup.md#Global-defaults).
-* **`rev_lock`**: 
+* **`revocation_lock`**: 
    A revocation lock contained in a zkChannel state, generated as the SHA3-256 hash digest of a revocation secret.
-* **`rev_secret`**: A revocation secret that corresponds to a revocation lock. A revocation secret is a randomly generated value.  
+* **`revocation_secret`**: A revocation secret that corresponds to a revocation lock. A revocation secret is a randomly generated value.  
 * **`self_delay`**: 
    This value sets the length of the timeout period during a unilateral closure where the other party must respond. The same timeout period is used for [customer initiated](4-channel-closure.md##unilateral-customer-close) unilateral closes and [merchant initiated](4-channel-closure.md##unilateral-merchant-close). The value is defined as part of the [global defaults](1-setup.md#Global-defaults).
   
