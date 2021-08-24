@@ -3,6 +3,7 @@
     * [Commitment scheme parameters](#commitment-scheme-parameters)
     * [Signature schemes](#signature-schemes)
     * [Global defaults](#global-defaults)
+    * [Tezos account balances](#tezos-account-balances)
   * [Merchant Setup](#merchant-setup)
     * [Blind signing key generation](#blind-signing-key-generation)
     * [Range proof parameters generation](#range-proof-parameters-generation)
@@ -27,6 +28,7 @@ We use SHA3-256 hashes to instantiate our hash-based commitments.
 * `context-string`: a string set to `"zkChannels mutual close"`. This is contained in the tuple that gets signed when creating `mutual_close_signature`.
 #### `zkAbacus` global defaults
 * `close`: a fixed scalar used to differentiate closing state and state. The default value is 0x000000000000000000000000000000000000000000000000000000434c4f5345, which is derived from the binary encoding of the string 'CLOSE'.
+
 
 ## Merchant Setup
 

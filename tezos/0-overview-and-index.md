@@ -76,10 +76,14 @@ There are three options for [channel closure](4-channel-closure.md):
    A status assigned to an operation that is included in the blockchain and is successful. For more details see _operation_ and _operation status_.
 * **backtracked**:
    A status assigned to an operation that is included in the blockchain and previously successful, but the effects of which have been reverted. This occurs when a subsequent operation in the same operation group fails. For more details see _operation_, _operation group_, and _operation status_.
-*  **baker**: An entity who _bakes_ blocks. Also known as a _validator_. A baker must stake tezos in order to bake blocks.
 *  **bake**: To produce a new block in the Tezos blockchain. It is the equivalent of _mining_ on a proof-of-work blockchain.
+*  **baker**: A Tezos node that _bakes_ blocks. Also known as a _validator_. 
+*  **baker fee**:
+   All operations contain a _baker fee_ that is paid to the baker that creates the block containing the operation. This fee provides a monetary incentive for bakers to include the operation in their next block.
 * **burn**:
    To permanently remove _tez_ from circulation, thereby reducing the total supply. 
+*  **burn fee**:
+   A fee paid by an operation's source account for adding storage to the state of the blockchain. The amount of the burn fee for an operation is determined by a protocol constant multiplied by the number of additional bytes an operation's effect adds to the state of the blockchain. 
 * **contract identifier**:
    A _smart contract's KT1 address_. This acts as a unique identifier for a given contract that may be used to look up the latest state as well as any previous operations that interact with that contract.
 * **confirmation**: A _confirmation_ of a given operation is any block included in the blockchain that implies the operation in question is also included in the blockchain. That is, the first block to include the given operation or any subsequent block thereof is a confirmation.
@@ -90,14 +94,24 @@ There are three options for [channel closure](4-channel-closure.md):
    A status assigned to an operation that is included in the blockchain, but the execution of which has failed. An operation can fail for a few reasons, e.g., due to a programmed `FAILWITH` instruction in the smart contract, or because the source account does not have sufficient tez to cover the cost of the operation. For a list of reasons why an operation may fail, see the [tezos developer documentation](https://tezos.gitlab.io/active/michelson.html#failures). 
 *  **forge**:
    To create a serialized Tezos operation.
+*  **gas**:
+   A measure of the number of elementary operations performed during the execution of a smart contract. Gas is used to measure how much computing power is used to execute a smart contract.
 *  **implicit account**:
    An account that is linked to a public key. An implicit account cannot include a script and cannot reject incoming transactions. The address prefix indicates the instantiation of EdDSA signature scheme for the associated public key, i.e. 'tz1' indicates Ed25519, 'tz2' indicates ECDSA over Secp256k1, and 'tz3' indicates ECDSA over P256. 
 *  **inject**:
    To broadcast a signed operation to Tezos nodes in the network; injection is performed by a Tezos node.
 *  **KT1 address**: 
    The address of a smart contract account, which always starts with 'KT1'. The KT1 address is derived from the operation hash of the contract's originating operation.
+*  **mempool**:
+   A node's mechanism for storing unconfirmed operations.
+*  **minimal operation fee**:
+   The minimal fee required by either a Tezos node in order to propagate operations over the gossip network or required by a baker in order to include an operation into a block. This fee is set in the Tezos node's configuration. For more information see the [developer documentation](https://tezos.gitlab.io/protocols/004_Pt24m4xi.html).
 *  **mutez**:
-   The smallest denomination of tez. 1 tez is equal to 1 million mutez.
+   The smallest denomination of tez. One tez is equal to one million mutez.
+*  **nanotez**:
+   _Nanotez_ are used for fine-grained gas calculations for fees. One nanotez is equal to one thousand mutez. Fees calculated using nanotez are rounded to mutez when being defined in operations.
+*  **tezos node**:
+   A peer in the peer-to-peer network. A tezos node maintains local state and propagates blocks and operations in the gossip network. A tezos node may also participate in baking.
 *  **operation**:
    An _operation_ is a set of instructions that transform the state of the blockchain. Supported operation types are as follows:
    - **origination**: An operation that creates a new smart contract. 
@@ -125,7 +139,8 @@ There are three options for [channel closure](4-channel-closure.md):
    Every implict account is linked to a public key. The public key is used to verify that an operation was signed by the owner of the source's address. Since an account's address is derived from the hash of a public key, it is impossible to derive the public key from the address. 
 *  **tz1 address**: 
    The address of an implicit account using the Ed25519 signature scheme. The address is derived from the hash of the public key and always begin with the prefix 'tz1'.
-
+*  **weight**:
+   The default measure used in the Tezos node reference implementation for prioritizing operations for inclusion in a block. An operation's _weight_ is defined by `weight = fee / (max ( (storage/storage_block_limit), (gas/gas_block_limit)))` where `fee` is the baker fee, `storage` is the operation storage, `storage_block_limit` is the storage limit for a block, `gas` is the operation gas, and `gas_block_limit` is the gas limit for a block ([see source code](https://gitlab.com/tezos/tezos/-/blob/master/src/proto_009_PsFLoren/lib_delegate/client_baking_forge.ml#L283)).
 ### zkChannels Glossary 
 * **channel identifer**: 
    A unique identifier for a zkChannel.
