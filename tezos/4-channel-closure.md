@@ -49,14 +49,14 @@ Upon receipt, the merchant:
 #### Customer Requirements
 
 Upon receipt, the customer:
-  - Verifies `mutual_close_signature` is a valid EdDSA signature with respect to `merch_pk`.
+  - Verifies `mutual_close_signature` is a valid EdDSA signature with respect to `merchant_public_key`.
   - If the signature is not valid, aborts and initiates a [unilateral customer close](##unilateral-customer-close).
 
 #### Merchant Requirements
-The merchant generates `mutual_close_signature` as an EdDSA signature under the merchant's Tezos public key pair (`merch_pk`, `merch_sk`) on the tuple `(contract-id, "zkChannels mutual close", channel_id, customer_balance, merchant_balance)`, where `contract-id` is the address of the smart contract and `context-string` is a [global default](1-setup.md#global-defaults) set to `"zkChannels mutual close"`.
+The merchant generates `mutual_close_signature` as an EdDSA signature under the merchant's Tezos public key pair (`merchant_public_key`, `merch_sk`) on the tuple `(contract-id, "zkChannels mutual close", channel_id, customer_balance, merchant_balance)`, where `contract-id` is the address of the smart contract and `context-string` is a [global default](1-setup.md#global-defaults) set to `"zkChannels mutual close"`.
 
 ### The `mutualClose` entrypoint
-This entry point sends `customer_balance` funds to the customer's Tezos account (associated to `cust_pk`) and `merchant_balance` funds to the merchant's Tezos account (associated to `merch_pk `).
+This entry point sends `customer_balance` funds to the customer's Tezos account (associated to `customer_public_key`) and `merchant_balance` funds to the merchant's Tezos account (associated to `merchant_public_key `).
 
 A call to the `mutualClose` entrypoint will only succeed if and only if all of the following are true:
 * The sender is `customer_address`, as defined in the smart contract.

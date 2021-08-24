@@ -13,9 +13,9 @@ The merchant has completed the [setup](1-setup.md#merchant-setup) phase, and the
 
 The customer has [obtained the merchant’s setup information](1-setup.md#publishing-public-parameters) out of band. The customer must verify the merchant's public parameters are well-formed and valid:
 * The merchant blind signing public key `merchant_zkabacus_public_key` must consist of a valid Pointcheval Sanders public key of the expected length with components in the BLS12-381 pairing subgroups G1 and G2.
-* The range proof parameters `range_proof_params` must consist of a valid Pointcheval Sanders key of the expected length with components in the BLS12-381 pairing subgroup G1, and valid signatures on the appropriate integer range.
-* The revocation lock commitment parameters `revlock_com_params` must be well-formed Pedersen parameters of the expected length, and consist of elements in the BLS12-381 pairing subgroup G1.
-* The merchant EdDSA public key `merch_pk` must be a valid EdDSA key for the curve specified by `tezos-client` and the merchant address `merchant_address` must be a Tezos tz1 address correctly derived from `merch_pk`. 
+* The range constraint parameters `range_constraint_parameters` must consist of a valid Pointcheval Sanders key of the expected length with components in the BLS12-381 pairing subgroup G1, and valid signatures on the appropriate integer range.
+* The revocation lock commitment parameters `revocation_commitment_parameters` must be well-formed Pedersen parameters of the expected length, and consist of elements in the BLS12-381 pairing subgroup G1.
+* The merchant EdDSA public key `merchant_public_key` must be a valid EdDSA key for the curve specified by `tezos-client` and the merchant address `merchant_address` must be a Tezos tz1 address correctly derived from `merchant_public_key`. 
 
 The customer should ensure they have a Tezos implicit account with balance sufficient to both contribute the desired amount to the zkChannel and pay the [operations fees](5-tezos-escrowagent.md#operation-fees) needed to originate, fund, and call the appropriate entry points of the corresponding smart contract. We recommend 2 tez based on our [contract benchmarks](https://github.com/boltlabs-inc/tezos-contract/wiki/Benchmark-Results) on testnet.
 
@@ -62,7 +62,7 @@ The `open_c` message is sent from the customer to the merchant and is formed as 
     * [`int`:`customer_balance`]: The proposed initial customer balance.
     * [`int`:`merchant_balance`]: The proposed initial merchant balance.
     * [`address`:`customer_address`]: The customer's Tezos tz1 account address.
-    * [`key`:`cust_pk`]: The customer's Tezos EdDSA public key.
+    * [`key`:`customer_public_key`]: The customer's Tezos EdDSA public key.
     * [`string`: `merch_pp_hash`]: A hash of merchant public parameters as specified in [Merchant Setup](1-setup.md#merchant-setup).
 
 #### Customer Requirements
@@ -77,8 +77,8 @@ The customer, before sending:
 Upon receipt, the merchant checks that the following are true. If any are false, the merchant aborts:
   - Checks `customer_randomness` is the correct length.
   - Checks `customer_balance` ≥ 0 and `merchant_balance` ≥ 0 are positive integers.
-  - Checks `cust_pk` is a valid Tezos EdDSA public key for the curve specified by `tezos-client` and that `customer_address` is a valid Tezos tz1 address that is correctly derived from `cust_pk`.
-  - Checks `merch_pp_hash` is the SHA3-256 hash of` (merchant_zkabacus_public_key, merchant_address, merch_pk)`.
+  - Checks `customer_public_key` is a valid Tezos EdDSA public key for the curve specified by `tezos-client` and that `customer_address` is a valid Tezos tz1 address that is correctly derived from `customer_public_key`.
+  - Checks `merch_pp_hash` is the SHA3-256 hash of` (merchant_zkabacus_public_key, merchant_address, merchant_public_key)`.
   - Checks `customer_address` is an implicit Tezos account (tz1 address), and not a smart contract address (KT1 address). 
 
 The merchant may choose to either accept or reject the channel establishment request. If the merchant accepts, they should ensure their implicit Tezos account with address `merchant_address` has a balance sufficient to both contribute the desired amount to the zkChannel and pay the [operations fees](5-tezos-escrowagent.md#operation-fees) needed to fund and call the appropriate entry points of the corresponding smart contract. We recommend 0.009 tez based on our [contract benchmarks](https://github.com/boltlabs-inc/tezos-contract/wiki/Benchmark-Results) on testnet.
@@ -89,11 +89,11 @@ The merchant sends the `open_m` message to the customer; this message is formed 
 2. data: [`string`:`merchant_randomness`]. This is the merchant randomness contribution to the channel identifier.
 
 #### Customer Requirements
-Upon receipt, the customer checks the that `merchant_randomness` is the correct length. If so, the customer sets the channel identifier `channel_id` to: `SHA3-256(customer_randomness, merchant_randomness, cust_pk, merch_pk, merchant_zkabacus_public_key)`, where:
+Upon receipt, the customer checks the that `merchant_randomness` is the correct length. If so, the customer sets the channel identifier `channel_id` to: `SHA3-256(customer_randomness, merchant_randomness, customer_public_key, merchant_public_key, merchant_zkabacus_public_key)`, where:
 - `customer_randomness` is the customer's contribution to the channel identifier sent to the merchant in the `open_c` message.
 - `merchant_randomness` is the merchant's contribution to the channel identifier received in the `open_m` message.
-- `cust_pk` is the customer Tezos account public key.
-- `merch_pk` is the merchant Tezos account public key.
+- `customer_public_key` is the customer Tezos account public key.
+- `merchant_public_key` is the merchant Tezos account public key.
 - `merchant_zkabacus_public_key` is the merchant's zkAbacus Pointcheval Sanders public key.
 
 If not, the customer aborts.
@@ -101,11 +101,11 @@ If not, the customer aborts.
 #### Merchant Requirements
 Before sending, the merchant:
   - Generates `merchant_randomness` uniformly at random using a secure RNG.
-  - Sets the channel identifier `channel_id` to: `SHA3-256(customer_randomness, merchant_randomness, cust_pk, merch_pk, merchant_zkabacus_public_key)`, where:
+  - Sets the channel identifier `channel_id` to: `SHA3-256(customer_randomness, merchant_randomness, customer_public_key, merchant_public_key, merchant_zkabacus_public_key)`, where:
     * `customer_randomness` is the customer's contribution to the channel identifier sent to the merchant in the `open_c` message.
     * `merchant_randomness` is the merchant's contribution to the channel identifier received in the `open_m` message.
-    * `cust_pk` is the customer Tezos account public key.
-    * `merch_pk` is the merchant Tezos account public key.
+    * `customer_public_key` is the customer Tezos account public key.
+    * `merchant_public_key` is the merchant Tezos account public key.
     * `merchant_zkabacus_public_key` is the merchant's zkAbacus Pointcheval Sanders public key.
 
 
@@ -162,11 +162,11 @@ The customer:
 
 #### Merchant Requirements
 Upon receipt of the `funding_confirmed` message, the merchant: 
-  - Checks that the originated contract `contract-id` contains the expected [zkchannels contract](https://github.com/boltlabs-inc/tezos-contract/blob/main/zkchannels-contract/zkchannel_contract.tz) with respect to the channel identifier `channel_id`, the customer Tezos public key `cust_pk`, the customer's tezos tz1 address `customer_address`, the merchant public parameters, and the initial balances `customer_balance` and `merchant_balance`.
+  - Checks that the originated contract `contract-id` contains the expected [zkchannels contract](https://github.com/boltlabs-inc/tezos-contract/blob/main/zkchannels-contract/zkchannel_contract.tz) with respect to the channel identifier `channel_id`, the customer Tezos public key `customer_public_key`, the customer's tezos tz1 address `customer_address`, the merchant public parameters, and the initial balances `customer_balance` and `merchant_balance`.
   - Checks that the on-chain storage of `contract-id` at `originated-block-height` is exactly as expected for channel `channel_id`:
     - The contract storage contains the merchant's Pointcheval Sanders public key.
-    - The customer's tezos tz1 address and public key match the fields `customer_address` and  `cust_pk`, respectively.
-    - The merchant's tezos tz1 address and public key match the fields `merchant_address` and  `merch_pk`, respectively.
+    - The customer's tezos tz1 address and public key match the fields `customer_address` and  `customer_public_key`, respectively.
+    - The merchant's tezos tz1 address and public key match the fields `merchant_address` and  `merchant_public_key`, respectively.
     - The `self_delay` field in the contract matches the value specified in the [global defaults](1-setup.md#Global-defaults). 
     - The `close` field in the contract matches the merchant's `close` flag defined as defined in the [global defaults](1-setup.md#Global-defaults). The `close` flag represents a fixed scalar used by the merchant to differentiate closing state and state.
     - `custFunding` and `merchFunding` match the initial balances `customer_balance` and `merchant_balance`, respectively.

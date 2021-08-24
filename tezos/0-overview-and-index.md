@@ -166,12 +166,12 @@ There are three options for [channel closure](4-channel-closure.md):
    A fixed scalar used to differentiate closing state and state. It is defined as a [global default](1-setup.md#Global-defaults).
 * **`context-string`**:
    A string set to `"zkChannels mutual close"`. This is contained in the tuple that gets signed when creating `mutual_close_signature`. This value is defined as part of the [global defaults](1-setup.md#Global-defaults).
-* **`cust_pk`, `merch_pk`**:
+* **`customer_public_key`, `merchant_public_key`**:
    These refer to the customer and merchant's tezos account public keys. For the customer, it is defined during [channel establishment](2-channel-establishment.md#the-open_c-message), and for the merchant during [merchant setup](1-setup.md#Merchant-Setup).
-* **`merch_PS_pk`**:
+* **`merchant_zkabacus_public_key`**:
    The merchant's blind signing public key defined during [merchant setup](1-setup.md#Merchant-Setup)
 * **`merch_pp_hash`**:
-   This is the hash of the merchant's public parameters. It is used as a unique identifier for the merchant and is used by the customer to connect to them. `merch_pp_hash` is set to `SHA3-256(merch_PS_pk, merchant_address, merch_pk)` during the [merchant setup](1-setup.md#Merchant-Setup).
+   This is the hash of the merchant's public parameters. It is used as a unique identifier for the merchant and is used by the customer to connect to them. `merch_pp_hash` is set to `SHA3-256(merchant_zkabacus_public_key, merchant_address, merchant_public_key)` during the [merchant setup](1-setup.md#Merchant-Setup).
 * **`required_confirmations`**:
    An integer that represents the minimum number of confirmations for an operation on the blockchain to be considered final. This value is defined as part of the [global defaults](1-setup.md#Global-defaults).
 * **`revocation_lock`**: 
