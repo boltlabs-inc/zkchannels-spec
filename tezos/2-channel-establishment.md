@@ -81,7 +81,7 @@ Upon receipt, the merchant checks that the following are true. If any are false,
   - Checks `merch_pp_hash` is the SHA3-256 hash of` (merchant_zkabacus_public_key, merchant_address, merchant_public_key)`.
   - Checks `customer_address` is an implicit Tezos account (tz1 address), and not a smart contract address (KT1 address). 
 
-The merchant may choose to either accept or reject the channel establishment request. If the merchant accepts, they should ensure their implicit Tezos account with address `merchant_address` has a balance sufficient to both contribute the desired amount to the zkChannel and pay the [operations fees](5-tezos-escrowagent.md#operation-fees) needed to fund and call the appropriate entry points of the corresponding smart contract. We recommend 0.009 tez based on our [contract benchmarks](https://github.com/boltlabs-inc/tezos-contract/wiki/Benchmark-Results) on testnet.
+The merchant may choose to either accept or reject the channel establishment request. The implementation should provide a customizable approver mechanism in order to realize channel establishment approvals and rejections. If the merchant accepts, they should ensure their implicit Tezos account with address `merchant_address` has a balance sufficient to both contribute the desired amount to the zkChannel and pay the [operations fees](5-tezos-escrowagent.md#operation-fees) needed to fund and call the appropriate entry points of the corresponding smart contract. We recommend 0.009 tez based on our [contract benchmarks](https://github.com/boltlabs-inc/tezos-contract/wiki/Benchmark-Results) on testnet.
 
 ### The `open_m` Message
 The merchant sends the `open_m` message to the customer; this message is formed as follows:
