@@ -194,7 +194,7 @@ Upon receipt of the `funding_confirmed` message, the merchant:
     - The `self_delay` field in the contract matches the value specified in the [global defaults](1-setup.md#Global-defaults). 
     - The `close` field in the contract matches the merchant's `close` flag defined as defined in the [global defaults](1-setup.md#Global-defaults). The `close` flag represents a fixed scalar used by the merchant to differentiate closing state and state.
     - The fields `customer_balance` and `merchant_balance` are initialized to `init_customer_balance` and `init_merchant_balance`, respectively.
-    - The `status` field of the contract is initialized to `AWAITING_FUNDING`.
+    - The `status` field of the contract is initialized to `AWAITING_CUST_FUNDING`.
     - The `context-string` is set to `"zkChannels mutual close"`, as defined in the [global defaults](1-setup.md#Global-defaults). 
   - Waits until the originated contract is confirmed on chain for at least `required_confirmations` blocks.
   - Updates the channel status to `Originated`.
