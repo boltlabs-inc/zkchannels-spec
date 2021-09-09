@@ -12,7 +12,7 @@ different sessions.
 
 - **Label**: A text description input by the customer to identify a channel.
 - **Address**: The `zkchannel://` address for the channel.
-- **Initial Merchant Balance**, **Initial Customer Balance**: The amount initially deposited by the merchant and the customer, respectively, upon establishing the channel. The customer may use this for their own accounting purposes, outside the scope of the protocol.
+- **Merchant Deposit**, **Customer Deposit**: The amount initially deposited by the merchant (`init_merchant_balance`) and the customer (`init_customer_balance`), respectively, upon establishing the channel. The customer may use this for their own accounting purposes, outside the scope of the protocol.
 - **Channel State and Status**: All the information pertaining to the present state and status of the
   channel, including a unique channel identifier, allocation of the balance to customer and merchant, a nonce, and a revocation pair. The set of valid statuses are listed in the table below.
   Internal details of the channel state are discussed in the zkAbacus specification in [the zkChannels protocol document](https://github.com/boltlabs-inc/blindsigs-protocol/releases/download/ecc-review/zkchannels-protocol-spec-v3.pdf).

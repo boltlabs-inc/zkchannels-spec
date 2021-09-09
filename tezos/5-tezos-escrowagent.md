@@ -168,10 +168,10 @@ The Tezos client is used to interact with the Tezos node for performing actions 
 The zkChannel contract is originated with the following channel-specific arguments as specified [channel establishment](2-channel-establishment.md):
 * `channel_id`: The channel identifier.
 * `customer_address`: The customer's Tezos tz1 address.
-* `custFunding`: The customer's initial balance.
+* `init_customer_balance`: The customer's initial balance.
 * `customer_public_key`: The customer's Tezos public key.
 * `merchant_address`: The merchant's Tezos tz1 address.
-* `merchFunding`: The merchant's initial balance.
+* `init_merchant_balance`: The merchant's initial balance.
 * `merchant_public_key`: The merchan'ts Tezos public key.
 * `merchant_zkabacus_public_key`: The merchant's zkAbacus Pointcheval Sanders public key.
 
@@ -190,11 +190,11 @@ The value for `close` is derived from the binary encoding of the string 'CLOSE'.
 ### Entrypoints
 
 #### `addCustFunding` entrypoint
-The `addCustFunding` entrypoint allows the customer to fund the contract with their initial balance, `custFunding`. 
+The `addCustFunding` entrypoint allows the customer to fund the contract with their initial balance, `init_customer_balance`. 
 Requirements:
 * The contract status must be `AWAITING_CUST_FUNDING`.
 * The source must be `customer_address`.
-* The amount of tez transferred to the contract must be exactly equal to `custFunding`. 
+* The amount of tez transferred to the contract must be exactly equal to `init_customer_balance`. 
 
 
 On execution:
@@ -204,11 +204,11 @@ On execution:
 
 
 #### `addMerchFunding` entrypoint
-The `addMerchFunding` entrypoint allows the merchant to fund a dual-funded contract with their initial balance, `merchFunding`. 
+The `addMerchFunding` entrypoint allows the merchant to fund a dual-funded contract with their initial balance, `init_merchant_balance`. 
 Requirements:
 * The contract status must be `AWAITING_MERCH_FUNDING`.
 * The source must be `merchant_address`.
-* The amount of tez transferred to the contract must be exactly equal to `merchFunding`.
+* The amount of tez transferred to the contract must be exactly equal to `init_merchant_balance`.
 
 On execution:
 * The contract status is updated to `OPEN`.
@@ -342,8 +342,8 @@ The `TezosEscrowAgent` contract origination proceeds as follows.
     * [`ChannelID`:`channel_id`]
     * [`address`:`customer_address`]
     * [`key`:`customer_public_key`]
-    * [`mutez`:`custFunding`]
-    * [`mutez`:`merchFunding`]
+    * [`mutez`:`init_customer_balance`]
+    * [`mutez`:`init_merchant_balance`]
 
 * Fixed arguments
     * [`int`:`status`]
@@ -359,7 +359,7 @@ When the customer injects the origination operation, they watch the blockchain t
 Once the operation has reached the minimum number of required confirmations, the `contract-id` is locked in, the customer is ready to fund the contract with their initial balance.
 
 ## Customer funds their side of the contract
-The customer funds their side of the contract using the `addFunding` entrypoint of the contract. The source of this transfer operation must be the `customer_address` specified in the contract's initial storage, with the transfer amount being exactly equal to `custFunding`. 
+The customer funds their side of the contract using the `addFunding` entrypoint of the contract. The source of this transfer operation must be the `customer_address` specified in the contract's initial storage, with the transfer amount being exactly equal to `init_customer_balance`. 
 
 Once the funding has been confirmed, the customer sends the merchant a `funding_confirmed` message containing the `contract-id` and `channel_id`. This is to inform the merchant that the channel is ready, either for the merchant to fund their side, or if single-funded, to consider the channel open. 
 
@@ -373,7 +373,7 @@ If any of the above checks fail, the merchant aborts.
 
 If the customer has funded their side of the channel but there are not at least `required_confirmations` confirmations, wait until there are before proceeding. 
 
-If it is a dual-funded channel, the merchant funds their side of the channel using the `addFunding` entrypoint and waits for that operation to confirm. The source of this transfer operation must be the `merchant_address` specified in the contract's initial storage, with the transfer amount being exactly equal to `merchFunding`. 
+If it is a dual-funded channel, the merchant funds their side of the channel using the `addFunding` entrypoint and waits for that operation to confirm. The source of this transfer operation must be the `merchant_address` specified in the contract's initial storage, with the transfer amount being exactly equal to `init_merchant_balance`. 
 
 At this point, the merchant checks the contract storage and ensure that `status` is `OPEN` (denoted as `1`), meaning the funding is locked in. When this status has at least `required_confirmations` confirmations, the merchant will send continue as specified in [channel establishment](2-channel-establishment#), i.e. they send the `open_m` message to the customer.
 
