@@ -300,12 +300,12 @@ The `mutualClose` entrypoint allows the customer to close the channel and get th
 
 Inputs:
 * The closing balances, `customer_balance` and `merchant_balance`, are the amounts to be sent to `customer_address` and `merchant_address`, respectively, when the channel closes.
-* A merchant EdDSA signature, `merch_sig`, which is used to authorize the closing balances.
+* A merchant EdDSA signature, `mutual_close_signature`, which is used to authorize the closing balances.
 
 Requirements:
 * The source must be `customer_address`.
 * The contract status must be `OPEN`.
-* `merch_sig` must be a valid EdDSA signature over the tuple `(contract-id, context-string, channel_id, customer_balance, merchant_balance)` with respect to `merchant_public_key`. Note that while `customer_balance`, `merchant_balance`, and `merch_sig` are provided to the entrypoint call as inputs, `contract-id`, `context-string`, and `channel_id` are retrieved internally from the contract's storage. `context-string` is the string  `"zkChannels mutual close"` and is defined as [global default](1-setup.md#Merchant-Setup).
+* `mutual_close_signature` must be a valid EdDSA signature over the tuple `(contract-id, context-string, channel_id, customer_balance, merchant_balance)` with respect to `merchant_public_key`. Note that while `customer_balance`, `merchant_balance`, and `mutual_close_signature` are provided to the entrypoint call as inputs, `contract-id`, `context-string`, and `channel_id` are retrieved internally from the contract's storage. `context-string` is the string  `"zkChannels mutual close"` and is defined as [global default](1-setup.md#Merchant-Setup).
 
 On execution:
 * `customer_balance` and `merchant_balance` are sent to `customer_address` and `merchant_address`, respectively.
