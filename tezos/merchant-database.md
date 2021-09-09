@@ -36,30 +36,23 @@ different sessions.
 - **Channel ID**: Used to look up the channel in subsequent steps to update the
   status.
 - **Contract ID**: Used to perform operations on chain.
-- **Initial Merchant Balance**: The amount initially deposited by the merchant
-  upon establishing the channel. The merchant may use this for its own
-  accounting purposes, outside the scope of the protocol.
-- **Initial Customer Balance**: The amount initially deposited by the customer
-  upon establishing the channel. The merchant may use this for its own
-  accounting purposes, outside the scope of the protocol.
-- **Status**: Used to determine valid operations on the channel. For example,
-  a channel with the status "Originated" is not merchant funded (because it has
-  not yet been customer funded). This is the only column that can be updated.
-  The possible statuses are: "Originated", "CustomerFunded", "MerchantFunded", "Active", "PendingClose", "Dispute", and "Closed".
+- **Merchant Deposit, Customer Deposit**: The amount initially deposited by the merchant
+  and customer, respectively, upon establishing the channel. The merchant may use this for its own accounting purposes outside the scope of the protocol.
+- **Status**: Used to determine valid operations on the channel.  The possible statuses are listed in the table below.
+- **Closing Balances**: The balances that have been paid out on chain.
+
+Only the status and closing balance fields can be updated.
 
 ## Operations
+All inputs are required unless otherwise noted.
 
 | Name                                                  | Input                                                                                      | Output                                                 | Summary                                             |
 | ----------------------------------------------------- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------ | --------------------------------------------------- |
-| [**Insert Nonce**][insert_nonce]                      | Nonce (Required)                                                                           | True if it succeeded, False if not.                    | Insert the nonce if it doesn't already exist.       |
-| [**Insert Revocation Lock + Secret**][insert_revlock] | Revocation Lock (Required) and a Revocation Secret (Optional)                              | A list of previously stored pairs with the input lock. | Insert the (Revocation Lock, Optional Secret) pair  |
-| [**Insert Channel**][insert_channel]                  | Channel ID, Contract ID, Initial Merchant Balance, Initial Customer Balance (All Required) | None                                                   | Insert the new channel with the status "originated" |
-| [**Update Channel Status**][update_channel_status]    | Channel ID (Required), New Status (Required)                                               | None                                                   | Update an existing channel's status                 |
-
-[insert_nonce]: #insert-nonce
-[insert_revlock]: #insert-revocation-lock--secret
-[insert_channel]: #insert-channel
-[update_channel_status]: #update-channel-status
+| [**Insert Nonce**](#insert_nonce)                      | Nonce                                                                           | True if it succeeded, False if not.                    | Insert the nonce if it doesn't already exist    |
+| [**Insert Revocation Lock + Secret**](#insert_revlock) | Revocation lock, revocation secret (optional)                              | A list of previously stored pairs with the input lock. | Insert the (revocation lock, optional secret) pair  |
+| [**Insert Channel**](#insert_channel)                  | Channel ID, contract ID, merchant deposit, customer deposit | None                                                   | Insert the new channel with the status "originated" |
+| [**Update Channel Status**](#update_channel_status)    | Channel ID, previous status, new status                                               | None                                                   | Update an existing channel's status                 |
+| [**Update Closing Balances**](#update_closing_balances) | Channel ID, merchant balance, customer balance (optional) | None | Updates an existing channel's closing balances
 
 ### Insert Nonce
 
@@ -126,22 +119,53 @@ ID, Merchant Balance, Customer Balance, and the "originated" status.
 
 ### Update Channel Status
 
-This operation updates the channel status. The expected progression of a
-channel is:
+This operation atomically verifies the current channel status and updates the channel status. There are two methods to achieve this:
+- specify both the previous and updated status. 
+- specify that the updated status is `PendingClose`. This operation will succeed only if the current status is one of `MerchantFunded`, `Active`, `PendingExpiry`, or `PendingMutualClose`.
 
-Originated → Customer funded → Merchant funded → Active → Pending close → Closed
+The expected progression of a channel is:
 
-Two variations from this pattern are:
-- Any channel that's not already closed may skip to "Pending close" if either the merchant or customer performs a unilateral close. 
-- A "Pending close" channel may enter the "Dispute" status before closing if dishonest behavior is detected.
+```
+Originated -> Customer funded -> Merchant funded -> Active 
+```
 
-Any update must be an atomic compare-and-swap that asserts the previous status
-to prevent race conditions. For example, if multiple sessions try to close the
-same channel concurrently, exactly one session will succeed. The other sessions
-will read the updated status, see that the channel is already either closed or in the process of closing, and fail.
+The close procedure can be somewhat more complicated. If initiated by the merchant, the expected flow is 
+```
+Pending expiry -> Pending merchant claim -> Closed
+              \-> Pending close ----------/ /
+                               |-> Dispute / 
+```
+If initiated by the customer, the channel will transition directly to `Pending close` and continue as above.
 
 For full details about when the merchant transitions from one status to the
 next, [refer to the overview of the protocol](0-overview-and-index.md).
+
+All updates must be an atomic compare-and-swap to prevent race conditions.
+For example, if multiple sessions try to close the same channel concurrently, exactly one session will succeed. The other sessions will read the updated status, see that the channel is already either closed or in the process of closing, and fail.
+
+
+| Status           | Condition | 
+| ---------------- | --------- | 
+| Originated       | The channel has a contract that is originated on chain.
+| CustomerFunded   | The contract is funded by the customer, but not the merchant.
+| MerchantFunded   | The contract is funded by both parties.
+| Active           | The channel is funded, activated, and can process payments.
+| PendingExpiry    | The merchant has initiated channel closure.
+| PendingMerchantClaim | The merchant has claimed the full balance of the channel.
+| PendingClose     | The customer has posted closing channel balances.
+| Dispute          | The merchant has evidence that the customer posted invalid closing balances.
+| PendingMutualClose | The parties have started a mutual close.
+| Closed           | The channel is closed; all balances are paid out.
+
+
+### Update Closing Balances
+This is called when balances are finalized on chain. It maintains three invariants:
+- The merchant balance can be set either once or twice.
+- The merchant balance cannot decrease in a second update.
+- The customer balance can be set at most once.
+
+By definition, balances are nonnegative.
+
 
 ## Schema
 
@@ -164,9 +188,11 @@ next, [refer to the overview of the protocol](0-overview-and-index.md).
 | ------------------------ | ---------------------------------------------------------------------------------------------------------- | ------------------- |
 | channel_id               | required                                                                                                   | [ChannelId][]       |
 | contract_id              | required                                                                                                   | [ContractId][]      |
-| initial_merchant_balance | required                                                                                                   | [MerchantBalance][] |
-| initial_customer_balance | required                                                                                                   | [CustomerBalance][] |
-| status                   | required, one of ["Originated", "CustomerFunded", "MerchantFunded", "Active", "PendingClose", "Dispute", "Closed"] | [ChannelStatus][]   |
+| level        | required  | `Level`
+| merchant_deposit | required                                                                                                   | [MerchantBalance][] |
+| customer_deposit | required                                                                                                   | [CustomerBalance][] |
+| status                   | required, one of the above set | [ChannelStatus][]   |
+| closing_balances | required | `ClosingBalances`
 
 [nonce]: https://github.com/boltlabs-inc/libzkchannels-crypto/blob/f953b6187370f0b42edf0571c4abbae1a473e2fe/zkabacus-crypto/src/nonce.rs#L7-L10
 [revocationlock]: https://github.com/boltlabs-inc/libzkchannels-crypto/blob/f953b6187370f0b42edf0571c4abbae1a473e2fe/zkabacus-crypto/src/revlock.rs#L19-L22

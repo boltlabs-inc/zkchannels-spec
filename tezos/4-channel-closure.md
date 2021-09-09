@@ -31,14 +31,14 @@ The details of each message are as follows.
       
 #### Customer Requirements
 The customer:
-  - Forms the message `mutual_close_c` using the most recent closing state and closing authorization signature for the `zkAbacus` channel with identifier `channel_id`.
   - Updates the channel status to `PendingClose` and does not initiate any more payments for the channel with identifier `channel_id`.
+  - Forms the message `mutual_close_c` using the most recent closing state and closing authorization signature for the `zkAbacus` channel with identifier `channel_id`.
 
 #### Merchant Requirements
 Upon receipt, the merchant:
   - Aborts if no channel with identifier `channel_id` and status `Active` exists.
-  - [Update Channel Status][merchant_update_channel_status] for the channel with identifier `channel_id` to `PendingClose`.
-  - Atomically [Insert Revocation Lock][merchant_insert_revlock] if it doesn't already exist. If the value already exists in the database, the merchant aborts the mutual close session.
+  - [Update Channel Status][merchant_update_channel_status] for the channel with identifier `channel_id` to `PendingMutualClose`.
+  - Atomically [Inserts Revocation Lock][merchant_insert_revlock] if it doesn't already exist. If the value already exists in the database, the merchant aborts the mutual close session.
   - Checks that `closing_signature` is a valid Pointcheval Sanders signature on the proposed closing state `(channel_id, close, revocation_lock, customer_balance, merchant_balance)` with respect to the merchant's blind signing public key `merchant_zkabacus_public_key`. If this check fails, the merchant aborts.
  
 ### The `mutual_close_m` Message
@@ -97,28 +97,30 @@ The merchant reads the revocation lock `revocation_lock` from the contract stora
 - If so, they call [the `merchDispute` entrypoint](5-tezos-escrowagent#merchdispute-entrypoint) with the resulting revocation secret as the argument.
 Calling `merchDispute` creates an operation group of size two: the `merchDispute` operation and an operation that transfers the customer's timelocked balance to the merchant's account `merchant_address`. If successful, the merchant waits until the `merchDispute` operation reaches a confirmation depth of `required_confirmations`, and then [Update Channel Status][merchant_update_channel_status] to `Closed`. They stop monitoring the contract.
 
-    Calling `merchDispute` creates an operation group of size two: the `merchDispute` operation and an operation that transfers the customer's timelocked balance to the merchant's account `merch_addr`. If successful, the merchant waits until the `merchDispute` operation reaches a confirmation depth of `required_confirmations`, and then [Updates Channel Status][merchant_update_channel_status] to `Closed`. They stop monitoring the contract.
+    When the customer is notified that a `merchDispute` operation is posted on chain for one of their channels, they [Update Channel Status][customer_update_channel_status] to `Dispute`. 
+    When they are notified that the operation reaches a confirmation depth of `required_confirmations`, they update their channel status to `Closed`.
 
-After the timelock elapses, the customer claims their balance by calling [the `custClaim` entrypoint](5-tezos-escrowagent#custclaim-entrypoint).
+- Otherwise, the merchant waits until the `custClose` operation is confirmed to the required confirmation depth and [Updates Channel Status][merchant_update_channel_status] to `Closed`. They stop monitoring the contract.
+
+When the customer is notified that the timelock has elapsed, the customer updates their status from `PendingClose` to `PendingCustomerClaim` and claims their balance by calling [the `custClaim` entrypoint](5-tezos-escrowagent#custclaim).
 Calling `custClaim` creates an operation group of size two: the `custClaim` operation and an operation that transfers the customer's balance from the smart contract to `customer_address`. 
 
 When the `custClaim` operation reaches a confirmation depth of `required_confirmations`, the customer updates the channel status to `Closed`. They stop monitoring the contract.
-If the operation does not succeed, the customer remains in the `PendingClose` status.
+If the operation does not succeed, the customer remains in the `PendingCustomerClaim` status.
 
 
 ## Unilateral Merchant Close
 
-The merchant initiates a unilateral channel closure by calling [Update Channel Status][merchant_update_channel_status] with `PendingClose`. 
+The merchant initiates a unilateral channel closure by calling [Update Channel Status][merchant_update_channel_status] with `PendingExpiry`. 
 
 They call [the `expiry` entrypoint](5-tezos-escrowagent#expiry-entrypoint). This operation will only be successful if the sender is `merchant_address` as defined in the contract. 
 The operation timelocks the channel balance for a timeout period of `self_delay` (set in the smart contract at origination).
 
-As soon as the customer observes the `expiry` entrypoint on chain for one of their channels, they must
-- Complete any payment in progress.
-- Update the channel status to `PendingClose`.
-- Call [the `custClose` entrypoint](5-tezos-escrowagent#custclose-entrypoint) and continue as in [Unilateral Customer Close](#unilateral-customer-close).
+As soon as the customer observes the `expiry` entrypoint on chain for one of their channels, they must complete any payment in progress. Then they decide whether to update the closing balances.
+- If so, they update the channel status to `PendingClose` and call [the `custClose` entrypoint](5-tezos-escrowagent#custclose). The process continues as in [Unilateral Customer Close](#unilateral-customer-close).
+- Otherwise, they update the channel status to `PendingExpiry`.
 
-If the timeout period passes without the customer calling the `custClose` entrypoint, the merchant calls [the `merchClaim` entrypoint](5-tezos-escrowagent#merchclaim-entrypoint). This creates an operation group of size two: the `merchClaim` operation and an operation that transfers the entire channel balance to `merchant_address`.
+If the timeout period passes without the customer calling the `custClose` entrypoint, the merchant updates the channel status to `PendingMerchantClaim` and calls [the `merchClaim` entrypoint](5-tezos-escrowagent#merchclaim). This creates an operation group of size two: the `merchClaim` operation and an operation that transfers the entire channel balance to `merchant_address`.
 
 Once the `merchClaim` operation has reached a confirmation depth of `required_confirmations`, the merchant calls [Update Channel Status][merchant_update_channel_status] with `Closed` and no longer needs to monitor the contract.
 Similarly, the customer updates the channel status to `Closed` and no longer needs to monitor the contract.

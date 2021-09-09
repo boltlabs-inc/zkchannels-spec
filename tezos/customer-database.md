@@ -12,23 +12,27 @@ different sessions.
 
 - **Label**: A text description input by the customer to identify a channel.
 - **Address**: The `zkchannel://` address for the channel.
-- **Initial Customer Balance**: The amount initially deposited by the customer
-  upon establishing the channel. The customer may use this for their own
-  accounting purposes, outside the scope of the protocol.
-- **Initial Merchant Balance**: The amount initially deposited by the merchant
-  upon establishing the channel. The customer may use this for their own
-  accounting purposes, outside the scope of the protocol.
+- **Initial Merchant Balance**, **Initial Customer Balance**: The amount initially deposited by the merchant and the customer, respectively, upon establishing the channel. The customer may use this for their own accounting purposes, outside the scope of the protocol.
 - **Channel State and Status**: All the information pertaining to the present state and status of the
-  channel, including a unique channel identifier, allocation of the balance to customer and merchant, a nonce, and a revocation pair. The status must be one of the following: [Inactive][], [Ready][], [Started][],
-  [Locked][], [PendingClose][], [Closed][]. Internal details of the channel state are discussed in the zkAbacus specification in [the zkChannels protocol document](https://github.com/boltlabs-inc/blindsigs-protocol/releases/download/ecc-review/zkchannels-protocol-spec-v3.pdf).
+  channel, including a unique channel identifier, allocation of the balance to customer and merchant, a nonce, and a revocation pair. The set of valid statuses are listed in the table below.
+  Internal details of the channel state are discussed in the zkAbacus specification in [the zkChannels protocol document](https://github.com/boltlabs-inc/blindsigs-protocol/releases/download/ecc-review/zkchannels-protocol-spec-v3.pdf).
+- **Closing Balances**: This field is set when the final channel balances are paid out on chain.
+- **Contract Details**: This includes the merchant's Tezos public key, the on-chain ID of the contract, and the level at which it was originated.
 
 ## Operations
 
-| Name                                             | Input                                      | Output  | Summary                                                                                           |
-| ------------------------------------------------ | ------------------------------------------ | ------- | ------------------------------------------------------------------------------------------------- |
-| [**Insert Channel**][insert_channel]             | Label, Address, Inactive (All Required)    | None    | Insert the new channel if it doesn't already exist. If the insertion fails, return the Inactive. |
-| [**Get Address**][get_address]                   | Label (Required)                           | Address | Get the address of a channel with a given label.                                                  |
-| [**Update Channel Status**][update_channel_status] | Label, Old Status, New Status (All Required) | None    | Update an existing channel's status atomically.                                                    |
+The database has an operation to retrieve each field above, given a label. Operations that mutate the database are described in this section.
+
+All inputs are required except where noted.
+
+| Name                                             | Input                        | Summary |
+| ------------------------------------------------ | -----------------------------| --------|
+| [**Insert Channel**][insert_channel]             | Label, address, `Inactive`, contract details| Insert the new channel if it doesn't already exist. If the insertion fails, return the `Inactive`. The contract details should only include the merchant's Tezos public key, not a contract ID or level.|
+| [**Update Channel Status**][update_channel_status] | Label, old status, new status | Update an existing channel's status atomically.                                                    |
+| **Update Closing Balances** | Label, merchant balance, customer balance (optional) | Update the closing balances to the specified values.
+| **Initialize Contract Details** | Label, contract ID, level | Update the contract details. This can be called at most once.
+
+
 
 [insert_channel]: #insert-channel
 [get_address]: #get-address
@@ -41,11 +45,6 @@ different sessions.
 race conditions. For example, if multiple Establish sessions try to insert a
 channel with the same label, only the first session succeeds. Subsequent inserts
 fail because a channel already exists with the given label.
-
-### Get Address
-
-`zkAbacus.Pay` and `zkAbacus.Close` call this operation to connect to the
-merchant.
 
 ### Update Channel Status
 
@@ -64,11 +63,13 @@ Ready -> Started -> Locked
    |__________________|
 ```
 
-The closing procedure can begin from many statuses, but in a normal run, we expect it to start from the `Ready` status:
-``` 
-Ready -> Pending close -> Close
-            |              ^
-            ---> Dispute --|
+The closing procedure can begin from many statuses, but in a normal run, we expect it to start from the `Ready` status. There are no loops in close; it can only move forward.
+```
+                         __________________
+                        |                  \
+Ready -> Pending expiry -> Pending close -> PendingCustomerClaim -> Close
+  |_______________________/             |-> Dispute________________/
+  
 ```
 
 Here, we describe briefly what each status means for the channel:
@@ -82,9 +83,17 @@ Here, we describe briefly what each status means for the channel:
 | `Ready`          | Customer has a valid pay token | Customer can make payments on the channel.
 | `Started`        | Customer has made a payment request and provided proof that it is valid. | Customer cannot initiate another payment on the channel.
 | `Locked`         | Customer has a valid closing signature for the new channel balances. | Customer cannot initiate another payment on the channel.
-| `PendingClose`   | One of the parties has initiated a close procedure.
-| `Dispute`        | Merchant has evidence that customer posted invalid close information.
+| `PendingExpiry`  | Merchant initiated a channel close.
+| `PendingClose`   | Customer posted closing balances on chain.
+| `Dispute`        | Merchant provided evidence that customer posted invalid closing balances.
+| `PendingCustomerClaim` | The customer initiated a claim of the funds they are due.
 | `Closed`         | The balances on the smart contract are paid out. 
+
+### Update closing balances
+This operation updates the balances of the channel as they are paid out. It enforces the following invariants:
+- The merchant can receive money either one or two times
+- The merchant's balance cannot decrease in a subsequent update 
+- The customer can receive money exactly once
 
 
 ## Schema
@@ -95,10 +104,13 @@ Here, we describe briefly what each status means for the channel:
 | ------------------------ | ---------------- | -------------------------------------------------------------------------------------- |
 | label                    | unique, required | [ChannelName][channel_name]                                                            |
 | address                  | required         | [ZkChannelAddress][zk_channel_address]                                                 |
-| initial_customer_balance | required         | [CustomerBalance][customer_balance]                                                    |
-| initial_merchant_balance | required         | [MerchantBalance][merchant_balance]                                                    |
-| state                    | required         | [ChannelState][channel_state], which is one of: Inactive, Originated, CustomerFunded, MerchantFunded, Ready, Started, Locked, PendingClose, Dispute, Closed |
-
+| customer_deposit | required         | [CustomerBalance][customer_balance]                                                    |
+| merchant_deposit | required         | [MerchantBalance][merchant_balance]                                                    |
+| state                    | required         | [ChannelState][channel_state], which is one of the options listed above |
+| closing_balances | required | ClosingBalances
+| merchant_tezos_public_key | required | TezosPublicKey
+| contract_id | | ContractId
+| level | | Level
 
 [channel_state]: https://github.com/boltlabs-inc/zeekoe/blob/9240bbc0982c563be48d93df5c643dac3512614f/src/database/customer/state.rs#L15-L33
 [channel_name]: https://github.com/boltlabs-inc/zeekoe/blob/9240bbc0982c563be48d93df5c643dac3512614f/src/customer.rs#L39-L41
