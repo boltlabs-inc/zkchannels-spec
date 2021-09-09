@@ -8,7 +8,7 @@ of merchants. The customer database holds details about each channel.
 ### Channels Database
 
 The channels database is used to remember details about a channel across
-different sessions.
+different sessions. We describe the minimal information a customer should store about their channels.
 
 - **Label**: A text description input by the customer to identify a channel.
 - **Address**: The `zkchannel://` address for the channel.
