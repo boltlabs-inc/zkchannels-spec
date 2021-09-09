@@ -135,7 +135,7 @@ Pending expiry -> Pending merchant claim -> Closed
               \-> Pending close ----------/ /
                                |-> Dispute / 
 ```
-If initiated by the customer, the channel will transition directly to `Pending close` and continue as above.
+If initiated by the customer, the channel will transition directly to `PendingClose` and continue as above.
 
 For full details about when the merchant transitions from one status to the
 next, [refer to the overview of the protocol](0-overview-and-index.md).

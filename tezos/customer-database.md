@@ -17,7 +17,7 @@ different sessions.
   channel, including a unique channel identifier, allocation of the balance to customer and merchant, a nonce, and a revocation pair. The set of valid statuses are listed in the table below.
   Internal details of the channel state are discussed in the zkAbacus specification in [the zkChannels protocol document](https://github.com/boltlabs-inc/blindsigs-protocol/releases/download/ecc-review/zkchannels-protocol-spec-v3.pdf).
 - **Closing Balances**: This field is set when the final channel balances are paid out on chain.
-- **Contract Details**: This includes the merchant's Tezos public key, the on-chain ID of the contract, and the level at which it was originated.
+- **Contract Details**: This includes the merchant's Tezos public key, the on-chain ID of the contract, and the level at which the contract was originated.
 
 ## Operations
 
@@ -91,9 +91,9 @@ Here, we describe briefly what each status means for the channel:
 
 ### Update closing balances
 This operation updates the balances of the channel as they are paid out. It enforces the following invariants:
-- The merchant can receive money either one or two times
-- The merchant's balance cannot decrease in a subsequent update 
-- The customer can receive money exactly once
+- The merchant can receive money either one or two times.
+- The merchant's balance cannot decrease in a subsequent update. 
+- The customer can receive money exactly once.
 
 
 ## Schema
