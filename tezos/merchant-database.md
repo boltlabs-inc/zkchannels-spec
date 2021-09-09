@@ -36,8 +36,8 @@ different sessions.
 - **Channel ID**: Used to look up the channel in subsequent steps to update the
   status.
 - **Contract ID**: Used to perform operations on chain.
-- **Merchant Deposit, Customer Deposit**: The amount initially deposited by the merchant
-  and customer, respectively, upon establishing the channel. The merchant may use this for its own accounting purposes outside the scope of the protocol.
+- **Merchant Deposit, Customer Deposit**: The amount initially deposited by the merchant (`init_merchant_balance`)
+  and customer (`init_customer_balance`), respectively, upon establishing the channel. The merchant may use this for its own accounting purposes outside the scope of the protocol.
 - **Status**: Used to determine valid operations on the channel.  The possible statuses are listed in the table below.
 - **Closing Balances**: The balances that have been paid out on chain.
 
