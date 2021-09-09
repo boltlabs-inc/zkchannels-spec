@@ -86,7 +86,7 @@ This is used in a couple situations:
      close while closing unilaterally, both on the most recent state. In this
      case, the merchant aborts the mutual close session.
 3. When the merchant processes a mutual close request, they call this operation
-   just like in an on chain close (2). The merchant then checks the output and
+   just like in an on-chain close (2). The merchant then checks the output and
    proceeds as specified in the [mutual close
    section](4-channel-closure.md#mutual-close):
    - _If the returned list is empty_, then the merchant has never seen the
@@ -97,7 +97,7 @@ This is used in a couple situations:
      mutual close. If the merchant knows the identity of the customer, they
      may wish to take some sort of (possibly punitive) action.
    - _If the returned list contains only locks (without any corresponding
-     secrets)_, this means there is an on chain customer close transaction on
+     secrets)_, this means there is an on-chain customer close transaction on
      the most recent channel state at the time of the mutual close session.
      In this case, the merchant aborts the mutual close session as specified.
 
@@ -105,7 +105,7 @@ This is used in a couple situations:
 
 This operation may be separated into two, specialized queries if necessary. Since
 Pay (1) only cares whether the set is empty or not, it could return a boolean
-denoting success. Similarly, in processing an on chain close (2) or a mutual close (3), we
+denoting success. Similarly, in processing an on-chain close (2) or a mutual close (3), we
 could optionally return a single revocation secret if one exists.
 
 These optimizations would minimize the rows fetched from the database and may
@@ -120,8 +120,8 @@ ID, Merchant Balance, Customer Balance, and the "originated" status.
 ### Update Channel Status
 
 This operation atomically verifies the current channel status and updates the channel status. There are two methods to achieve this:
-- specify both the previous and updated status. 
-- specify that the updated status is `PendingClose`. This operation will succeed only if the current status is one of `MerchantFunded`, `Active`, `PendingExpiry`, or `PendingMutualClose`.
+- Specify both the previous and updated status. 
+- Specify that the updated status is `PendingClose`. This operation will succeed only if the current status is one of `MerchantFunded`, `Active`, `PendingExpiry`, or `PendingMutualClose`.
 
 The expected progression of a channel is:
 
@@ -131,11 +131,11 @@ Originated -> Customer funded -> Merchant funded -> Active
 
 The close procedure can be somewhat more complicated. If initiated by the merchant, the expected flow is 
 ```
-Pending expiry -> Pending merchant claim -> Closed
-              \-> Pending close ----------/ /
+PendingExpiry -> PendingMerchantClaim -> Closed
+              \-> PendingClose ----------/ /
                                |-> Dispute / 
 ```
-If initiated by the customer, the channel will transition directly to `PendingClose` and continue as above.
+If initiated by the customer on chain, the channel will transition directly to `PendingClose` and continue as above. If initiated by the customer off chain, the channel will transition to `PendingMutualClose` to `Closed`.
 
 For full details about when the merchant transitions from one status to the
 next, [refer to the overview of the protocol](0-overview-and-index.md).
