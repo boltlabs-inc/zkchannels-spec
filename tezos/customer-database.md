@@ -63,7 +63,7 @@ Ready -> Started -> Locked
    |__________________|
 ```
 
-The closing procedure can begin from many statuses, but in a normal run, we expect it to start from the `Ready` status. There are no loops in close; it can only move forward.
+The closing procedure can begin from many statuses, but in a normal run, we expect closing to start from the `Ready` status. There are no loops in close; the status progression can only move forward.
 ```
    _______________________________________/-> PendingMutualClose 
   |                                                              \
