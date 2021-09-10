@@ -24,11 +24,12 @@ The customer should ensure they have a Tezos implicit account with balance suffi
 
 ## Protocol Overview
 
-Channel establishment is a three round protocol between the customer and the merchant.
 
-The establishment protocol uses `zkAbacus` as a subprotocol.  Details for `zkAbacus` may be found in Chapter 3.3.3 of the [zkChannels Protocol document](https://github.com/boltlabs-inc/blindsigs-protocol/releases/download/ecc-review-v1/zkchannels-protocol-spec-v3.1.pdf).
+Channel establishment is a three-round protocol between the customer and the merchant.
 
-Each party also interacts with the Tezos blockchain to open and verify the channel's escrow account. Details are provided [here](5-tezos-escrowagent.md).
+The establishment protocol uses `zkAbacus` as a subprotocol.  Details for `zkAbacus` may be found in Chapter 3.3.3 of the [zkChannels Protocol document](https://github.com/boltlabs-inc/blindsigs-protocol/releases/download/ecc-review-v1/zkchannels-protocol-spec-v3.1.pdf). Each party also interacts with the Tezos blockchain to open and verify the channel's escrow account. Details of on-chain operations are provided [here](5-tezos-escrowagent.md).
+
+The protocol flows between the customer and the merchant are given in the following diagram:
 
 
         +-------+                           +-------+
@@ -43,9 +44,9 @@ Each party also interacts with the Tezos blockchain to open and verify the chann
         |       |                           |       |
         +-------+                           +-------+
 
-The protocol flows between the customer and the merchant are given in the above diagram. The protocol proceeds as follows:
+The protocol proceeds as follows:
         
-1. The customer sends [the `open_c` message](#the-open_c-message), which contains information about the initial state of the proposed channel. 
+1. The customer sends the [`open_c` message](#the-open_c-message), which contains information about the initial state of the proposed channel. 
 2. The merchant [verifies the received message](#merchant-requirements) and either accepts or rejects the proposed channel. They reply with [the `open_m` message](#the-open_m-message), which contains the merchant's contribution to the channel identifier. 
 3. The customer and merchant each compute the channel identifer `channel_id`, which acts as the unique channel identifier for the on-chain Tezos escrow account and off-chain `zkAbacus` channel. The identifier `channel_id` is computed as `SHA3-256(customer_randomness, merchant_randomness, customer_public_key, merchant_public_key, merchant_zkabacus_public_key)`. 
 4. They then initialize the `zkAbacus` channel by running `zkAbacus.Initialize()` on the previously established public parameters. In this subroutine:
