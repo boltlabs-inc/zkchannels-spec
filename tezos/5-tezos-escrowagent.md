@@ -337,10 +337,4 @@ The origination operation contains the [zkChannels contract](#zkchannels-contrac
     * [`int`:`status`]
     * [`bytes`:`revocation_lock`]
 
-## zkChannels Customer Origination and Funding Protocol 
-1.  The customer forges and signs the origination operation. This operation contains the zkchannels contract and the initial storage arguments listed above. The operation fees are paid by the customer's Tezos client using the account `customer_address`.
-2. The customer injects the [origination operation](#origination-operation).
-3. The customer funds their side of the contract using the `addCustFunding` entrypoint of the contract. The source of this transfer operation must be the `customer_address` specified in the contract's initial storage and transfer amount must be equal to `init_customer_balance`. 
-4. The customer waits until the `addCustFunding` operation groups is confirmed to the depth `required_confirmations`. 
-
 

@@ -20,30 +20,8 @@ The customer has [obtained the merchant’s setup information](1-setup.md#publis
 The customer should ensure they have a Tezos implicit account with balance sufficient to both contribute the desired amount to the zkChannel and pay the [operations fees](5-tezos-escrowagent.md#operation-fees) needed to originate, fund, and call the appropriate entry points of the corresponding smart contract. We recommend 2 tez based on our [contract benchmarks](https://github.com/boltlabs-inc/tezos-contract/wiki/Benchmark-Results) on testnet.
 
 ## Protocol Overview
-1. The customer sends [the `open_c` message](#the-openc-message), which contains information about the initial state of the proposed channel. 
-2. The merchant verifies the received message and either accepts or rejects the proposed channel. They reply with [the `open_m` message](#the-openm-message), which contains the merchan'ts contribution to the channel identifier. 
-3. The customer and merchant each compute the channel identifer `channel_id`, which acts as the unique channel identifier for the on-chain Tezos escrow account and off-chain `zkAbacus` channel. They then initialize the `zkAbacus` channel by running `zkAbacus.Initialize()` on the previously established public parameters. In this subroutine:
-    
-   a. The customer sends [the `init_c` message](#the-initc-message) to the merchant. This message consists of a (hiding) commitment to the intial state and a zero-knowledge proof of correctness. 
 
-    b. The merchant verifies the received message and sends [the `init_m` message](#the-initm-message), which contains an initial closing authorization signature, to the customer. 
-
-4. The customer originates and funds the [zkChannels contract] on chain:
-    
-      a.  They forge and sign the [origination operation].
-
-      b.  They inject the [origination operation](#origination-operation) using their Tezos client. They wait until this operation is confirmed to depth `required_confirmations` and then they update their channel status to `Originated`.
-
-      c. They fund their side of the contract by [calling the `addCustFunding` entrypoint] of the contract. The source of this transfer operation must be the `customer_address` specified in the contract's initial storage and transfer amount must be equal to `init_customer_balance`. The customer waits until the `addCustFunding` operation group is confirmed to the depth `required_confirmations` and updates the channel status to `CustomerFunded`.
-      
-      d. The customer sends [the `funding_confirmed` message](#the-fundingconfirmed-message) to the merchant.
-8. The merchant 
-
-The customer then sends the merchant the [`funding_confirmed` message as specified in channel establishment](2-channel-establishment.md#the-fundingconfirmed-message).The customer sends `funding_confirmed` to the merchant, which contains the contract identifier `contract-id`. The merchant checks the corresponding contract and initial storage for the expected values. The merchant then funds their side of the smart contract, if applicable. Once the contract is fully funded, the funds are locked in. At this point, the merchant runs `zkAbacus.Activate()` to generate the initial payment tag and sends the customer the message `activate`, which contains the payment tag. Upon completion of `zkAbacus.Activate()`, the channel is open and ready for [payments](3-channel-payments.md). 
-
- Details for `zkAbacus` may be found in Chapter 3.3.3 of the [zkChannels Protocol document](https://github.com/boltlabs-inc/blindsigs-protocol/releases/download/ecc-review-v1/zkchannels-protocol-spec-v3.1.pdf).
-
-
+Channel establishment is a three round protocol between the customer and the merchant. Each party also interacts with the Tezos blockchain to open and verify the channel's escrow account.
 
 
         +-------+                           +-------+
@@ -59,10 +37,35 @@ The customer then sends the merchant the [`funding_confirmed` message as specifi
         +-------+                           +-------+
 
         
+1. The customer sends [the `open_c` message](#the-open_c-message), which contains information about the initial state of the proposed channel. 
+2. The merchant [verifies the received message](#merchant-requirements) and either accepts or rejects the proposed channel. They reply with [the `open_m` message](#the-open_m-message), which contains the merchant's contribution to the channel identifier. 
+3. The customer and merchant each compute the channel identifer `channel_id`, which acts as the unique channel identifier for the on-chain Tezos escrow account and off-chain `zkAbacus` channel. They then initialize the `zkAbacus` channel by running `zkAbacus.Initialize()` on the previously established public parameters. In this subroutine:
+    
+   a. The customer [sends the `init_c` message](#the-init_c-message) to the merchant. This message consists of a (hiding) commitment to the intial state and a zero-knowledge proof of correctness. 
 
-## Global Defaults
-* [`int`:`self_delay`]: The default timeout length applied to the customer closing entrypoint `custClose` and the merchant expiry entrypoint `expiry`. The value is interpreted in sections.
-* [`int`:`required_confirmations`]: The minimum number of confirmations for an operation to be considered final.
+    b. The merchant [verifies the received message and sends the `init_m` message](#the-init_m-message), which contains an initial closing authorization signature, to the customer. 
+
+4. The customer originates and funds the [zkChannels contract](5-tezos-escrowagent#zkchannels-contract) on chain:
+    
+    a.  They forge and sign the [origination operation](5-tezos-escrowagent.md#zkchannels-contract-origination-operation) with the following arguments:        
+      * `channel_id`: The channel identifier.
+      * `customer_address`: The customer's Tezos tz1 address.
+      * `init_customer_balance`: The customer's initial balance.
+      * `customer_public_key`: The customer's Tezos public key.
+      * `merchant_address`: The merchant's Tezos tz1 address.
+      * `init_merchant_balance`: The merchant's initial balance.
+      * `merchant_public_key`: The merchant's Tezos public key.
+      * `merchant_zkabacus_public_key`: The merchant's zkAbacus public key.
+
+      b.  They inject the [origination operation](5-tezos-escrowagent.md#zkchannels-contract-origination-operation). They wait until this operation is confirmed to depth `required_confirmations` and then they update their channel status to `Originated`.
+
+      c.  They fund the contract by [calling the `addCustFunding` entrypoint](5-tezos-escrowagent.md#addcustfunding-entrypoint) of the contract. The source of this transfer operation must be the `customer_address` specified in the contract's initial storage and transfer amount must be equal to `init_customer_balance`. They wait until the `addCustFunding` operation group is confirmed to the depth `required_confirmations` and then update the channel status to `CustomerFunded`.
+      
+5. The customer [sends the `funding_confirmed` message](#the-funding_confirmed-message) to the merchant, which contains the contract identifier `contract-id`.
+6. The merchant [checks the corresponding contract and initial storage for the expected values](#merchant-requirements-4). The merchant then funds their side of the smart contract, if the channel is dual-funded, by [calling the `AddMerchFunding` entrypoint](5-tezos-escrowagent.md#addmerchfunding-entrypoint) of the contract with identifier `contract_id`. Once this contract has status `OPEN` for `required_confirmations` blocks, the merchant runs `zkAbacus.Activate()` to generate the initial payment tag and [sends the customer the message `activate`](#the-activate-message), which contains this payment tag. 
+7. Upon completion of `zkAbacus.Activate()`, the channel is open and ready for [payments](3-channel-payments.md). 
+
+ Details for `zkAbacus` may be found in Chapter 3.3.3 of the [zkChannels Protocol document](https://github.com/boltlabs-inc/blindsigs-protocol/releases/download/ecc-review-v1/zkchannels-protocol-spec-v3.1.pdf).
 
 ## Message Specifications
 
