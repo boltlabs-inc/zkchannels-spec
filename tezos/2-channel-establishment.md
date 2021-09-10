@@ -1,6 +1,6 @@
 # Channel Establishment
-  * [Overview](#overview)
-  * [Global defaults](#global-defaults)
+  * [Prerequisites](#prerequisites)
+  * [Protocol Overview](#protocol-overview)
   * [Message Specifications](#message-specifications)
     * [The `open_c` Message](#the-open_c-message)
     * [The `open_m` Message](#the-open_m-message)
@@ -8,6 +8,9 @@
     * [The `init_m` Message](#the-init_m-message)
     * [The `funding_confirmed` Message](#the-funding_confirmed-message)
     * [The `activate` Message](#the-activate-message)
+
+Channel establishment is initiated by the customer in zkChannels. 
+
 ## Prerequisites
 The merchant has completed the [setup](1-setup.md#merchant-setup) phase, and the customer and merchant have established a communication session.
 
