@@ -29,7 +29,6 @@ It includes support for mutual closes, unilateral closes by either the customer 
       - [`merchClaim`](#merchclaim-entrypoint)
       - [`mutualClose`](#mutualclose-entrypoint)
   - [zkChannels Contract Origination Operation](#zkchannels-contract-origination-operation)
-- [zkChannels Customer Origination and Funding Protocol](#zkchannels-customer-origination-and-funding-protocol)
 
 
 ## Tezos background
