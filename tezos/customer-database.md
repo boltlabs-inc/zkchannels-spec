@@ -54,7 +54,7 @@ Each status transition is accompanied by a condition; the update function must b
 
 In a correct zkChannels execution, the statuses will transition in an expected order, based on the outcome of `zkAbacus` and `zkEscrowAgent` subprotocol executions. Establishing a channel includes the following status transitions:
 ```
-Inactive -> Originated -> Customer funded -> Merchant funded -> Ready 
+Inactive -> Originated -> CustomerFunded -> MerchantFunded -> Ready 
 ```
 A payment on a channel goes through a status transition loop:
 ```
@@ -63,12 +63,15 @@ Ready -> Started -> Locked
    |__________________|
 ```
 
-The closing procedure can begin from many statuses, but in a normal run, we expect it to start from the `Ready` status. There are no loops in close; it can only move forward.
+The closing procedure can begin from many statuses, but in a normal run, we expect closing to start from the `Ready` status. There are no loops in close; the status progression can only move forward.
 ```
-                         __________________
-                        |                  \
-Ready -> Pending expiry -> Pending close -> PendingCustomerClaim -> Close
-  |_______________________/             |-> Dispute________________/
+   _______________________________________/-> PendingMutualClose 
+  |                                                              \
+  |             _____________________________                     \ 
+  |            |                             \                     \
+Ready -> PendingExpiry -> PendingClose -> PendingCustomerClaim -> Closed
+  |_______________________/     |                                  /
+                                |-> Dispute_______________________/
   
 ```
 
@@ -83,6 +86,7 @@ Here, we describe briefly what each status means for the channel:
 | `Ready`          | Customer has a valid pay token | Customer can make payments on the channel.
 | `Started`        | Customer has made a payment request and provided proof that it is valid. | Customer cannot initiate another payment on the channel.
 | `Locked`         | Customer has a valid closing signature for the new channel balances. | Customer cannot initiate another payment on the channel.
+| `PendingMutualClose` | The customer initiated a mutual close.
 | `PendingExpiry`  | Merchant initiated a channel close.
 | `PendingClose`   | Customer posted closing balances on chain.
 | `Dispute`        | Merchant provided evidence that customer posted invalid closing balances.
