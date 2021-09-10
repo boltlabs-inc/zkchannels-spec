@@ -23,6 +23,7 @@ The customer has [obtained the merchant’s setup information](1-setup.md#publis
 The customer should ensure they have a Tezos implicit account with balance sufficient to both contribute the desired amount to the zkChannel and pay the [operations fees](5-tezos-escrowagent.md#operation-fees) needed to originate, fund, and call the appropriate entry points of the corresponding smart contract. We recommend 2 tez based on our [contract benchmarks](https://github.com/boltlabs-inc/tezos-contract/wiki/Benchmark-Results) on testnet.
 
 ## Protocol Overview
+<<<<<<< HEAD
 
 
 Channel establishment is a three-round protocol between the customer and the merchant.
@@ -30,6 +31,10 @@ Channel establishment is a three-round protocol between the customer and the mer
 The establishment protocol uses `zkAbacus` as a subprotocol.  Details for `zkAbacus` may be found in Chapter 3.3.3 of the [zkChannels Protocol document](https://github.com/boltlabs-inc/blindsigs-protocol/releases/download/ecc-review-v1/zkchannels-protocol-spec-v3.1.pdf). Each party also interacts with the Tezos blockchain to open and verify the channel's escrow account. Details of on-chain operations are provided [here](5-tezos-escrowagent.md).
 
 The protocol flows between the customer and the merchant are given in the following diagram:
+=======
+
+Channel establishment is a three round protocol between the customer and the merchant. Each party also interacts with the Tezos blockchain to open and verify the channel's escrow account.
+>>>>>>> ca4176d (remove duplication of info between establish and tezos escrow agent)
 
 
         +-------+                           +-------+
