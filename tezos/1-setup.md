@@ -34,16 +34,16 @@ We use SHA3-256 hashes to instantiate our hash-based commitments.
 
 A party who wishes to act as a zkChannel merchant must generate and publish the following parameters for use across all of their zkChannels: 
 
-* **Blind signature public key pair.** The merchant uses this Pointcheval-Sanders key pair to sign all channel state initializations and updates in `zkAbacus`. This keypair is also used as a condition in the Tezos smart contract for each channel. 
+* **Blind signature key pair.** The merchant uses this Pointcheval-Sanders key pair to sign all channel state initializations and updates in `zkAbacus`. This keypair is also used as a condition in the Tezos smart contract for each channel. 
 
-* **Range constraint public key pair and signatures.** 
+* **Range constraint key pair and signatures.** 
 A range constraint demonstrates that a value in a zero-knowledge proof is in the range `[0, u^l)`. For our purposes, it suffices to set `u = 128` and `l = 9`. 
 The range constraint parameters consist of a Pointcheval-Sanders public key and a signature on each value in the range `[0, u)`.
 The `zkAbacus.Pay` protocol uses these to prove that updated channel balances are valid (namely, non-negative).
 
 * **Revocation lock commitment parameters.** The `zkAbacus.Pay` protocol requires a set of Pedersen commitment parameters on messages of length one in the pairing group `G1` of BLS12-381. These are used to prove that the customer reveals the correct revocation lock.
 
-* **EdDSA public key pair and Tezos tz1 address.** The merchant uses this EdDSA keypair for escrow account set up and closing as specified in `TezosEscrowAgent`.
+* **EdDSA key pair and Tezos tz1 address.** The merchant uses this EdDSA keypair for escrow account set up and closing as specified in `TezosEscrowAgent`.
 
 The merchant must also initialize a database `revocation_DB` for use with all their zkChannel operations.
 
