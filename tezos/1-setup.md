@@ -70,9 +70,9 @@ Generate a new set of [Pedersen commitment parameters](https://github.com/boltla
 The user can specify an EdDSA keypair and associated Tezos address. They can use an existing keypair or generate a new one using the `tezos-client`.
 
 ### Publishing public parameters
-The merchant's public parameters consists of their blind signing public key `merchant_zkabacus_public_key`, parameters for constructing range constraints `range_constraint_parameters`, revocation commitment parameters `revocation_commitment_parameters`, EdDSA public key `merchant_public_key`, and Tezos tz1 address `merchant_address`. 
+The merchant's public parameters consist of their blind signing public key `merchant_zkabacus_public_key`, parameters for constructing range constraints `range_constraint_parameters`, revocation commitment parameters `revocation_commitment_parameters`, EdDSA public key `merchant_public_key`, and Tezos tz1 address `merchant_address`. 
 
-The merchant publishes their public parameters in a config file. The merchant then advertises their server IP address and port for customers to open channels using the `<merch_pp_hash>@<ip>:<port>` format, where `merch_pp_hash` is set to `SHA3-256(merchant_zkabacus_public_key, merchant_address, merchant_public_key)`.
+The merchant publishes their public parameters in a config file. The merchant then advertises their server IP address and port for customers. Ideally, customers should use an out-of-band method to verify that they have received the correct parameters.
 
 ### Tezos-related node initialization
 We assume the merchant runs or connects to a `tezos-node` that has been initialized correctly and securely. This means that the node has successfully established a connection to the P2P network and connected to a list of bootstrapped and trusted peers. It is assumed that the node runs a version of tezos that includes support for the **Edo** protocol or later.
