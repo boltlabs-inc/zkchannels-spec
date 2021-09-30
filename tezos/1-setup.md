@@ -34,13 +34,13 @@ We use SHA3-256 hashes to instantiate our hash-based commitments.
 
 A party who wishes to act as a zkChannel merchant must generate and publish the following parameters for use across all of their zkChannels: 
 
-* **Blind signature public key pair.** The merchant must use this key pair to sign all channel state initializations and updates in `zkAbacus`. This keypair is also used as a condition in the Tezos smart contract for each channel. 
+* **Blind signature key pair.** The merchant must use this key pair to sign all channel state initializations and updates in `zkAbacus`. This keypair is also used as a condition in the Tezos smart contract for each channel. 
 
-* **Range constraint public key pair and signatures.** The `zkAbacus.Pay` protocol requires a separate set of parameters to prove that updated channel balances are valid. A range constraint demonstrates that a value in a zero-knowledge proof is non-negative (in zkChannels, the value is the updated channel balance). We use range constraints to show that an integer is in the range `[0, u^l)`, for integer values `u`, `l`. We set `u = 128` and `l = 9`. This primitive relies on Poincheval Sanders signatures.
+* **Range constraint key pair and signatures.** The `zkAbacus.Pay` protocol requires a separate set of parameters to prove that updated channel balances are valid. A range constraint demonstrates that a value in a zero-knowledge proof is non-negative (in zkChannels, the value is the updated channel balance). We use range constraints to show that an integer is in the range `[0, u^l)`, for integer values `u`, `l`. We set `u = 128` and `l = 9`. This primitive relies on Poincheval Sanders signatures.
 
 * **Revocation lock commitment parameters.** The `zkAbacus.Pay` protocol requires a set of Pedersen commitment parameters on messages of length one in the pairing group `G1` of BLS12-381. These are used to prove that the customer reveals the correct revocation lock.
 
-* **EdDSA public key pair and Tezos tz1 address.** The merchant uses this keypair for escrow account set up and closing as specified in `TezosEscrowAgent`.
+* **EdDSA key pair and Tezos tz1 address.** The merchant uses this keypair for escrow account set up and closing as specified in `TezosEscrowAgent`.
 
 
 The merchant must also initialize a database `revocation_DB` for use with all their zkChannel operations.

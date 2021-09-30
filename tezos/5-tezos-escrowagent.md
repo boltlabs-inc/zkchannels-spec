@@ -4,7 +4,6 @@
 It includes support for mutual closes, unilateral closes by either the customer or the merchant, and dispute resolution via on-chain punishment.
 
 
-- [TezosEscrowAgent](#tezosescrowagent)
   - [Tezos background](#tezos-background)
     - [Operation structure](#operation-structure)
     - [Forging an operation](#forging-an-operation)
@@ -147,7 +146,7 @@ The default minimal fee values are below. For more details see the tezos [develo
 We assume that the minimal operation fee will be sufficient for operations to be confirmed. As such, operations are forged using the minimal operation fee. This specification does not handle the case where the minimal operation fee is insufficient for bakers to include the operation into a block. 
 
 ## Tezos client requirements
-The Tezos client is used to interact with the tezos node for performing actions as creating operations, injecting operations and querying the state of the blockchain. We assume that the Tezos client is capable of:
+The Tezos client is used to interact with the Tezos node for performing actions as creating operations, injecting operations and querying the state of the blockchain. We assume that the Tezos client is capable of:
 * Creating and injecting operations:
   * Regular transfer operations outside of the zkChannels protocol. 
   * Operations used in the zkChannels protocol.
@@ -158,10 +157,10 @@ The Tezos client is used to interact with the tezos node for performing actions 
 * Querying the blockchain:
   * Given a contract-id, return the contract code and storage.
   * Given an address, return the balance.
-  * Given an operation hash, return the operation and the block height it was included in.
+  * Given an operation hash, return the operation and the block height in which the given operation was included.
 
 ## Contract Requirements
-* The contract keeps track of its current `status` that can be used to determine which entrypoint can be called. The initial contract status is set to `AWAITING_FUNDING`. The possible contract statuses are: `AWAITING_CUST_FUNDING`, `AWAITING_MERCH_FUNDING`, `OPEN`, `EXPIRY`, `CUST_CLOSE`, `CLOSED`, and `FUNDING_RECLAIMED`.
+* The contract keeps track of its current `status` that can be used to determine which entrypoint can be called. The possible contract statuses are `AWAITING_CUST_FUNDING`, `AWAITING_MERCH_FUNDING`, `OPEN`, `EXPIRY`, `CUST_CLOSE`, `CLOSED`, and `FUNDING_RECLAIMED`.
 * The contract keeps track of a timeout period (denoted by `selfDelay`) that is used to determine whether an entrypoint call of type `custClaim` or `merchClaim` is legitimate.
 * The contract stores `revocation_lock`, which stores the revocation lock submitted as part of a `custClose` entrypoint call. 
 * The contract stores the customer's closing balance after `custClose` is called.
@@ -169,10 +168,10 @@ The Tezos client is used to interact with the tezos node for performing actions 
 The zkChannel contract is originated with the following channel-specific arguments as specified [channel establishment](2-channel-establishment.md):
 * `channel_id`: The channel identifier.
 * `customer_address`: The customer's Tezos tz1 address.
-* `custFunding`: The customer's initial balance.
+* `init_customer_balance`: The customer's initial balance.
 * `customer_public_key`: The customer's Tezos public key.
 * `merchant_address`: The merchant's Tezos tz1 address.
-* `merchFunding`: The merchant's initial balance.
+* `init_merchant_balance`: The merchant's initial balance.
 * `merchant_public_key`: The merchan'ts Tezos public key.
 * `merchant_zkabacus_public_key`: The merchant's zkAbacus Pointcheval Sanders public key.
 
@@ -191,28 +190,28 @@ The value for `close` is derived from the binary encoding of the string 'CLOSE'.
 ### Entrypoints
 
 #### `addCustFunding` entrypoint
-The `addCustFunding` entrypoint allows the customer to fund the contract with their initial balance, `custFunding`. 
+The `addCustFunding` entrypoint allows the customer to fund the contract with their initial balance, `init_customer_balance`. 
 Requirements:
-* The contract status must be set to `AWAITING_CUST_FUNDING`.
+* The contract status must be `AWAITING_CUST_FUNDING`.
 * The source must be `customer_address`.
-* The amount of tez transferred to the contract must be exactly equal to `custFunding`. 
+* The amount of tez transferred to the contract must be exactly equal to `init_customer_balance`. 
 
 
 On execution:
-* The contract status is set to either:
+* The contract status is updated to either:
   * `AWAITING_MERCH_FUNDING` if the channel is dual-funded.
   * `OPEN` if the channel is funded by the customer alone.
 
 
 #### `addMerchFunding` entrypoint
-The `addMerchFunding` entrypoint allows the merchant to fund a dual-funded contract with their initial balance, `merchFunding`. 
+The `addMerchFunding` entrypoint allows the merchant to fund a dual-funded contract with their initial balance, `init_merchant_balance`. 
 Requirements:
-* The contract status must be set to `AWAITING_MERCH_FUNDING`.
+* The contract status must be `AWAITING_MERCH_FUNDING`.
 * The source must be `merchant_address`.
-* The amount of tez transferred to the contract must be exactly equal to `merchFunding`.
+* The amount of tez transferred to the contract must be exactly equal to `init_merchant_balance`.
 
 On execution:
-* The contract status is set to `OPEN`.
+* The contract status is updated to `OPEN`.
 
 #### `reclaimFunding` entrypoint
 The `reclaimFunding` entrypoint allows the customer to reclaim their funding if the following conditions are met:
@@ -220,23 +219,23 @@ The `reclaimFunding` entrypoint allows the customer to reclaim their funding if 
 - The merchant has not contributed their promised funds. 
 
 Requirements:
-* The contract status must be set to `AWAITING_MERCH_FUNDING`.
+* The contract status must be `AWAITING_MERCH_FUNDING`.
 * The source must be `customer_address`.
 
 On execution:
 * The customer's balance `customer_balance` is sent to the source of the entrypoint caller.
-* The contract status is set to `FUNDING_RECLAIMED`.
+* The contract status is updated to `FUNDING_RECLAIMED`.
 
 #### `expiry` entrypoint
 The `expiry` entrypoint allows the merchant to initiate a unilateral channel closure.
 
 Requirements:
 * The source must be `merchant_address`.
-* The contract status must be set to `OPEN`.
+* The contract status must be `OPEN`.
 
 On execution:
 * The timestamp marking the start of the delay period (defined by `selfDelay`) is recorded by the contract.
-* The contract status is set to `EXPIRY`.
+* The contract status is updated to `EXPIRY`.
 
 #### `custClose` entrypoint
 The `custClose` entrypoint allows the customer to initate a unilateral channel closure or to responsd to an `expiry` entrypoint call.
@@ -248,7 +247,7 @@ Inputs:
 
 Requirements:
 * The source must be `customer_address`.
-* The contract status must be set to either `OPEN` or `EXPIRY`.
+* The contract status must be either `OPEN` or `EXPIRY`.
 * The closing authorization signature must be a valid signature on the closing state that verifies under `merchant_zkabacus_public_key`. The closing state contains the `channel_id`, `close`, `revocation_lock`, `customer_balance`, and `merchant_balance`. 
 
 On execution:
@@ -256,7 +255,7 @@ On execution:
 * The revocation lock `revocation_lock` from the close state is stored in the contract.
 * The merchant's close balance, `merchant_balance`, is sent to the destination `merchant_address`.
 * The timestamp marking the start of the delay period (defined by `selfDelay`) is recorded by the contract.
-* The contract status is set to `CUST_CLOSE`.
+* The contract status is updated to `CUST_CLOSE`.
 
 #### `merchDispute` entrypoint
 The `merchDispute` entrypoint allows the merchant to dispute the closing state posted by a `custClose` entrypoint call.
@@ -266,63 +265,63 @@ Input:
 
 Requirements:
 * The source must be `merchant_address`.
-* The contract status must be set to `CUST_CLOSE`.
+* The contract status must be `CUST_CLOSE`.
 * The revocation secret `revocation_secret` must satisfy `SHA3-256(revocation_secret) = revocation_lock`.
 
 On execution:
-* The customer's close balance is sent to `merchant_address`
+* The customer's close balance is sent to `merchant_address`.
 
 #### `custClaim` entrypoint
 The `custClaim` entrypoint allows the customer to claim their funds after the timeout period from `custClose` has passed.
 
 Requirements:
 * The source must be `customer_address`.
-* The contract status must be set to `CUST_CLOSE`.
+* The contract status must be `CUST_CLOSE`.
 * The timeout period set by `selfDelay` has passed.
 
 On execution:
 * The customer's close balance is sent to `customer_address`.
-* The contract status is set to `CLOSED`.
+* The contract status is updated to `CLOSED`.
 
 #### `merchClaim` entrypoint
 The `merchClaim` entrypoint allows the merchant to claim their funds after the timeout period from `expiry` has passed.
 
 Requirements:
 * The source must be `merchant_address`.
-* The contract status must be set to `EXPIRY`.
+* The contract status must be `EXPIRY`.
 * The timeout period set by `selfDelay` has passed.
 
 On execution:
 * The entire balance is sent to `merchant_address`.
-* The contract status is set to `CLOSED`.
+* The contract status is updated to `CLOSED`.
 
 #### `mutualClose` entrypoint
 The `mutualClose` entrypoint allows the customer to close the channel and get their balance immediately, provided they have the merchant's authorization to do so.
 
 Inputs:
 * The closing balances, `customer_balance` and `merchant_balance`, are the amounts to be sent to `customer_address` and `merchant_address`, respectively, when the channel closes.
-* A merchant EdDSA signature, `merch_sig`, which is used to authorize the closing balances.
+* A merchant EdDSA signature, `mutual_close_signature`, which is used to authorize the closing balances.
 
 Requirements:
 * The source must be `customer_address`.
-* The contract status must be set to `OPEN`.
-* `merch_sig` must be a valid EdDSA signature over the tuple `(contract-id, context-string, channel_id, customer_balance, merchant_balance)` with respect to `merchant_public_key`. Note that while `customer_balance`, `merchant_balance`, and `merch_sig` are provided to the entrypoint call as inputs, `contract-id`, `context-string`, and `channel_id` are retrieved internally from the contract's storage. `context-string` is a string set to `"zkChannels mutual close"` and is defined as [global default](1-setup.md#Merchant-Setup).
+* The contract status must be `OPEN`.
+* `mutual_close_signature` must be a valid EdDSA signature over the tuple `(contract-id, context-string, channel_id, customer_balance, merchant_balance)` with respect to `merchant_public_key`. Note that while `customer_balance`, `merchant_balance`, and `mutual_close_signature` are provided to the entrypoint call as inputs, `contract-id`, `context-string`, and `channel_id` are retrieved internally from the contract's storage. `context-string` is the string  `"zkChannels mutual close"` and is defined as [global default](1-setup.md#Merchant-Setup).
 
 On execution:
 * `customer_balance` and `merchant_balance` are sent to `customer_address` and `merchant_address`, respectively.
-* The contract status is set to `CLOSED`.
+* The contract status is updated to `CLOSED`.
 
 
 # Contract Origination and Funding
 The `TezosEscrowAgent` contract origination proceeds as follows.
 
 ## Requirements
-* Both the customer and merchant:
-    * need tz1 accounts with a sufficient balance to carry out on-chain operations (origination, funding, and closure).
-    * need online Tezos clients that can estimate fees, create, and inject operations from their (`customer_address` and `merchant_address`).
-    * have already agreed upon the initial storage arguments.
-* In addition, the customer:
-    * needs a closing signature from the merchant on the initial state.
+* The customer and merchant must each have the following:
+    * A tz1 account with a sufficient balance to carry out on-chain operations (origination, funding, and closure).
+    * Tezos clients that can estimate fees, create, and inject operations from their tz1 accounts.
+   
+* In addition, as specified in [Channel Establishment](2-channel-establishment.md#), the customer and merchant must have already agreed upon the initial storage arguments and the customer must have a closing authorization signature from the merchant on the initial channel state.
+
 ### Initial storage arguments
 * Merchant's fixed arguments
     * [`address`:`merchant_address`]
@@ -343,8 +342,8 @@ The `TezosEscrowAgent` contract origination proceeds as follows.
     * [`ChannelID`:`channel_id`]
     * [`address`:`customer_address`]
     * [`key`:`customer_public_key`]
-    * [`mutez`:`custFunding`]
-    * [`mutez`:`merchFunding`]
+    * [`mutez`:`init_customer_balance`]
+    * [`mutez`:`init_merchant_balance`]
 
 * Fixed arguments
     * [`int`:`status`]
@@ -360,7 +359,7 @@ When the customer injects the origination operation, they watch the blockchain t
 Once the operation has reached the minimum number of required confirmations, the `contract-id` is locked in, the customer is ready to fund the contract with their initial balance.
 
 ## Customer funds their side of the contract
-The customer funds their side of the contract using the `addFunding` entrypoint of the contract. The source of this transfer operation must be the `customer_address` specified in the contract's initial storage, with the transfer amount being exactly equal to `custFunding`. 
+The customer funds their side of the contract using the `addFunding` entrypoint of the contract. The source of this transfer operation must be the `customer_address` specified in the contract's initial storage, with the transfer amount being exactly equal to `init_customer_balance`. 
 
 Once the funding has been confirmed, the customer sends the merchant a `funding_confirmed` message containing the `contract-id` and `channel_id`. This is to inform the merchant that the channel is ready, either for the merchant to fund their side, or if single-funded, to consider the channel open. 
 
@@ -374,9 +373,9 @@ If any of the above checks fail, the merchant aborts.
 
 If the customer has funded their side of the channel but there are not at least `required_confirmations` confirmations, wait until there are before proceeding. 
 
-If it is a dual-funded channel, the merchant funds their side of the channel using the `addFunding` entrypoint and waits for that operation to confirm. The source of this transfer operation must be the `merchant_address` specified in the contract's initial storage, with the transfer amount being exactly equal to `merchFunding`. 
+If it is a dual-funded channel, the merchant funds their side of the channel using the `addFunding` entrypoint and waits for that operation to confirm. The source of this transfer operation must be the `merchant_address` specified in the contract's initial storage, with the transfer amount being exactly equal to `init_merchant_balance`. 
 
-At this point, the merchant checks the contract storage and ensure that `status` is set to `OPEN` (denoted as `1`), meaning the funding is locked in. When this status has at least `required_confirmations` confirmations, the merchant will send `open_m` to the customer.
+At this point, the merchant checks the contract storage and ensure that `status` is `OPEN` (denoted as `1`), meaning the funding is locked in. When this status has at least `required_confirmations` confirmations, the merchant will send continue as specified in [channel establishment](2-channel-establishment#), i.e. they send the `open_m` message to the customer.
 
 ## Reclaim funding
-If a channel is dual-funded, the customer may reclaim their initial funds by calling the `reclaimFunding` entrypoint before the merchant contributes their funds. Once `reclaimFunding` has been called, the contract status is set to `FUNDING_RECLAIMED`, which prevents any further contract activity.
+If a channel is dual-funded, the customer may reclaim their initial funds by calling the `reclaimFunding` entrypoint before the merchant contributes their funds. Once `reclaimFunding` has been called, the contract status is updated to `FUNDING_RECLAIMED`, which prevents any further contract activity.

@@ -31,7 +31,7 @@ The details of each message are as follows.
       
 #### Customer Requirements
 The customer:
-  - Updates the channel status to `PendingClose` and does not initiate any more payments for the channel with identifier `channel_id`.
+  - Updates the channel status to `PendingMutualClose` and does not initiate any more payments for the channel with identifier `channel_id`.
   - Forms the message `mutual_close_c` using the most recent closing state and closing authorization signature for the `zkAbacus` channel with identifier `channel_id`.
 
 #### Merchant Requirements
