@@ -2,13 +2,13 @@
 
 ## Overview
 
-A merchant in the zkChannels protocol is expected to have zkChannels open with multiple distinct customers. For each such channel, the merchant's view is limited to a channel identifier, the opening and closing balances, an on chain escrow account identifier, and the customer's Tezos public key used in the escrow account. (The escrow account is realized via [the `TezosEscrowAgent` protocol](5-tezos-escrowagent.md) as a smart contract account.) Only the associated customer has a full view of a given channel's current state.
+A merchant in the zkChannels protocol is expected to have zkChannels open with multiple distinct customers. For each such channel, the merchant's view is limited to a channel identifier, the opening and closing balances, an on-chain escrow account identifier, and the customer's Tezos public key used in the escrow account. (The escrow account is realized via [the `TezosEscrowAgent` protocol](5-tezos-escrowagent.md) as a smart contract account.) Only the associated customer has a full view of a given channel's current state.
 
-That is, the merchant _cannot associate any given received payment to a particular channel_. Instead, the merchant keeps the information sufficient to prevent double spends and punish the customer if they attempt to close the escrow account down on an old state. Two types of information are necessary to achieve this functionality: _nonces_ and _revocation pairs_, as discussed in the [payments overview](0-overview-and-index.md#channel-payments). The merchant stores this information in a single _revocations database_ as follows.
+That is, the merchant _cannot associate any given received payment to a particular channel_. Instead, the merchant keeps the information sufficient to prevent double spends and punish the customer if they attempt to close the escrow account down on an old state. Two types of information are necessary to achieve this functionality: _nonces_ and _revocation pairs_, as discussed in the [payments overview](0-overview-and-index.md#channel-payments). The merchant stores this information in a single _revocations database_ as follows. It is critical that the database operations are atomic as described, as otherwise concurrent payments and channel closures will not be properly handled.
 
 ### Revocations Database
 
-This database consists of two independent tables:
+Logically, this database consists of two independent tables:
 
 #### Nonces
 
@@ -36,8 +36,8 @@ different sessions.
 - **Channel ID**: Used to look up the channel in subsequent steps to update the
   status.
 - **Contract ID**: Used to perform operations on chain.
-- **Merchant Deposit, Customer Deposit**: The amount initially deposited by the merchant
-  and customer, respectively, upon establishing the channel. The merchant may use this for its own accounting purposes outside the scope of the protocol.
+- **Merchant Deposit, Customer Deposit**: The amount initially deposited by the merchant (`init_merchant_balance`)
+  and customer (`init_customer_balance`), respectively, upon establishing the channel. The merchant may use this for its own accounting purposes outside the scope of the protocol.
 - **Status**: Used to determine valid operations on the channel.  The possible statuses are listed in the table below.
 - **Closing Balances**: The balances that have been paid out on chain.
 

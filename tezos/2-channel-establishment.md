@@ -59,8 +59,8 @@ The `open_c` message is sent from the customer to the merchant and is formed as 
 1. type: `open_c`
 2. data: 
     * [`string`:`customer_randomness`]: Customer randomness contribution to the channel identifer.
-    * [`int`:`customer_balance`]: The proposed initial customer balance.
-    * [`int`:`merchant_balance`]: The proposed initial merchant balance.
+    * [`int`:`init_customer_balance`]: The proposed initial customer balance.
+    * [`int`:`init_merchant_balance`]: The proposed initial merchant balance.
     * [`address`:`customer_address`]: The customer's Tezos tz1 account address.
     * [`key`:`customer_public_key`]: The customer's Tezos EdDSA public key.
     * [`string`: `merch_pp_hash`]: A hash of merchant public parameters as specified in [Merchant Setup](1-setup.md#merchant-setup).
@@ -76,12 +76,12 @@ The customer, before sending:
 
 Upon receipt, the merchant checks that the following are true. If any are false, the merchant aborts:
   - Checks `customer_randomness` is the correct length.
-  - Checks `customer_balance` ≥ 0 and `merchant_balance` ≥ 0 are positive integers.
+  - Checks `init_customer_balance` ≥ 0 and `init_merchant_balance` ≥ 0 are positive integers.
   - Checks `customer_public_key` is a valid Tezos EdDSA public key for the curve specified by `tezos-client` and that `customer_address` is a valid Tezos tz1 address that is correctly derived from `customer_public_key`.
   - Checks `merch_pp_hash` is the SHA3-256 hash of` (merchant_zkabacus_public_key, merchant_address, merchant_public_key)`.
   - Checks `customer_address` is an implicit Tezos account (tz1 address), and not a smart contract address (KT1 address). 
 
-The merchant may choose to either accept or reject the channel establishment request. If the merchant accepts, they should ensure their implicit Tezos account with address `merchant_address` has a balance sufficient to both contribute the desired amount to the zkChannel and pay the [operations fees](5-tezos-escrowagent.md#operation-fees) needed to fund and call the appropriate entry points of the corresponding smart contract. We recommend 0.009 tez based on our [contract benchmarks](https://github.com/boltlabs-inc/tezos-contract/wiki/Benchmark-Results) on testnet.
+The merchant may choose to either accept or reject the channel establishment request. The implementation should provide a customizable approver mechanism in order to realize channel establishment approvals and rejections. If the merchant accepts, they should ensure their implicit Tezos account with address `merchant_address` has a balance sufficient to both contribute the desired amount to the zkChannel and pay the [operations fees](5-tezos-escrowagent.md#operation-fees) needed to fund and call the appropriate entry points of the corresponding smart contract. We recommend 0.009 tez based on our [contract benchmarks](https://github.com/boltlabs-inc/tezos-contract/wiki/Benchmark-Results) on testnet.
 
 ### The `open_m` Message
 The merchant sends the `open_m` message to the customer; this message is formed as follows:
@@ -120,7 +120,7 @@ The customer sends an `init_c` message to the merchant.
     * [`(bls12_381_g1, bls12_381_g1, Vec<bls12_381_fr>): establish_proof`]: A zero-knowledge proof of correctness of the commitments to the initial state and initial closing state.
 
 #### Customer Requirements
-The customer runs the `zkAbacus.Initialize()` on inputs `channel_id`, `customer_balance`, and `merchant_balance` to generate the `init_c` message.
+The customer runs the `zkAbacus.Initialize()` on inputs `channel_id`, `init_customer_balance`, and `init_merchant_balance` to generate the `init_c` message.
 
 #### Merchant Requirements
 Upon receipt, the merchant:
@@ -139,7 +139,7 @@ The merchant sends an `init_m` message to the customer.
 Upon receipt, the customer verifies `closing_signature` is a valid signature with respect to the merchant zkAbacus Pointcheval Sanders public key. If the signature is valid, the customer continues as specified in `zkAbacus.Initialize()`. If the signaure is invalid, the customer aborts.
 
 #### Merchant Requirements
-The merchant runs `zkAbacus.Initialize` on inputs `channel_id`, `customer_balance`, and `merchant_balance`. If successful, the merchant sends the resulting message `init_m`. Otherwise, the merchant aborts.
+The merchant runs `zkAbacus.Initialize` on inputs `channel_id`, `init_customer_balance`, and `init_merchant_balance`. If successful, the merchant sends the resulting message `init_m`. Otherwise, the merchant aborts.
 
 ### The `funding_confirmed` Message
 The customer sends the `funding_confirmed` message to the merchant.
@@ -162,14 +162,14 @@ The customer:
 
 #### Merchant Requirements
 Upon receipt of the `funding_confirmed` message, the merchant: 
-  - Checks that the originated contract `contract-id` contains the expected [zkchannels contract](https://github.com/boltlabs-inc/tezos-contract/blob/main/zkchannels-contract/zkchannel_contract.tz) with respect to the channel identifier `channel_id`, the customer Tezos public key `customer_public_key`, the customer's tezos tz1 address `customer_address`, the merchant public parameters, and the initial balances `customer_balance` and `merchant_balance`.
+  - Checks that the originated contract `contract-id` contains the expected [zkchannels contract](https://github.com/boltlabs-inc/tezos-contract/blob/main/zkchannels-contract/zkchannel_contract.tz) with respect to the channel identifier `channel_id`, the customer Tezos public key `customer_public_key`, the customer's tezos tz1 address `customer_address`, the merchant public parameters, and the initial balances `init_customer_balance` and `init_merchant_balance`.
   - Checks that the on-chain storage of `contract-id` at `originated-block-height` is exactly as expected for channel `channel_id`:
     - The contract storage contains the merchant's Pointcheval Sanders public key.
     - The customer's tezos tz1 address and public key match the fields `customer_address` and  `customer_public_key`, respectively.
     - The merchant's tezos tz1 address and public key match the fields `merchant_address` and  `merchant_public_key`, respectively.
     - The `self_delay` field in the contract matches the value specified in the [global defaults](1-setup.md#Global-defaults). 
     - The `close` field in the contract matches the merchant's `close` flag defined as defined in the [global defaults](1-setup.md#Global-defaults). The `close` flag represents a fixed scalar used by the merchant to differentiate closing state and state.
-    - `custFunding` and `merchFunding` match the initial balances `customer_balance` and `merchant_balance`, respectively.
+    - The fields `customer_balance` and `merchant_balance` are set to `init_customer_balance` and `init_merchant_balance`, respectively.
     - The `status` field of the contract is set to `0`, which corresponds to `AWAITING_FUNDING`.
     - The `context-string` is set to `"zkChannels mutual close"`, as defined in the [global defaults](1-setup.md#Global-defaults). 
   - Waits until the originated contract is confirmed on chain for at least `required_confirmation` blocks.

@@ -34,6 +34,7 @@ We use SHA3-256 hashes to instantiate our hash-based commitments.
 
 A party who wishes to act as a zkChannel merchant must generate and publish the following parameters for use across all of their zkChannels: 
 
+
 * **Blind signature key pair.** The merchant uses this Pointcheval-Sanders key pair to sign all channel state initializations and updates in `zkAbacus`. This keypair is also used as a condition in the Tezos smart contract for each channel. 
 
 * **Range constraint key pair and signatures.** 
