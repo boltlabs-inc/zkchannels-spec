@@ -156,7 +156,7 @@ The Tezos client is used to interact with the Tezos node for performing actions 
 ## zkChannels Contract 
 * The contract keeps track of its current `status` that can be used to determine which entrypoint can be called. The possible contract statuses are `AWAITING_CUST_FUNDING`, `AWAITING_MERCH_FUNDING`, `OPEN`, `EXPIRY`, `CUST_CLOSE`, `CLOSED`, and `FUNDING_RECLAIMED`.
 * The contract keeps track of a timeout period (denoted by `selfDelay`) that is used to determine whether an entrypoint call of type `custClaim` or `merchClaim` is legitimate.
-* The contract stores `revocation_lock`, which stores the revocation lock submitted as part of a `custClose` entrypoint call. 
+* The contract stores `revocation_lock`, which stores the revocation lock submitted as part of a `custClose` entrypoint call as a scalar for the elliptic curve BLS12-381. 
 * The contract stores the customer's closing balance after `custClose` is called.
 ### Initial contract arguments
 #### Channel-specific arguments
@@ -172,7 +172,7 @@ The zkChannel contract is originated with the following channel-specific argumen
 
 #### Global default arguments
 These [global default](1-setup.md#global-defaults) arguments are constant for every implementation of a zkChannels contract, regardless of the customer or merchant. 
-* `close`: 0x000000000000000000000000000000000000000000000000000000434c4f5345
+* `close` scalar: 0x000000000000000000000000000000000000000000000000000000434c4f5345
 * `context_string`: `"zkChannels mutual close"`
 * `self_delay`: 172800 seconds (2 days). The time period that a party must wait to claim funds. 
 
@@ -180,7 +180,6 @@ The value for `close` is derived from the binary encoding of the string 'CLOSE'.
 
 #### Fixed arguments
 * `status`: An indicator that tracks the zkChannel contract's status as described in [contract requirements](#contract-requirements). This variable must be initialized to `AWAITING_CUST_FUNDING`.
-* `revocation_lock`: A placeholder for revocation locks revealed during a custClose entrypoint call; `revocation_lock` is of type `bytes` and is initialized with the value `0x00`.
 * `delay_expiry`: A placeholder for the time at which funds can be claimed by a party; `delay_expiry` is of type `Timestamp` and is initialized to the Unix time `0`.
 
 ### Entrypoints
@@ -336,7 +335,7 @@ The origination operation contains the [zkChannels contract](#zkchannels-contrac
 
 * Fixed arguments
     * [`int`:`status`]
-    * [`bytes`:`revocation_lock`]
+  
 
 
 
