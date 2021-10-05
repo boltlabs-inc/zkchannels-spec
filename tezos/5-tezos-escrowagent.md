@@ -170,13 +170,17 @@ The zkChannel contract is originated with the following channel-specific argumen
 * `merchant_public_key`: The merchant's Tezos public key.
 * `merchant_zkabacus_public_key`: The merchant's zkAbacus Pointcheval Sanders public key.
 
+For technical reasons, an initial revocation lock is also passed into the Tezos contract origination operation:
+* `initial_revocation_lock`: the BLS12-381 scalar `0x00`.
+
+This is Tezos-specific and unlikely to be required on other chains.
 #### Global default arguments
 These [global default](1-setup.md#global-defaults) arguments are constant for every implementation of a zkChannels contract, regardless of the customer or merchant. 
 * `close` scalar: 0x000000000000000000000000000000000000000000000000000000434c4f5345
 * `context_string`: `"zkChannels mutual close"`
 * `self_delay`: 172800 seconds (2 days). The time period that a party must wait to claim funds. 
 
-The value for `close` is derived from the binary encoding of the string 'CLOSE'. The value for `self_delay` is derived from the number of seconds in 48 hours.
+The value for `close` is derived from the binary encoding of the string `'CLOSE'`. The value for `self_delay` is the number of seconds in 48 hours.
 
 #### Fixed arguments
 * `status`: An indicator that tracks the zkChannel contract's status as described in [contract requirements](#contract-requirements). This variable must be initialized to `AWAITING_CUST_FUNDING`.
@@ -334,8 +338,8 @@ The origination operation contains the [zkChannels contract](#zkchannels-contrac
     * [`mutez`:`init_merchant_balance`]
 
 * Fixed arguments
-    * [`int`:`status`]
-  
+    * [`int`:`status == AWAITING_CUST_FUNDING`]
+    * [`BLS12-381_Fr`:`initial_revocation_lock`]
 
 
 
