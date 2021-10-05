@@ -59,7 +59,7 @@ The protocol proceeds as follows:
 
 5. The customer originates and funds the [zkChannels contract](5-tezos-escrowagent#zkchannels-contract) on chain:
     
-    a.  They forge and sign the [origination operation](5-tezos-escrowagent.md#zkchannels-contract-origination-operation) with the following arguments:        
+    a.  They forge and sign the [origination operation](5-tezos-escrowagent.md#zkchannels-contract-origination-operation) with the following channel-specific arguments:        
       * `channel_id`: The channel identifier.
       * `customer_address`: The customer's Tezos tz1 address.
       * `init_customer_balance`: The customer's initial balance.

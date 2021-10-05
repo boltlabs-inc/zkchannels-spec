@@ -23,7 +23,7 @@ We use SHA3-256 hashes to instantiate our hash-based commitments.
 
 ### Global defaults
 #### `TezosEscrowAgent` global defaults
-* `self_delay`: an integer that represents the length of the timeout period. The same delay is applied to the `expiry` and `custClose` entrypoints. The value is interpreted in seconds. The default value is set to 172800, based on the number of seconds in 48 hours.
+* `self_delay`: an integer that represents the length of the timeout period. The same delay is applied to the `expiry` and `custClose` entrypoints. The value is interpreted in seconds. The default value is 172800 (the number of seconds in 48 hours).
 * `required_confirmations`: an integer that represents the minimum number of confirmations for an operation to be considered final. The default value is set to 20.
 * `context-string`: a string set to `"zkChannels mutual close"`. This is contained in the tuple that gets signed when creating `mutual_close_signature`.
 #### `zkAbacus` global defaults
