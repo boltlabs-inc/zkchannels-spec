@@ -125,6 +125,6 @@ If the timeout period passes without the customer calling the `custClose` entryp
 Once the `merchClaim` operation has reached a confirmation depth of `required_confirmations`, the merchant calls [Update Channel Status][merchant_update_channel_status] with `Closed` and no longer needs to monitor the contract.
 Similarly, the customer updates the channel status to `Closed` and no longer needs to monitor the contract.
 
-[merchant_update_channel_status]: merchant_database.md#update-channel-status
-[merchant_insert_revlock]: merchant_database.md#insert-revocation-lock--secret
-[customer_update_channel_status]: customer_database.md#update-channel-status
+[merchant_update_channel_status]: merchant-database.md#update-channel-status
+[merchant_insert_revlock]: merchant-database.md#insert-revocation-lock--secret
+[customer_update_channel_status]: customer-database.md#update-channel-status
