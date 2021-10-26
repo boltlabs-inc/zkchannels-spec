@@ -19,7 +19,7 @@ A zkChannels network for a given merchant follows a 'hub-and-spoke' topology. A 
 
 zkChannels on Tezos is built out two main components:
 * `zkAbacus`: [The zkAbacus component](https://github.com/boltlabs-inc/blindsigs-protocol/releases/download/ecc-review/zkchannels-protocol-spec-v3.pdf) contains the functionality for a customer and a merchant to open, track payments, and collaboratively close a channel. This component does not interact with a blockchain.
-* `TezosEscrowAgent`: [The TezosEscrowAgent component](5-tezos-escrowagent.md) provides the functionality for a customer and a merchant to open and close a zkChannels escrow account as a Tezos smart contract. Formally, this is a realization of the [zkEscrowAgent functionality](https://github.com/boltlabs-inc/blindsigs-protocol/releases/download/ecc-review/zkchannels-protocol-spec-v3.pdf) for Tezos. 
+* `TezosEscrowAgent`: [The TezosEscrowAgent component](5-tezos-escrowagent.md) provides the functionality for a customer and a merchant to open and close a zkChannels escrow account as a Tezos smart contract. Formally, this is a realization of the [zkEscrowAgent functionality](https://github.com/boltlabs-inc/blindsigs-protocol/releases/download/ecc-review/zkchannels-protocol-spec-v3.pdf) for Tezos. This realization must include [chain watcher functionality](5-tezos-escrowagent#tezos-chain-watcher-requirements) in order for channel participants to track escrow account updates and [client functionality](5-tezos-escrowagent#tezos-client-requirements) to actively interact with the chain.
 
 We briefly describe the protocol in four phases: System Setup and Merchant Initialization, Channel Establishment, Channel Payments, and Channel Closure.
 
