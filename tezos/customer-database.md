@@ -68,7 +68,7 @@ The closing procedure can begin from many statuses, but in a normal run, we expe
    _______________________________________/-> PendingMutualClose 
   |                                                              \
   |             __________________________________________________\ 
-  |            |               \                                   \
+  |            |                                                   \
 Ready -> PendingExpiry -> PendingClose -> PendingCustomerClaim -> Closed
   |_______________________/     |                                  /
                                 |-> Dispute_______________________/

@@ -223,7 +223,7 @@ Upon receipt, the customer:
 
 #### Merchant Requirements
 Before sending, the merchant:
-  - In the single-funded case, the contract status must be `OPEN` for `required_confirmations` blocks.
+  - In the single-funded case, the merchant checks that contract status has been `OPEN` for `required_confirmations` blocks.
   - In the dual-funded cases, the chain watcher must indicate that the contract storage status has been set to `OPEN` for `required_confirmations` blocks.
   - Generates the `activate` message by running `zkAbacus.Activate()` on the initial state commitment `state_commitment` provided in the customer's `init_c` message, the channel identifier `channel_id`, and their Pointcheval Sanders public key.
   - Updates the channel status to `Active`.

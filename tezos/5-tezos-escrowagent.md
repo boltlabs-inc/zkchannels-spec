@@ -143,9 +143,10 @@ We assume that the minimal operation fee will be sufficient for operations to be
 ## Tezos chain watcher requirements
 The Tezos chain watcher allows a party to track the current status of a zkChannels contract. That is, the chain watcher:
 * Provides details of each on-chain contract update to the party, including:
-  * when a transaction has reached the required confirmations depth, `required_confirmations`; and
+  * when an update has reached the required confirmation depth, `required_confirmations`; and
   * when an active timelock has elapsed. 
-* Must be a persistent process from the time of contract origination to the time of contract closure.
+* On initialization, the chain watcher indicates the current state of the contract and whether or not that state has reached a confirmation depth of `required_confirmations`. If the current state is not confirmed to the depth `required_confirmatins`, the chain watcher will indicate when this depth has been reached.
+* Must be a persistent process from the time of chain watcher initialization to the time chain watcher is halted.
 * Must provide update notifications in real time, ie without delays.
 
 ## Tezos client requirements
