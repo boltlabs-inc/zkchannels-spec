@@ -124,6 +124,6 @@ The customer responds to a unilateral merchant close as follows:
 - If the chain watcher indicates that the `merchClaim` entrypoint has been posted on chain and reached a confirmation depth of `required_confirmations`, the customer [updates the channel status][customer_update_channel_status] to `Closed` and stops the chain watcher for the contract.
   
 
-[merchant_update_channel_status]: merchant_database.md#update-channel-status
-[merchant_insert_revlock]: merchant_database.md#insert-revocation-lock--secret
-[customer_update_channel_status]: customer_database.md#update-channel-status
+[merchant_update_channel_status]: merchant-database.md#update-channel-status
+[merchant_insert_revlock]: merchant-database.md#insert-revocation-lock--secret
+[customer_update_channel_status]: customer-database.md#update-channel-status
