@@ -132,8 +132,8 @@ Originated -> Customer funded -> Merchant funded -> Active
 The close procedure can be somewhat more complicated. If initiated by the merchant, the expected flow is 
 ```
 PendingExpiry -> PendingMerchantClaim -> Closed
-              \-> PendingClose ----------/ /
-                               |-> Dispute / 
+        |-> PendingClose -------------------/
+                |-> Dispute -------------->/ 
 ```
 If initiated by the customer on chain, the channel will transition directly to `PendingClose` and continue as above. If initiated by the customer off chain, the channel will transition to `PendingMutualClose` to `Closed`.
 
