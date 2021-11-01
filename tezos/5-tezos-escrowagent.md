@@ -13,6 +13,7 @@ It includes support for mutual closes, unilateral closes by either the customer 
       - [Estimating operation gas and storage](#estimating-operation-gas-and-storage)
       - [Minimal operation fees](#minimal-operation-fees)
     - [Fee handling](#fee-handling)
+  - [Tezos chain watcher requirements](#tezos-chain-watcher-requirements)
   - [Tezos client requirements](#tezos-client-requirements)
   - [zkChannels Contract](#zkchannels-contract)
     - [Initial contract arguments](#initial-contract-arguments)
@@ -138,6 +139,15 @@ The default minimal fee values are below. For more details see the tezos [develo
 
 ### Fee handling
 We assume that the minimal operation fee will be sufficient for operations to be confirmed. As such, operations are forged using the minimal operation fee. This specification does not handle the case where the minimal operation fee is insufficient for bakers to include the operation into a block. 
+
+## Tezos chain watcher requirements
+The Tezos chain watcher allows a party to track the current status of a zkChannels contract. That is, the chain watcher:
+* Provides details of each on-chain contract update to the party, including:
+  * when an update has reached the required confirmation depth, `required_confirmations`; and
+  * when an active timelock has elapsed. 
+* On initialization, the chain watcher indicates the current state of the contract and whether or not that state has reached a confirmation depth of `required_confirmations`. If the current state is not confirmed to the depth `required_confirmatins`, the chain watcher will indicate when this depth has been reached.
+* Must be a persistent process from the time of chain watcher initialization to the time chain watcher is halted.
+* Must provide update notifications in real time, ie without delays.
 
 ## Tezos client requirements
 The Tezos client is used to interact with the Tezos node for performing actions as creating operations, injecting operations and querying the state of the blockchain. We assume each party has a Tezos client capable of the following:

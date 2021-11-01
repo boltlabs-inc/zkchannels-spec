@@ -68,7 +68,7 @@ The resulting public key and signatures form the the merchant's range constraint
 Generate a new set of [Pedersen commitment parameters](https://github.com/boltlabs-inc/libzkchannels-crypto/blob/main/zkchannels-crypto/src/pedersen.rs#L85) for commitments to tuples of length one. 
 
 ### EdDSA and Tezos address generation
-The user can specify an EdDSA keypair and associated Tezos address. They can use an existing keypair or generate a new one using the `tezos-client`.
+The merchant can specify an EdDSA keypair and associated Tezos address. They can use an existing keypair or generate a new one using the `tezos-client`.
 
 ### Publishing public parameters
 The merchant's public parameters consist of their blind signing public key `merchant_zkabacus_public_key`, parameters for constructing range constraints `range_constraint_parameters`, revocation commitment parameters `revocation_commitment_parameters`, EdDSA public key `merchant_public_key`, and Tezos tz1 address `merchant_address`. 
