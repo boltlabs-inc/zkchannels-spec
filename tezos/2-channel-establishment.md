@@ -77,6 +77,8 @@ The protocol proceeds as follows:
 7. The merchant [checks the corresponding contract and initial storage for the expected values](#merchant-requirements-4) and initializes the chain watcher to track the zkChannels contract specified by `contract_ID`. The merchant then funds their side of the smart contract, if the channel is dual-funded, by calling the [`AddMerchFunding` entrypoint](5-tezos-escrowagent.md#addmerchfunding-entrypoint) of the contract with identifier `contract_id`. When the chain watcher indicates  this contract has status `OPEN` for a depth of `required_confirmations` blocks, the merchant runs `zkAbacus.Activate()` to generate the initial payment tag and sends the customer [the message `activate`](#the-activate-message), which contains this payment tag. 
 8. Upon completion of `zkAbacus.Activate()`, the zkChannel is open and ready for [payments](3-channel-payments.md). 
 
+## Representation of Balances
+Balances in zkAbacus are represented as BLS12-381 scalars. We support integer values in the range (-2^63, 2^63).
 
 ## Message Specifications
 
