@@ -7,3 +7,5 @@
 - _Traffic analysis_. The zkChannels protocol does not provide any protection against a network-level adversary. Implementations should use a privacy-enhancing networking tool such as Tor.
 
 - _Timing attacks on closes after adversarial merchant aborts_. The zkChannels protocol provides _cryptographic_ unlinkability if a merchant aborts during a customer payment. That is, the customer is always able to close using information that the merchant cannot, from the content of the close, use to link a channel to a particular aborted payment. However, this does not prevent _timing attacks_. Implementations should therefore consider mechanisms to avoid trivial trivial timing attacks in this case, such as by including a random delay interval before closing a channel after an aborted payment.
+
+- _Optimizing merchant storage_. A merchant may periodically drop closed channels from memory, but must not naively drop any information from their revocations database. In order to re-initialize this database, the merchant would have to stop processing payments and close all their channels at the same time.
