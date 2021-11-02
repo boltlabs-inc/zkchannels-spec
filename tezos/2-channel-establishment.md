@@ -50,7 +50,7 @@ The protocol proceeds as follows:
         
 1. The customer sends the [`open_c` message](#the-open_c-message), which contains information about the initial state of the proposed channel. 
 2. The merchant [verifies the received message](#merchant-requirements) and either accepts or rejects the proposed channel. They reply with the [`open_m` message](#the-open_m-message), which contains the merchant's contribution to the channel identifier. 
-3. The customer and merchant each compute the channel identifer `channel_id`, which acts as the unique channel identifier for the on-chain Tezos escrow account and off-chain `zkAbacus` channel. The identifier `channel_id` is computed as `SHA3-256(customer_randomness, merchant_randomness, customer_public_key, merchant_public_key, merchant_zkabacus_public_key)`. 
+3. The customer and merchant each compute the channel identifer `channel_id`, which acts as the unique channel identifier for the on-chain Tezos escrow account and off-chain `zkAbacus` channel. The identifier `channel_id` is computed as `SHA3-256(customer_randomness, merchant_randomness, customer_public_key, merchant_public_key, merchant_zkabacus_public_key)` converted to a BLS12-381 scalar. 
 4. They then initialize the `zkAbacus` channel by running `zkAbacus.Initialize()` on the previously established public parameters. In this subroutine:
     
    a. The customer sends the [`init_c` message](#the-init_c-message) to the merchant. This message consists of a (hiding) commitment to the intial state and a zero-knowledge proof of correctness. 
@@ -60,7 +60,7 @@ The protocol proceeds as follows:
 5. The customer originates and funds the [zkChannels contract](5-tezos-escrowagent#zkchannels-contract) on chain:
     
     a.  They forge and sign the [origination operation](5-tezos-escrowagent.md#zkchannels-contract-origination-operation) with the following channel-specific arguments:        
-      * `channel_id`: The channel identifier.
+      * `channel_id`: The channel identifier, a BLS12-381 scalar.
       * `customer_address`: The customer's Tezos tz1 address.
       * `init_customer_balance`: The customer's initial balance.
       * `customer_public_key`: The customer's Tezos public key.
@@ -116,7 +116,7 @@ The merchant sends the `open_m` message to the customer; this message is formed 
 2. data: [`string`:`merchant_randomness`]. This is the merchant randomness contribution to the channel identifier.
 
 #### Customer Requirements
-Upon receipt, the customer checks the that `merchant_randomness` is the correct length. If so, the customer sets the channel identifier `channel_id` to: `SHA3-256(customer_randomness, merchant_randomness, customer_public_key, merchant_public_key, merchant_zkabacus_public_key)`, where:
+Upon receipt, the customer checks the that `merchant_randomness` is the correct length. If so, the customer sets the channel identifier `channel_id` to: `SHA3-256(customer_randomness, merchant_randomness, customer_public_key, merchant_public_key, merchant_zkabacus_public_key)` converted to a BLS12-381 scalar, where:
 - `customer_randomness` is the customer's contribution to the channel identifier sent to the merchant in the `open_c` message.
 - `merchant_randomness` is the merchant's contribution to the channel identifier received in the `open_m` message.
 - `customer_public_key` is the customer Tezos account public key.
@@ -128,7 +128,7 @@ If not, the customer aborts.
 #### Merchant Requirements
 Before sending, the merchant:
   - Generates `merchant_randomness` uniformly at random using a secure RNG.
-  - Sets the channel identifier `channel_id` to: `SHA3-256(customer_randomness, merchant_randomness, customer_public_key, merchant_public_key, merchant_zkabacus_public_key)`, where:
+  - Sets the channel identifier `channel_id` to: `SHA3-256(customer_randomness, merchant_randomness, customer_public_key, merchant_public_key, merchant_zkabacus_public_key)` converted to a BLS12-381 scalar, where:
     * `customer_randomness` is the customer's contribution to the channel identifier sent to the merchant in the `open_c` message.
     * `merchant_randomness` is the merchant's contribution to the channel identifier received in the `open_m` message.
     * `customer_public_key` is the customer Tezos account public key.

@@ -143,9 +143,9 @@ There are three options for [channel closure](4-channel-closure.md):
    The default measure used in the Tezos node reference implementation for prioritizing operations for inclusion in a block. An operation's _weight_ is defined by `weight = fee / (max ( (storage/storage_block_limit), (gas/gas_block_limit)))` where `fee` is the baker fee, `storage` is the operation storage, `storage_block_limit` is the storage limit for a block, `gas` is the operation gas, and `gas_block_limit` is the gas limit for a block ([see source code](https://gitlab.com/tezos/tezos/-/blob/master/src/proto_009_PsFLoren/lib_delegate/client_baking_forge.ml#L283)).
 ### zkChannels Glossary 
 * **channel identifer**: 
-   A unique identifier for a zkChannel.
+   A unique identifier for a zkChannel, represented as a BLS12-381 scalar.
 * **closing state**:
-   A closing state contains a channel identifier (`channel_id`), close flag (`close`), revocation lock (`revocation_lock`), customer balance (`customer_balance`), and merchant balance (`merchant_balance`). The merchant's blind signature over the closing state is what allows the customer to post the final balances to the smart contract during a unilateral customer close. The revocation lock provides a mechanism for the merchant to dispute revoked closing states posted by the customer.
+   A closing state is a tuple that contains a channel identifier (`channel_id`), close flag (`close`), revocation lock (`revocation_lock`), customer balance (`customer_balance`), and merchant balance (`merchant_balance`); each element is represented as a BLS12-381 scalar. The merchant's blind signature over the closing state is what allows the customer to post the final balances to the smart contract during a unilateral customer close. The revocation lock provides a mechanism for the merchant to dispute revoked closing states posted by the customer.
 * **customer**:
    A _customer_ is a user who opens a zkChannel with a merchant. The customer has a complete view of the channel state and can initiate private payments to the given merchant over their zkChannel. The customer trusts the merchant to provide a requested good or service, but does not trust the merchant with their payment history. The customer's anonymity set for payments is the set of users with whom a given merchant has an open channel. Customers are the 'spokes' in the zkChannel 'hub and spoke' network topology.
 *  **timeout period**: 
@@ -155,13 +155,13 @@ There are three options for [channel closure](4-channel-closure.md):
 *  **revocation lock scheme**: 
    A _revocation lock scheme_ is a scheme used to prevent a customer from double spending. Each zkChannel state is associated with a _revocation lock_; when a customer makes a payment, they can revoke their previous state by revealing an associated _revocation secret_. Then if a customer attempts to make a payment on a previously revoked state, the merchant can detect and fail the requested payment. If a customer attempts to close the escrow account on a previously revoked state, the merchant may claim the customer's entire balance by providing the associated _revocation secret_ when disputing. 
 *  **state**: 
-   Abstractly, a zkchannel is a sequence of states, where a _state_ consists of the channel identifier, a nonce, a revocation lock, and a balance allocation.
+   Abstractly, a zkchannel is a sequence of states, where a _state_ is a tuple of BLS12-381 scalars, consisting of the channel identifier, a nonce, a revocation lock, and a balance allocation.
 *  **zkChannel**:
    A _zkChannel_ is a special type of payment channel that provides privacy for a customer when interacting with a merchant. More generally, a _payment channel_ allows two participants to send and receive payments to each other: when realized using cryptocurrencies, these channels typically consist of an on-chain escrow account and an off-chain state update protocol. A zkChannel is similarly comprised of two parts: an on-network escrow account and an off-network state update protocol, but the state update protocol does not allow the merchant to learn which specific channel is updated or how.
 
 ### zkChannels Notation Summary
 * **`channel_id`**:
-   A unique channel identifier generated as a SHA3-256 hash of random contributions from both parties, together with `zkAbacus` channel parameters and `TezosEscrowAgent` escrow account parameters. It is set during [channel establishment](2-channel-establishment.md) by the merchant after creating the [`open_m` message](2-channel-establishment.md#the-open_m-message), and by the customer after the receipt of the [`open_m` message](2-channel-establishment.md#the-open_m-message).
+   A unique channel identifier generated as a SHA3-256 hash of random contributions from both parties, together with `zkAbacus` channel parameters and `TezosEscrowAgent` escrow account parameters, and then converted to a BLS12-381 scalar. It is set during [channel establishment](2-channel-establishment.md) by the merchant after creating the [`open_m` message](2-channel-establishment.md#the-open_m-message), and by the customer after the receipt of the [`open_m` message](2-channel-establishment.md#the-open_m-message).
 * **`close`**: 
    A fixed scalar used to differentiate closing state and state. It is defined as a [global default](1-setup.md#Global-defaults).
 * **`context-string`**:
