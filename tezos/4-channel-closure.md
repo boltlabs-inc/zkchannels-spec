@@ -95,7 +95,7 @@ A successful application timelocks the customer's balance (`customer_balance`) f
 
 When the chain watcher indicates a `custClose` operation on chain for one of their channels, the merchant [updates the channel status][merchant_update_channel_status] to `PendingClose`.
 The merchant reads the revocation lock `revocation_lock` from the contract storage. They call [Insert Revocation Lock][merchant_insert_revlock] with the lock to add it to their database and determine if they've previously seen a revocation secret with a SHA3-256 hash that equals `revocation_lock`.
-- If so, the merchant calls [the `merchDispute` entrypoint](5-tezos-escrowagent#merchdispute-entrypoint) with the resulting revocation secret as the argument.
+- If the merchant has previously seen a revocation secret that correspond to the given revocation lock, the merchant [updates the channel status][merchant_update_channel_status] to `Dispute` and calls [the `merchDispute` entrypoint](5-tezos-escrowagent#merchdispute-entrypoint) with the resulting revocation secret as the argument.
 Calling `merchDispute` creates an operation group of size two: the `merchDispute` operation and an operation that transfers the customer's timelocked balance to the merchant's account `merchant_address`. Once the chain watcher indicates the `merchDispute` operation has reached a confirmation depth of `required_confirmations`, they [update their channel status][merchant_update_channel_status] to `Closed`. They stop the chain watcher for the contract.
 
    The customer:
