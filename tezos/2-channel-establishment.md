@@ -75,7 +75,7 @@ The protocol proceeds as follows:
 
 6.  The merchant [checks the corresponding contract and initial storage for the expected values](#merchant-requirements-4) and initializes the chain watcher to track the zkChannels contract specified by `contract_ID`. If the values are not as expected, the merchant aborts.
 
-7. The customer funds the [zkChannels contract](5-tezos-escrowagent#zkchannels-contract) by calling the [`addCustFunding` entrypoint](5-tezos-escrowagent.md#addcustfunding-entrypoint) of the contract. The source of this transfer operation must be the `customer_address` specified in the contract's initial storage and the transfer amount must be equal to `init_customer_balance`. When the chain watcher indicates that the `addCustFunding` operation group is confirmed to the depth `required_confirmations`, they update the channel status to `CustomerFunded`. The customer then sends the [`funding_confirmed` message](#the-funding_confirmed-message) to the merchant, which contains the contract identifier `contract-id`.
+7. The customer funds the [zkChannels contract](5-tezos-escrowagent#zkchannels-contract) by calling the [`addCustFunding` entrypoint](5-tezos-escrowagent.md#addcustfunding-entrypoint) of the contract. The source of this transfer operation must be the `customer_address` specified in the contract's initial storage and the transfer amount must be equal to `init_customer_balance`. When the chain watcher indicates that the `addCustFunding` operation group is confirmed to the depth `required_confirmations`, they update the channel status to `CustomerFunded`. The customer then sends a success message, namely the [`funding_confirmed` message](#the-funding_confirmed-message) to the merchant.
 
 8. The merchant then funds their side of the smart contract, if the channel is dual-funded, by calling the [`AddMerchFunding` entrypoint](5-tezos-escrowagent.md#addmerchfunding-entrypoint) of the contract with identifier `contract_id`. When the chain watcher indicates  this contract has status `OPEN` for a depth of `required_confirmations` blocks, the merchant runs `zkAbacus.Activate()` to generate the initial payment tag and sends the customer [the message `activate`](#the-activate-message), which contains this payment tag. 
 9. Upon completion of `zkAbacus.Activate()`, the zkChannel is open and ready for [payments](3-channel-payments.md). 
@@ -217,7 +217,6 @@ The customer sends the `funding_confirmed` message to the merchant.
 The customer:
   
   - Funds the contract by calling the [`addCustomerFunding` entrypoint](5-tezos-escrow-agent#addCustFunding-entrypoint).
-  - Computes the contract identifier `contract_ID`.
   - Receives a notification from the chain watcher that the funding operation is confirmed on chain for at least `required_confirmations` blocks. 
   - Updates the channel status to `CustomerFunded`.
   - Sends the `funding_confirmed` message to the merchant.
