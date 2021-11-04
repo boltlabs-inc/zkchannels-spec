@@ -4,6 +4,7 @@
   * [Channel Establishment](#channel-establishment)
   * [Channel Payments](#channel-payments)
   * [Channel Closure](#channel-closure) 
+  * [Implementation Considerations](#implementation-considerations)
   * [References](#references) 
   * [Glossaries and Notation](#glossaries-and-notation)
       * [Tezos Glossary](#tezos-glossary)
@@ -52,6 +53,9 @@ There are three options for [channel closure](4-channel-closure.md):
   - Mutual close: The customer and merchant can collaborate off-chain to create an operation calling the `mutualClose` entrypoint in the contract. This requires fewer on-chain operations and is therefore cheaper. This procedure is built using `zkAbacus.Close` and `TezosEscrowAgent`.
   - Unilateral customer close: The customer can unilaterally initiate channel closure by using their current closing authorization signature to create an operation calling the `custClose` entrypoint. The merchant's balance gets transferred to the merchant immediately and the customer's balance is held by the contract for a prespecified timeout period. If during this time, the merchant can prove it was an attempted double spend, by providing the revocation secret, the merchant can claim the customer's entire balance. After the timeout period, if the merchant has not claimed the customer's balance, the customer may claim it via the `custClaim` entrypoint. This procedure is defined by the `TezosEscrowAgent`.
   - Unilateral merchant close: The merchant can unilaterally initiate channel closure by calling the `expiry` entrypoint on the smart contract. This operation triggers a timeout period, during which the customer must broadcast their latest state by calling `custClose` (as with a unilateral customer close). If the customer fails to do so within the timeout period, the merchant may claim the entire channel balance via the `merchClaim` entrypoint. This procedure is defined by the `TezosEscrowAgent`.
+
+## Implementation Considerations
+There are a number of implementation considerations and pitfalls in realizing the zkChannels protocol. We touch on some of them [here](implementation-considerations.md).
 
 ## References
 ### zkChannels Resources
