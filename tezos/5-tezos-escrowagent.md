@@ -168,15 +168,19 @@ The Tezos client is used to interact with the Tezos node for performing actions 
 * The contract keeps track of a timeout period (denoted by `selfDelay`) that is used to determine whether an entrypoint call of type `custClaim` or `merchClaim` is legitimate.
 * The contract stores `revocation_lock`, which stores the revocation lock submitted as part of a `custClose` entrypoint call as a scalar for the elliptic curve BLS12-381. 
 * The contract stores the customer's closing balance after `custClose` is called.
+
+### Representation of balances
+Balances are represented as signed 64-bit integers in zkEscrowAgent. 
+
 ### Initial contract arguments
 #### Channel-specific arguments
 The zkChannel contract is originated with the following channel-specific arguments as specified [channel establishment](2-channel-establishment.md):
-* `channel_id`: The channel identifier.
+* `channel_id`: The channel identifier, a BLS12-381 scalar.
 * `customer_address`: The customer's Tezos tz1 address.
-* `init_customer_balance`: The customer's initial balance.
+* `init_customer_balance`: The customer's initial balance, converted to a signed 64-bit integer.
 * `customer_public_key`: The customer's Tezos public key.
 * `merchant_address`: The merchant's Tezos tz1 address.
-* `init_merchant_balance`: The merchant's initial balance.
+* `init_merchant_balance`: The merchant's initial balance, converted to a signed 64-bit integer.
 * `merchant_public_key`: The merchant's Tezos public key.
 * `merchant_zkabacus_public_key`: The merchant's zkAbacus Pointcheval Sanders public key.
 
@@ -250,14 +254,14 @@ On execution:
 The `custClose` entrypoint allows the customer to initate a unilateral channel closure or to responsd to an `expiry` entrypoint call.
 
 Inputs:
-* A `customer_balance` and `merchant_balance`, the closing state's balances for the customer and merchant, respectively.
-* A `revocation_lock`, the revocation lock for the closing state.
-* A closing authorization signature (i.e., a signature in the blind signature scheme).
+* A `customer_balance` and `merchant_balance`, the closing state's balances for the customer and merchant, respectively, represented as signed 64-bit integers.
+* A `revocation_lock`, the revocation lock for the closing state, a BLS12-381 scalar.
+* A closing authorization signature (i.e., a signature in the zkAbacus blind signature scheme).
 
 Requirements:
 * The source must be `customer_address`.
 * The contract status must be either `OPEN` or `EXPIRY`.
-* The closing authorization signature must be a valid signature on the closing state that verifies under `merchant_zkabacus_public_key`. The closing state contains the `channel_id`, `close`, `revocation_lock`, `customer_balance`, and `merchant_balance`. 
+* The closing authorization signature must be a valid signature on the closing state that verifies under `merchant_zkabacus_public_key`. The closing state contains the `channel_id`, `close`, `revocation_lock`, `customer_balance`, and `merchant_balance`, where the customer and merchant balances are converted to BLS12-381 scalars. 
 
 On execution:
 * The customer's balance from the close state, `customer_balance`, is stored in the contract.
@@ -308,13 +312,13 @@ On execution:
 The `mutualClose` entrypoint allows the customer to close the channel and get their balance immediately, provided they have the merchant's authorization to do so.
 
 Inputs:
-* The closing balances, `customer_balance` and `merchant_balance`, are the amounts to be sent to `customer_address` and `merchant_address`, respectively, when the channel closes.
+* The closing balances, `customer_balance` and `merchant_balance`, represented as signed 64-bit integers, are the amounts to be sent to `customer_address` and `merchant_address`, respectively, when the channel closes.
 * A merchant EdDSA signature, `mutual_close_signature`, which is used to authorize the closing balances.
 
 Requirements:
 * The source must be `customer_address`.
 * The contract status must be `OPEN`.
-* `mutual_close_signature` must be a valid EdDSA signature over the tuple `(contract-id, context-string, channel_id, customer_balance, merchant_balance)` with respect to `merchant_public_key`. Note that while `customer_balance`, `merchant_balance`, and `mutual_close_signature` are provided to the entrypoint call as inputs, `contract-id`, `context-string`, and `channel_id` are retrieved internally from the contract's storage. `context-string` is the string  `"zkChannels mutual close"` and is defined as [global default](1-setup.md#Merchant-Setup).
+* `mutual_close_signature` must be a valid EdDSA signature over a byte representation of the tuple `(contract-id, context-string, channel_id, customer_balance, merchant_balance)` with respect to `merchant_public_key`. Note that while `customer_balance`, `merchant_balance`, and `mutual_close_signature` are provided to the entrypoint call as inputs, `contract-id`, `context-string`, and `channel_id` are retrieved internally from the contract's storage. `context-string` is the string  `"zkChannels mutual close"` and is defined as [global default](1-setup.md#Merchant-Setup).  The types in Michelson for this message tuple are `BLS12-381 scalar`, `string`, `address`, `mutez / i64`, and `mutez / i64`, respectively.
 
 On execution:
 * `customer_balance` and `merchant_balance` are sent to `customer_address` and `merchant_address`, respectively.
@@ -341,11 +345,11 @@ The origination operation contains the [zkChannels contract](#zkchannels-contrac
     * [`int`:`self_delay`] 
     
 * Channel specific arguments
-    * [`ChannelID`:`channel_id`]
+    * [`ChannelID`:`channel_id`] (A BLS12-381 scalar)
     * [`address`:`customer_address`]
     * [`key`:`customer_public_key`]
-    * [`mutez`:`init_customer_balance`]
-    * [`mutez`:`init_merchant_balance`]
+    * [`mutez`:`init_customer_balance`] (A signed 64-bit integer)
+    * [`mutez`:`init_merchant_balance`] (A signed 64-bit integer)
 
 * Fixed arguments
     * [`int`:`status == AWAITING_CUST_FUNDING`]
