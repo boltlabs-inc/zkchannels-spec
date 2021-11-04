@@ -318,7 +318,7 @@ Inputs:
 Requirements:
 * The source must be `customer_address`.
 * The contract status must be `OPEN`.
-* `mutual_close_signature` must be a valid EdDSA signature over a byte representation of the tuple `(contract-id, context-string, channel_id, customer_balance, merchant_balance)` with respect to `merchant_public_key`. Note that while `customer_balance`, `merchant_balance`, and `mutual_close_signature` are provided to the entrypoint call as inputs, `contract-id`, `context-string`, and `channel_id` are retrieved internally from the contract's storage. `context-string` is the string  `"zkChannels mutual close"` and is defined as [global default](1-setup.md#Merchant-Setup).
+* `mutual_close_signature` must be a valid EdDSA signature over a byte representation of the tuple `(contract-id, context-string, channel_id, customer_balance, merchant_balance)` with respect to `merchant_public_key`. Note that while `customer_balance`, `merchant_balance`, and `mutual_close_signature` are provided to the entrypoint call as inputs, `contract-id`, `context-string`, and `channel_id` are retrieved internally from the contract's storage. `context-string` is the string  `"zkChannels mutual close"` and is defined as [global default](1-setup.md#Merchant-Setup).  The types in Michelson for this message tuple are `BLS12-381 scalar`, `string`, `address`, `mutez / i64`, and `mutez / i64`, respectively.
 
 On execution:
 * `customer_balance` and `merchant_balance` are sent to `customer_address` and `merchant_address`, respectively.
