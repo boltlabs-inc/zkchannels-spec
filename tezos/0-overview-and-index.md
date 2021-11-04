@@ -55,7 +55,7 @@ There are three options for [channel closure](4-channel-closure.md):
   - Unilateral merchant close: The merchant can unilaterally initiate channel closure by calling the `expiry` entrypoint on the smart contract. This operation triggers a timeout period, during which the customer must broadcast their latest state by calling `custClose` (as with a unilateral customer close). If the customer fails to do so within the timeout period, the merchant may claim the entire channel balance via the `merchClaim` entrypoint. This procedure is defined by the `TezosEscrowAgent`.
 
 ## Implementation Considerations
-There are a number of implementation considerations and pitfalls in realizing the zkChannels protocol. We touch on some of them [here](implementation-considerations.md).
+There are a number of implementation considerations and pitfalls in realizing the zkChannels protocol. We touch on some of them [here](implementation-considerations.md#).
 
 ## References
 ### zkChannels Resources
